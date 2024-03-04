@@ -1,0 +1,108 @@
+import json
+from src import loads
+
+
+def test_1():
+    result = loads("""{"dupa ":"heh"}""")
+    assert result == {"dupa ": "heh"}
+
+
+def test_2():
+    result = loads("""{   dupsko =heh}""")
+    assert result == {"dupsko": "heh"}
+
+
+def test_3():
+    result = loads("""{   dupsko {}}""")
+    assert result == {"dupsko": {}}
+
+
+def test_4():
+    result = loads("""{   "2 dupska".heh {}}""")
+    assert result == {"2 dupska": {"heh": {}}}
+
+
+def test_5():
+    result = loads("""{   "2 dupska" : 34.5e-2}""")
+    assert result == {"2 dupska": 0.345}
+
+
+def test_6():
+    hocon = """t = {
+                c = 5
+                "d" = true
+                e.y = {
+                    f: 7
+                    g: "hey dude!"
+                    h: hey man
+                    i = "first line"
+                    
+                }
+                j = [1, 2, 3]
+                u = 192.168.1.3/32
+                g = null
+            }
+            """
+    result = loads(hocon)
+    assert result == {
+        "t": {
+            "c": 5,
+            "d": True,
+            "e": {
+                "y": {
+                    "f": 7,
+                    "g": "hey dude!",
+                    "h": "hey man",
+                    "i": "first line"
+                }
+            },
+            "j": [1, 2, 3],
+            "u": "192.168.1.3/32",
+            "g": None
+        }
+    }
+
+
+def test_7():
+    hocon = """{
+                a: {
+                    b: {
+                        c = 5
+                    }
+                }
+                a.b {
+                    c = 7
+                    d = 8
+                }
+            }
+            """
+    result = loads(hocon)
+    assert result == {
+        "a": {
+            "b": {
+                "c": 7,
+                "d": 8
+            }
+        }
+    }
+
+
+def test_8():
+    hocon = """
+        a: {b: 1}
+        a: {c: 2}
+        b: {c: 3} {d: 4} {
+            c: 5
+        }
+        """
+    result = loads(hocon)
+    assert result == {
+        "a": {
+            "b": 1,
+            "c": 2,
+        },
+        "b": {
+            "c": 5,
+            "d": 4
+        }
+    }
