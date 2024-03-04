@@ -106,3 +106,30 @@ def test_8():
             "d": 4
         }
     }
+
+
+def test_9():
+    hocon = """
+            a = a b c
+            b = 5 b
+            c = b 7
+            """
+    result = loads(hocon)
+    assert result == {
+        "a": "a b c",
+        "b": "5 b",
+        "c": "b 7"
+    }
+
+
+def test_10():
+    hocon = """
+            a = [1, 2] [3, 4] [
+              5,
+              6
+            ]
+            """
+    result = loads(hocon)
+    assert result == {
+        "a": [1, 2, 3, 4, 5, 6]
+    }
