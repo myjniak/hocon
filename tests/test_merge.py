@@ -1,5 +1,4 @@
-import json
-from src._parser import merge
+from hocon._parser import merge
 
 
 def test_1():
@@ -29,7 +28,6 @@ def test_1():
         }
     }
     output = merge(dictionary, {key: value})
-    print(json.dumps(output, indent=4))
     assert output == {
         "a": {
             "b": 0,
@@ -56,7 +54,6 @@ def test_2():
     key = "a"
     value = 2
     output = merge(dictionary, {key: value})
-    print(json.dumps(output, indent=4))
     assert output == {
         "a": 2,
         "b": 1
@@ -71,7 +68,6 @@ def test_3():
     key = "a"
     value = {}
     output = merge(dictionary, {key: value})
-    print(json.dumps(output, indent=4))
     assert output == {
         "a": {},
         "b": 1

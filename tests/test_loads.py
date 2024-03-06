@@ -1,5 +1,4 @@
-import json
-from src import loads
+from hocon import loads
 
 
 def test_1():

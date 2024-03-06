@@ -1,5 +1,4 @@
 import re
-from json import JSONDecoder
 from typing import Union
 
 from ._quoted_string import parse_triple_quoted_string, parse_quoted_string
@@ -8,23 +7,29 @@ from .constants import SIMPLE_VALUE_TYPE, ELEMENT_SEPARATORS, SECTION_CLOSURES, 
 
 
 def parse_simple_value(data: str, idx: int = 0) -> tuple[SIMPLE_VALUE_TYPE, int]:
-    value = []
+    values = []
+    contains_quoted_string = False
     while True:
         char = data[idx]
         if data[idx:idx + 3] == "\"\"\"":
+            contains_quoted_string = True
             string, idx = parse_triple_quoted_string(data, idx + 3)
-            value.append(string)
+            values.append(string)
         elif char == "\"":
+            contains_quoted_string = True
             string, idx = parse_quoted_string(data, idx + 1)
-            value.append(string)
+            values.append(string)
         elif char in ELEMENT_SEPARATORS + SECTION_CLOSURES:
-            return _cast_string_value("".join(value)), idx
+            joined_value = "".join(values)
+            if len(values) == 1 and not contains_quoted_string:
+                return _cast_string_value(joined_value), idx
+            return joined_value, idx
         elif char in WHITE_CHARS:
             idx += 1
-            value.append(char)
+            values.append(char)
         else:
             string, idx = _parse_unquoted_string(data, idx)
-            value.append(string)
+            values.append(string)
 
 
 def _parse_unquoted_string(data: str, idx: int) -> tuple[str, int]:

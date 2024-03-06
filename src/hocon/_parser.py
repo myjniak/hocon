@@ -1,5 +1,4 @@
 from functools import reduce
-from itertools import chain
 
 from ._key import parse_keypath
 from ._simple_value import parse_simple_value
@@ -112,10 +111,10 @@ def merge(dictionary: dict, superior_dict: dict[str, ANY_VALUE_TYPE]) -> dict:
 def parse_dict(data: str, idx: int = 0) -> tuple[dict, int]:
     dictionary = {}
     while True:
+        idx = eat_whitespace(data, idx)
         if data[idx] == "}":
             idx += 1
             break
-        idx = eat_whitespace(data, idx)
         keys, idx = parse_keypath(data, idx=idx)
         value, idx = parse_value(data, idx=idx)
         value = evaluate_path_value(keys, value)
@@ -128,10 +127,10 @@ def parse_dict(data: str, idx: int = 0) -> tuple[dict, int]:
 def parse_list(data: str, idx: int = 0) -> tuple[list, int]:
     values = []
     while True:
+        idx = eat_whitespace(data, idx)
         if data[idx] == "]":
             idx += 1
             break
-        idx = eat_whitespace(data, idx)
         value, idx = parse_value_chunk(data, idx=idx)
         values.append(value)
         x, idx = eat_element_separators(data, idx)
