@@ -13,13 +13,13 @@ on:
     types: [published]
 
 permissions:
-  contents: read
+  id-token: write
 
 jobs:
   deploy:
 
     runs-on: ubuntu-latest
-
+    environment: release
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
