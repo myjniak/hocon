@@ -1,4 +1,5 @@
 from functools import reduce
+from typing import Union
 
 from ._eat import eat_comments, eat_whitespace_and_comments, eat_dict_item_separators, eat_whitespace, \
     eat_list_item_separators
@@ -8,7 +9,7 @@ from .constants import ANY_VALUE_TYPE
 from .exceptions import HOCONNoDataError, HOCONDecodeError, HOCONExcessiveDataError
 
 
-def loads(data: str) -> list | dict:
+def loads(data: str) -> Union[list, dict]:
     if not data:
         raise HOCONNoDataError("Empty string provided")
     idx = eat_whitespace_and_comments(data, 0)
