@@ -45,7 +45,8 @@ And you can dump it back to string:
 ## Specification
 
 The library has NOT YET been tested according to each and every statement in
-the [hocon specification](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md)
+the [hocon specification](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md).
+Check sections below to see which HOCON functionalities are already implemented and tested.
 
 ## Features from spec
 
@@ -87,7 +88,7 @@ For example tests for Array and object concatenation are marked with "f10.2" tag
 
 ## Additional requirements
 
-There are several assumptions which are not defined by spec but are essential to the library being healthy.
+There are several assumptions which are not defined by the spec but are essential to the library health.
 
 | Requirement ID | Requirement                                                             | Covered in tests |
 |----------------|-------------------------------------------------------------------------|:----------------:|
