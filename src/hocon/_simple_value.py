@@ -10,15 +10,15 @@ from .constants import SIMPLE_VALUE_TYPE, ELEMENT_SEPARATORS, SECTION_CLOSURES, 
 def parse_simple_value(data: str, idx: int = 0) -> tuple[SIMPLE_VALUE_TYPE, int, bool]:
     values = []
     contains_quoted_string = False
-    comment_in_unquoted_string_found = False
+    newline_found = False
     while True:
         char = data[idx]
-        if char in ELEMENT_SEPARATORS + SECTION_CLOSURES or comment_in_unquoted_string_found:
+        if char in ELEMENT_SEPARATORS + SECTION_CLOSURES or newline_found:
             stripped_values = _strip_string_list(values)
             joined = "".join(stripped_values)
             if len(stripped_values) == 1 and not contains_quoted_string:
-                return _cast_string_value(joined), idx, comment_in_unquoted_string_found
-            return joined, idx, comment_in_unquoted_string_found
+                return _cast_string_value(joined), idx, newline_found
+            return joined, idx, newline_found
         if data[idx:idx + 3] == "\"\"\"":
             contains_quoted_string = True
             string, idx = parse_triple_quoted_string(data, idx + 3)
@@ -31,7 +31,7 @@ def parse_simple_value(data: str, idx: int = 0) -> tuple[SIMPLE_VALUE_TYPE, int,
             idx += 1
             values.append(char)
         else:
-            string, idx, comment_in_unquoted_string_found = _parse_unquoted_string(data, idx)
+            string, idx, newline_found = _parse_unquoted_string(data, idx)
             values.append(string)
 
 

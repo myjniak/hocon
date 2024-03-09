@@ -1,4 +1,5 @@
 from .constants import INLINE_WHITE_CHARS, WHITE_CHARS, ELEMENT_SEPARATORS
+from .exceptions import HOCONUnexpectedBracesError
 
 
 def eat_comments(data: str, idx: int) -> int:
@@ -36,12 +37,30 @@ def eat_whitespace_and_comments(data: str, idx: int) -> int:
             return idx
 
 
-def eat_element_separators(data: str, idx: int) -> tuple[bool, int]:
+def eat_dict_item_separators(data: str, idx: int) -> tuple[bool, int]:
     chars_to_eat = WHITE_CHARS + ELEMENT_SEPARATORS
     separator_found = False
     while True:
         char = data[idx]
-        if char in "}]":
+        if char == "]":
+            raise HOCONUnexpectedBracesError("Unexpected list closure found")
+        if char == "}":
+            return True, idx
+        if char not in chars_to_eat:
+            return separator_found, idx
+        if char in ELEMENT_SEPARATORS:
+            separator_found = True
+        idx += 1
+
+
+def eat_list_item_separators(data: str, idx: int) -> tuple[bool, int]:
+    chars_to_eat = WHITE_CHARS + ELEMENT_SEPARATORS
+    separator_found = False
+    while True:
+        char = data[idx]
+        if char == "}":
+            raise HOCONUnexpectedBracesError("Unexpected dictionary closure found")
+        if char == "]":
             return True, idx
         if char not in chars_to_eat:
             return separator_found, idx

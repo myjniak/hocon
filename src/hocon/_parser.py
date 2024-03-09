@@ -1,10 +1,11 @@
 from functools import reduce
 
-from ._eat import eat_comments, eat_whitespace_and_comments, eat_element_separators, eat_whitespace
+from ._eat import eat_comments, eat_whitespace_and_comments, eat_dict_item_separators, eat_whitespace, \
+    eat_list_item_separators
 from ._key import parse_keypath
 from ._simple_value import parse_simple_value
 from .constants import ANY_VALUE_TYPE
-from .exceptions import HOCONNoDataError, HOCONDecodeError
+from .exceptions import HOCONNoDataError, HOCONDecodeError, HOCONExcessiveDataError
 
 
 def loads(data: str) -> list | dict:
@@ -12,20 +13,35 @@ def loads(data: str) -> list | dict:
         raise HOCONNoDataError("Empty string provided")
     idx = eat_whitespace_and_comments(data, 0)
     if data[idx] == "[":
-        return parse_list(data, idx=idx + 1)[0]
+        result, idx = parse_list(data, idx=idx + 1)
     elif data[idx] == "{":
-        return parse_dict(data, idx=idx + 1)[0]
+        result, idx = parse_dict(data, idx=idx + 1)
     else:
-        return parse_dict(data + "\n}", idx=idx)[0]
+        data += "\n}"
+        result, idx = parse_dict(data, idx=idx)
+    assert_no_content_left(data, idx)
+    return result
+
+
+def assert_no_content_left(data: str, idx: int) -> None:
+    try:
+        while True:
+            old_idx = idx
+            idx = eat_whitespace(data, idx)
+            idx = eat_comments(data, idx)
+            if idx == old_idx:
+                raise HOCONExcessiveDataError("Excessive meaningful data outside of the HOCON structure.")
+    except IndexError:
+        return
 
 
 def parse_value_chunk(data: str, idx: int = 0) -> tuple[ANY_VALUE_TYPE, int, bool]:
     char = data[idx]
     if char == "{":
-        dictionary, idx = parse_dict(data, idx = idx + 1)
+        dictionary, idx = parse_dict(data, idx=idx + 1)
         return dictionary, idx, False
     elif char == "[":
-        list_, idx = parse_list(data, idx = idx + 1)
+        list_, idx = parse_list(data, idx=idx + 1)
         return list_, idx, False
     return parse_simple_value(data, idx)
 
@@ -44,13 +60,24 @@ def concatenate(values: list[ANY_VALUE_TYPE]) -> ANY_VALUE_TYPE:
     raise HOCONDecodeError("Multiple types concatenation not supported")
 
 
-def parse_value(data: str, idx: int) -> tuple[ANY_VALUE_TYPE, int]:
+def parse_dict_value(data: str, idx: int) -> tuple[ANY_VALUE_TYPE, int]:
     values = []
     while True:
         idx = eat_comments(data, idx)
         value, idx, is_last_chunk = parse_value_chunk(data, idx=idx)
         values.append(value)
-        separator_found, idx = eat_element_separators(data, idx)
+        separator_found, idx = eat_dict_item_separators(data, idx)
+        if separator_found or is_last_chunk:
+            return concatenate(values), idx
+
+
+def parse_list_element(data: str, idx: int) -> tuple[ANY_VALUE_TYPE, int]:
+    values = []
+    while True:
+        idx = eat_comments(data, idx)
+        value, idx, is_last_chunk = parse_value_chunk(data, idx=idx)
+        values.append(value)
+        separator_found, idx = eat_list_item_separators(data, idx)
         if separator_found or is_last_chunk:
             return concatenate(values), idx
 
@@ -82,7 +109,7 @@ def parse_dict(data: str, idx: int = 0) -> tuple[dict, int]:
             idx += 1
             break
         keys, idx = parse_keypath(data, idx=idx)
-        value, idx = parse_value(data, idx=idx)
+        value, idx = parse_dict_value(data, idx=idx)
         value = evaluate_path_value(keys, value)
         key = keys[0]
         dictionary = merge(dictionary, {key: value})
@@ -97,9 +124,9 @@ def parse_list(data: str, idx: int = 0) -> tuple[list, int]:
         if data[idx] == "]":
             idx += 1
             break
-        value, idx = parse_value(data, idx=idx)
+        value, idx = parse_list_element(data, idx=idx)
         values.append(value)
-        x, idx = eat_element_separators(data, idx)
+        x, idx = eat_list_item_separators(data, idx)
     return values, idx
 
 # if __name__ == '__main__':

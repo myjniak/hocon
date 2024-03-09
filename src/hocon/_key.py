@@ -3,11 +3,13 @@ from typing import Union
 from ._eat import eat_comments
 from ._quoted_string import parse_quoted_string, parse_triple_quoted_string
 from .constants import UNQUOTED_STR_FORBIDDEN_CHARS, WHITE_CHARS, KEY_VALUE_SEPARATORS
+from .exceptions import HOCONDecodeError
 
 
 def parse_keypath(data: str, idx: int = 0) -> tuple[list[str], int]:
     keys = []
     while True:
+        old_idx = idx
         idx = eat_comments(data, idx)
         char = data[idx]
         if data[idx:idx + 3] == "\"\"\"":
@@ -17,9 +19,11 @@ def parse_keypath(data: str, idx: int = 0) -> tuple[list[str], int]:
         else:
             string, idx = _parse_unquoted_string_key(data, idx)
         keys.append(string)
-        key_ended, idx = _eat_key_value_separator(data, idx)
-        if key_ended:
+        separator_found, idx = _eat_key_value_separator(data, idx)
+        if separator_found:
             return keys, idx
+        if idx == old_idx:
+            raise HOCONDecodeError(f"No key-value separator found for key {''.join(keys)}")
         if data[idx] == ".":
             idx += 1
 
