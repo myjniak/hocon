@@ -1,4 +1,4 @@
-name: pytest
+name: CI
 
 on:
   pull_request:
@@ -25,7 +25,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest pytest-timeout
           pip install .
-      - name: Test with pytest
+      - name: Pytest
         run: python -m pytest -vs --junitxml=junit/test-results-${{ matrix.python-version }}.xml
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
