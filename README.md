@@ -46,4 +46,4 @@ And you can dump it back to string:
 
 The library has NOT YET been tested according to each and every statement in
 the [hocon specification](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md).
-Check FEATURES.md to see which HOCON functionalities are already implemented and tested.
+Check [FEATURES.md](https://github.com/myjniak/hocon/blob/main/FEATURES.md) to see which HOCON functionalities are already implemented and tested.
