@@ -1,0 +1,9 @@
+[
+    "after: null",  # I am ignored
+    after 215  // soooo ignored
+
+  #ignored pair key:value,
+  //ignored key2:value2
+  during,_val#ue,
+  during2 valu//e
+]

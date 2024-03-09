@@ -1,0 +1,14 @@
+[
+{
+    k1: null,  # I am ignored
+    k 2:   15  // soooo ignored
+
+  #ignored pair key:value,
+  //ignored key2:value2
+  k3: val#ue1,
+  k4: valu//e2
+}
+{"k1": "v1", "k2": "v2" # "k3": "v3"}
+}
+
+]

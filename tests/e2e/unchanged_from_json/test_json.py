@@ -1,3 +1,8 @@
+"""
+All valid JSON should be valid and should result in the same in-memory data that a JSON parser would have produced.
+quoted strings are in the same format as JSON strings
+values have possible types: string, number, object, array, boolean, null
+"""
 import json
 from pathlib import Path
 
@@ -9,7 +14,9 @@ import pytest
 @pytest.mark.parametrize("filename", [
     "special_chars.json",
     "nested.json",
-    "empty.json"
+    "empty.json",
+    "emptier.json",
+    "emptier2.json"
 ])
 def test_json_loads(filename: str):
     data = (Path(__file__).parent / "data" / filename).read_text()

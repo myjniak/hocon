@@ -1,73 +1,38 @@
 from functools import reduce
 
+from ._eat import eat_comments, eat_whitespace_and_comments, eat_element_separators, eat_whitespace
 from ._key import parse_keypath
 from ._simple_value import parse_simple_value
-from .constants import WHITE_CHARS, ELEMENT_SEPARATORS, ANY_VALUE_TYPE, INLINE_WHITE_CHARS
-
-
-class HOCONDecodeError(Exception):
-    ...
-
-
-class HoconNoDataError(HOCONDecodeError):
-    """In case there is no data"""
-
-
-class HoconBracesMismatchError(HOCONDecodeError):
-    ...
+from .constants import ANY_VALUE_TYPE
+from .exceptions import HOCONNoDataError, HOCONDecodeError
 
 
 def loads(data: str) -> list | dict:
     if not data:
-        raise HoconNoDataError("Empty string provided")
-    if data.startswith("["):
-        return parse_list(data, idx=1)[0]
-    elif data.startswith("{"):
-        return parse_dict(data, idx=1)[0]
+        raise HOCONNoDataError("Empty string provided")
+    idx = eat_whitespace_and_comments(data, 0)
+    if data[idx] == "[":
+        return parse_list(data, idx=idx + 1)[0]
+    elif data[idx] == "{":
+        return parse_dict(data, idx=idx + 1)[0]
     else:
-        return parse_dict(data + "}", idx=0)[0]
+        return parse_dict(data + "\n}", idx=idx)[0]
 
 
-def eat_inline_whitespace(data: str, idx: int) -> int:
-    while True:
-        char = data[idx]
-        if char not in INLINE_WHITE_CHARS:
-            return idx
-        idx += 1
-
-
-def eat_whitespace(data: str, idx: int) -> int:
-    while True:
-        char = data[idx]
-        if char not in WHITE_CHARS:
-            return idx
-        idx += 1
-
-
-def eat_element_separators(data: str, idx: int) -> tuple[bool, int]:
-    chars_to_eat = WHITE_CHARS + ELEMENT_SEPARATORS
-    separator_found = False
-    while True:
-        char = data[idx]
-        if char in "}]":
-            return True, idx
-        if char not in chars_to_eat:
-            return separator_found, idx
-        if char in ELEMENT_SEPARATORS:
-            separator_found = True
-        idx += 1
-
-
-def parse_value_chunk(data: str, idx: int = 0) -> tuple[ANY_VALUE_TYPE, int]:
+def parse_value_chunk(data: str, idx: int = 0) -> tuple[ANY_VALUE_TYPE, int, bool]:
     char = data[idx]
     if char == "{":
-        return parse_dict(data, idx=idx + 1)
+        dictionary, idx = parse_dict(data, idx = idx + 1)
+        return dictionary, idx, False
     elif char == "[":
-        return parse_list(data, idx=idx + 1)
+        list_, idx = parse_list(data, idx = idx + 1)
+        return list_, idx, False
     return parse_simple_value(data, idx)
 
 
 def concatenate(values: list[ANY_VALUE_TYPE]) -> ANY_VALUE_TYPE:
+    if not values:
+        raise HOCONDecodeError("Expected value not found")
     if all(isinstance(value, list) for value in values):
         return sum(values, [])
     if all(isinstance(value, dict) for value in values):
@@ -82,10 +47,11 @@ def concatenate(values: list[ANY_VALUE_TYPE]) -> ANY_VALUE_TYPE:
 def parse_value(data: str, idx: int) -> tuple[ANY_VALUE_TYPE, int]:
     values = []
     while True:
-        value, idx = parse_value_chunk(data, idx=idx)
+        idx = eat_comments(data, idx)
+        value, idx, is_last_chunk = parse_value_chunk(data, idx=idx)
         values.append(value)
         separator_found, idx = eat_element_separators(data, idx)
-        if separator_found:
+        if separator_found or is_last_chunk:
             return concatenate(values), idx
 
 
@@ -131,7 +97,7 @@ def parse_list(data: str, idx: int = 0) -> tuple[list, int]:
         if data[idx] == "]":
             idx += 1
             break
-        value, idx = parse_value_chunk(data, idx=idx)
+        value, idx = parse_value(data, idx=idx)
         values.append(value)
         x, idx = eat_element_separators(data, idx)
     return values, idx

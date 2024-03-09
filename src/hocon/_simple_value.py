@@ -1,16 +1,24 @@
 import re
 from typing import Union
 
+from ._eat import eat_comments
 from ._quoted_string import parse_triple_quoted_string, parse_quoted_string
 from .constants import SIMPLE_VALUE_TYPE, ELEMENT_SEPARATORS, SECTION_CLOSURES, WHITE_CHARS, \
     UNQUOTED_STR_FORBIDDEN_CHARS, _FLOAT_CONSTANTS, NUMBER_RE
 
 
-def parse_simple_value(data: str, idx: int = 0) -> tuple[SIMPLE_VALUE_TYPE, int]:
+def parse_simple_value(data: str, idx: int = 0) -> tuple[SIMPLE_VALUE_TYPE, int, bool]:
     values = []
     contains_quoted_string = False
+    comment_in_unquoted_string_found = False
     while True:
         char = data[idx]
+        if char in ELEMENT_SEPARATORS + SECTION_CLOSURES or comment_in_unquoted_string_found:
+            stripped_values = _strip_string_list(values)
+            joined = "".join(stripped_values)
+            if len(stripped_values) == 1 and not contains_quoted_string:
+                return _cast_string_value(joined), idx, comment_in_unquoted_string_found
+            return joined, idx, comment_in_unquoted_string_found
         if data[idx:idx + 3] == "\"\"\"":
             contains_quoted_string = True
             string, idx = parse_triple_quoted_string(data, idx + 3)
@@ -19,29 +27,33 @@ def parse_simple_value(data: str, idx: int = 0) -> tuple[SIMPLE_VALUE_TYPE, int]
             contains_quoted_string = True
             string, idx = parse_quoted_string(data, idx + 1)
             values.append(string)
-        elif char in ELEMENT_SEPARATORS + SECTION_CLOSURES:
-            joined_value = "".join(values)
-            if len(values) == 1 and not contains_quoted_string:
-                return _cast_string_value(joined_value), idx
-            return joined_value, idx
         elif char in WHITE_CHARS:
             idx += 1
             values.append(char)
         else:
-            string, idx = _parse_unquoted_string(data, idx)
+            string, idx, comment_in_unquoted_string_found = _parse_unquoted_string(data, idx)
             values.append(string)
 
 
-def _parse_unquoted_string(data: str, idx: int) -> tuple[str, int]:
+def _strip_string_list(values: list[str]) -> list[str]:
+    first = next(index for index, value in enumerate(values) if value.strip())
+    last = -1 * next(index for index, value in enumerate(reversed(values)) if value.strip())
+    if last == 0:
+        return values[first:]
+    return values[first:last]
+
+
+def _parse_unquoted_string(data: str, idx: int) -> tuple[str, int, bool]:
     unquoted_key_end = UNQUOTED_STR_FORBIDDEN_CHARS + WHITE_CHARS
-    key = data[idx]
+    string = ""
     while True:
-        idx += 1
         char = data[idx]
-        if char not in unquoted_key_end:
-            key += char
-        else:
-            return key.strip(), idx
+        old_idx = idx
+        idx = eat_comments(data, idx)
+        if char in unquoted_key_end or idx != old_idx:
+            return string.strip(), idx, idx != old_idx
+        string += char
+        idx += 1
 
 
 def _cast_string_value(string: str) -> SIMPLE_VALUE_TYPE:

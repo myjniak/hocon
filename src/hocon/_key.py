@@ -1,5 +1,6 @@
 from typing import Union
 
+from ._eat import eat_comments
 from ._quoted_string import parse_quoted_string, parse_triple_quoted_string
 from .constants import UNQUOTED_STR_FORBIDDEN_CHARS, WHITE_CHARS, KEY_VALUE_SEPARATORS
 
@@ -7,6 +8,7 @@ from .constants import UNQUOTED_STR_FORBIDDEN_CHARS, WHITE_CHARS, KEY_VALUE_SEPA
 def parse_keypath(data: str, idx: int = 0) -> tuple[list[str], int]:
     keys = []
     while True:
+        idx = eat_comments(data, idx)
         char = data[idx]
         if data[idx:idx + 3] == "\"\"\"":
             string, idx = parse_triple_quoted_string(data, idx + 3)
@@ -23,15 +25,16 @@ def parse_keypath(data: str, idx: int = 0) -> tuple[list[str], int]:
 
 
 def _parse_unquoted_string_key(data: str, idx: int) -> tuple[Union[str, list[str]], int]:
-    unquoted_key_end = UNQUOTED_STR_FORBIDDEN_CHARS + WHITE_CHARS + "."
-    key = data[idx]
+    key_endings = UNQUOTED_STR_FORBIDDEN_CHARS + "."
+    key = ""
     while True:
-        idx += 1
+        old_idx = idx
+        idx = eat_comments(data, idx)
         char = data[idx]
-        if char not in unquoted_key_end:
-            key += char
-        else:
+        if char in key_endings or idx != old_idx:
             return key.strip(), idx
+        key += char
+        idx += 1
 
 
 def _eat_key_value_separator(data: str, idx: int) -> tuple[bool, int]:
