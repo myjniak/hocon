@@ -23,6 +23,7 @@ requires-python = ">= 3.9"
 [project.urls]
 Homepage = 'https://github.com/myjniak/hocon'
 Source = 'https://github.com/myjniak/hocon'
+Changelog = 'https://github.com/myjniak/hocon/blob/main/CHANGELOG.md'
 
 [tool.hatch.version]
 path = "src/hocon/__version__.py"
@@ -40,7 +41,6 @@ content-type = 'text/markdown'
 # construct the PyPI readme from README.md and HISTORY.md
 fragments = [
     {path = "README.md"},
-    {text = "\n## Changelog\n\n"},
     {path = "CHANGELOG.md"},
 ]
 
