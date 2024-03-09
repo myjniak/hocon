@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python # Set Python version
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       # Install pip and pytest
@@ -22,7 +22,7 @@ jobs:
           pip install pytest pytest-timeout
           pip install .
       - name: Pytest
-        run: python -m pytest -vs --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+        run: python -m pytest -vs --junitxml=junit/test-results.xml-${{ matrix.python-version }}.xml
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
         with:
