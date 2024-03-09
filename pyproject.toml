@@ -1,8 +1,50 @@
 [project]
 name = "hocon"
-version = "0.0.1"
+author = "Michał Szajkowski"
+author_email="myjniak@gmail.com"
+description="HOCON parser for python"
+classifiers = [
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+]
+dynamic = ["readme", "version"]
+
 dependencies = []
 requires-python = ">= 3.9"
+
+[project.urls]
+Homepage = 'https://github.com/myjniak/hocon'
+Source = 'https://github.com/myjniak/hocon'
+
+[tool.hatch.version]
+path = "httpx/__version__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src/hocon",
+    "/CHANGELOG.md",
+    "/README.md",
+    "/tests",
+]
+
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+text = "\n## Release Information\n\n"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "CHANGELOG.md"
+pattern = "\n(###.+?\n)## "
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+text = "\n---\n\n[Full changelog](https://github.com/myjniak/hocon/blob/main/CHANGELOG.md)\n"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["hocon*"]
