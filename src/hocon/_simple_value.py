@@ -5,6 +5,7 @@ from ._eat import eat_comments
 from ._quoted_string import parse_triple_quoted_string, parse_quoted_string
 from .constants import SIMPLE_VALUE_TYPE, ELEMENT_SEPARATORS, SECTION_CLOSURES, WHITE_CHARS, \
     UNQUOTED_STR_FORBIDDEN_CHARS, _FLOAT_CONSTANTS, NUMBER_RE
+from .exceptions import HOCONUnexpectedSeparatorError
 
 
 def parse_simple_value(data: str, idx: int = 0) -> tuple[SIMPLE_VALUE_TYPE, int, bool]:
@@ -13,6 +14,8 @@ def parse_simple_value(data: str, idx: int = 0) -> tuple[SIMPLE_VALUE_TYPE, int,
     newline_found = False
     while True:
         char = data[idx]
+        if char == "," and not values:
+            raise HOCONUnexpectedSeparatorError("Unexpected ',' found.")
         if char in ELEMENT_SEPARATORS + SECTION_CLOSURES or newline_found:
             stripped_values = _strip_string_list(values)
             joined = "".join(stripped_values)

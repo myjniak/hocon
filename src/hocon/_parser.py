@@ -127,7 +127,6 @@ def parse_list(data: str, idx: int = 0) -> tuple[list, int]:
             break
         value, idx = parse_list_element(data, idx=idx)
         values.append(value)
-        x, idx = eat_list_item_separators(data, idx)
     return values, idx
 
 # if __name__ == '__main__':

@@ -1,5 +1,5 @@
 from .constants import INLINE_WHITE_CHARS, WHITE_CHARS, ELEMENT_SEPARATORS
-from .exceptions import HOCONUnexpectedBracesError
+from .exceptions import HOCONUnexpectedBracesError, HOCONUnexpectedSeparatorError
 
 
 def eat_comments(data: str, idx: int) -> int:
@@ -39,7 +39,7 @@ def eat_whitespace_and_comments(data: str, idx: int) -> int:
 
 def eat_dict_item_separators(data: str, idx: int) -> tuple[bool, int]:
     chars_to_eat = WHITE_CHARS + ELEMENT_SEPARATORS
-    separator_found = False
+    separators_found = ""
     while True:
         char = data[idx]
         if char == "]":
@@ -47,15 +47,17 @@ def eat_dict_item_separators(data: str, idx: int) -> tuple[bool, int]:
         if char == "}":
             return True, idx
         if char not in chars_to_eat:
-            return separator_found, idx
+            return bool(separators_found), idx
         if char in ELEMENT_SEPARATORS:
-            separator_found = True
+            separators_found += char
+        if separators_found.count(",") > 1:
+            raise HOCONUnexpectedSeparatorError("Multiple commas found")
         idx += 1
 
 
 def eat_list_item_separators(data: str, idx: int) -> tuple[bool, int]:
     chars_to_eat = WHITE_CHARS + ELEMENT_SEPARATORS
-    separator_found = False
+    separators_found = ""
     while True:
         char = data[idx]
         if char == "}":
@@ -63,9 +65,11 @@ def eat_list_item_separators(data: str, idx: int) -> tuple[bool, int]:
         if char == "]":
             return True, idx
         if char not in chars_to_eat:
-            return separator_found, idx
+            return bool(separators_found), idx
         if char in ELEMENT_SEPARATORS:
-            separator_found = True
+            separators_found += char
+        if separators_found.count(",") > 1:
+            raise HOCONUnexpectedSeparatorError("Multiple commas found")
         idx += 1
 
 

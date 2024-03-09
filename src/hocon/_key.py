@@ -3,7 +3,7 @@ from typing import Union
 from ._eat import eat_comments
 from ._quoted_string import parse_quoted_string, parse_triple_quoted_string
 from .constants import UNQUOTED_STR_FORBIDDEN_CHARS, WHITE_CHARS, KEY_VALUE_SEPARATORS
-from .exceptions import HOCONDecodeError
+from .exceptions import HOCONDecodeError, HOCONUnexpectedSeparatorError
 
 
 def parse_keypath(data: str, idx: int = 0) -> tuple[list[str], int]:
@@ -23,7 +23,9 @@ def parse_keypath(data: str, idx: int = 0) -> tuple[list[str], int]:
         if separator_found:
             return keys, idx
         if idx == old_idx:
-            raise HOCONDecodeError(f"No key-value separator found for key {''.join(keys)}")
+            if "".join(keys).strip():
+                raise HOCONDecodeError(f"No key-value separator found for key {''.join(keys)}")
+            raise HOCONUnexpectedSeparatorError("Excessive leading dict field separator found.")
         if data[idx] == ".":
             idx += 1
 

@@ -12,3 +12,7 @@ class HOCONExcessiveDataError(HOCONDecodeError):
 
 class HOCONUnexpectedBracesError(HOCONDecodeError):
     """When an unexpected closure happens."""
+
+
+class HOCONUnexpectedSeparatorError(HOCONDecodeError):
+    """When an unexpected comma happens."""
