@@ -1,1 +1,1 @@
-from ._parser import loads
+from ._main import loads
