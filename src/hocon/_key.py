@@ -25,7 +25,9 @@ def parse_keypath(data: str, idx: int = 0) -> tuple[list[str], int]:
         if idx == old_idx:
             if "".join(keys).strip():
                 raise HOCONDecodeError(f"No key-value separator found for key {''.join(keys)}")
-            raise HOCONUnexpectedSeparatorError("Excessive leading dict field separator found.")
+            if char == ",":
+                raise HOCONUnexpectedSeparatorError("Excessive leading dict field separator found.")
+            raise HOCONDecodeError("Dictionary started with an invalid character.")
         if data[idx] == ".":
             idx += 1
 

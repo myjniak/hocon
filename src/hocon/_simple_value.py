@@ -5,7 +5,7 @@ from ._eat import eat_comments
 from ._quoted_string import parse_triple_quoted_string, parse_quoted_string
 from .constants import SIMPLE_VALUE_TYPE, ELEMENT_SEPARATORS, SECTION_CLOSURES, WHITE_CHARS, \
     UNQUOTED_STR_FORBIDDEN_CHARS, _FLOAT_CONSTANTS, NUMBER_RE
-from .exceptions import HOCONUnexpectedSeparatorError
+from .exceptions import HOCONUnexpectedSeparatorError, HOCONUnquotedStringError, HOCONUnexpectedBracesError
 
 
 def parse_simple_value(data: str, idx: int = 0) -> tuple[SIMPLE_VALUE_TYPE, int, bool]:
@@ -17,6 +17,8 @@ def parse_simple_value(data: str, idx: int = 0) -> tuple[SIMPLE_VALUE_TYPE, int,
         if char == "," and not values:
             raise HOCONUnexpectedSeparatorError("Unexpected ',' found.")
         if char in ELEMENT_SEPARATORS + SECTION_CLOSURES or newline_found:
+            if not values:
+                raise HOCONUnexpectedBracesError("Unexpected closure")
             stripped_values = _strip_string_list(values)
             joined = "".join(stripped_values)
             if len(stripped_values) == 1 and not contains_quoted_string:
@@ -47,13 +49,17 @@ def _strip_string_list(values: list[str]) -> list[str]:
 
 
 def _parse_unquoted_string(data: str, idx: int) -> tuple[str, int, bool]:
-    unquoted_key_end = UNQUOTED_STR_FORBIDDEN_CHARS + WHITE_CHARS
+    unquoted_string_end = UNQUOTED_STR_FORBIDDEN_CHARS + WHITE_CHARS
     string = ""
     while True:
         char = data[idx]
         old_idx = idx
         idx = eat_comments(data, idx)
-        if char in unquoted_key_end or idx != old_idx:
+        if idx != old_idx:
+            return string.strip(), idx, idx != old_idx
+        if char in unquoted_string_end:
+            if not string:
+                raise HOCONUnquotedStringError("Error when parsing unquoted string")
             return string.strip(), idx, idx != old_idx
         string += char
         idx += 1

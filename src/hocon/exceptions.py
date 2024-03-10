@@ -16,3 +16,7 @@ class HOCONUnexpectedBracesError(HOCONDecodeError):
 
 class HOCONUnexpectedSeparatorError(HOCONDecodeError):
     """When an unexpected comma happens."""
+
+
+class HOCONUnquotedStringError(HOCONDecodeError):
+    """When forbidden character is used within an unquoted string"""
