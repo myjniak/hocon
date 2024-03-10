@@ -11,14 +11,6 @@ def eat_comments(data: str, idx: int) -> int:
             return idx
 
 
-def eat_inline_whitespace(data: str, idx: int) -> int:
-    while True:
-        char = data[idx]
-        if char not in INLINE_WHITE_CHARS:
-            return idx
-        idx += 1
-
-
 def eat_whitespace(data: str, idx: int) -> int:
     while True:
         char = data[idx]
