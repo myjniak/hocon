@@ -1,5 +1,7 @@
 # HOCON parser with json-like interface
 
+[![codecov](https://codecov.io/github/myjniak/hocon/graph/badge.svg?token=ZY5KK0BSJY)](https://codecov.io/github/myjniak/hocon)
+
 ## Installation
 
 ```shell
