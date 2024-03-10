@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.7
+- Handled corner negative cases for unquoted strings
+
 ## 0.0.6
 - More test coverage
 
