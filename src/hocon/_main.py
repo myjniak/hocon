@@ -1,3 +1,4 @@
+import json
 from typing import Union
 
 from ._eat import eat_whitespace_and_comments, eat_whitespace, eat_comments
@@ -18,6 +19,10 @@ def loads(data: str) -> Union[list, dict]:
         result, idx = parse_dict(data, idx=idx)
     __assert_no_content_left(data, idx)
     return result
+
+
+def dumps(hocon_: Union[list, dict]) -> str:
+    return json.dumps(hocon_)
 
 
 def __assert_no_content_left(data: str, idx: int) -> None:

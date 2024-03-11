@@ -15,6 +15,6 @@ def parse_triple_quoted_string(data: str, idx: int) -> tuple[str, int]:
             continue
         while True:
             if data[idx + 1:idx + 4] != "\"\"\"":
-                return string, idx + 4
+                return string, idx + 3
             string += data[idx]
             idx += 1
