@@ -4,8 +4,8 @@ import json
 import pytest
 
 import hocon
-from hocon.exceptions import HOCONUnquotedStringError, HOCONDecodeError, HOCONUnexpectedBracesError, \
-    HOCONExcessiveDataError, HOCONUnexpectedSeparatorError
+from hocon.exceptions import HOCONUnquotedStringError, HOCONUnexpectedBracesError, \
+    HOCONExcessiveDataError, HOCONUnexpectedSeparatorError, HOCONInvalidKeyError
 
 pytestmark = pytest.mark.f8
 
@@ -46,7 +46,7 @@ def test_closing_inexistent_dict(forbidden: str):
     '{'
 ])
 def test_starting_dict_by_list_closure(forbidden: str):
-    with pytest.raises(HOCONDecodeError):
+    with pytest.raises(HOCONInvalidKeyError):
         hocon.loads(f"[{forbidden}]")
 
 

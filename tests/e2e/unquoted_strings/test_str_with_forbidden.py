@@ -4,14 +4,14 @@ import json
 import pytest
 
 import hocon
-from hocon.exceptions import HOCONUnquotedStringError, HOCONDecodeError, HOCONUnexpectedBracesError, \
+from hocon.exceptions import HOCONUnquotedStringError, HOCONUnexpectedBracesError, \
     HOCONExcessiveDataError
 
 pytestmark = pytest.mark.f8
 
 
 @pytest.mark.parametrize("forbidden", [
-    '$', '[', ':', '=', '+', '`', '^', '?', '!', '@', '*', '&', '\\'
+    '$', '[', '{', ':', '=', '+', '`', '^', '?', '!', '@', '*', '&', '\\'
 ])
 def test_forbidden_chars_raise_exception(forbidden: str):
     with pytest.raises(HOCONUnquotedStringError):
@@ -39,14 +39,6 @@ def test_unclosed_double_quote_casues_decode_error(forbidden: str):
 ])
 def test_closing_inexistent_dict(forbidden: str):
     with pytest.raises(HOCONUnexpectedBracesError):
-        hocon.loads(f"[str with illegal char{forbidden}]")
-
-
-@pytest.mark.parametrize("forbidden", [
-    '{'
-])
-def test_starting_dict_by_list_closure(forbidden: str):
-    with pytest.raises(HOCONDecodeError):
         hocon.loads(f"[str with illegal char{forbidden}]")
 
 
