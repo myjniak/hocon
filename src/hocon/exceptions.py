@@ -20,3 +20,7 @@ class HOCONUnexpectedSeparatorError(HOCONDecodeError):
 
 class HOCONUnquotedStringError(HOCONDecodeError):
     """When forbidden character is used within an unquoted string"""
+
+
+class HOCONInvalidKeyError(HOCONDecodeError):
+    """Objects and arrays do not make sense as field keys."""
