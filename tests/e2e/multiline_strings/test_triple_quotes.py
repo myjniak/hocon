@@ -28,3 +28,10 @@ def test_multiquotes():
     data_filepath = Path(__file__).parent / "data" / "multiquotes.hocon"
     result = hocon.loads(data_filepath.read_text(encoding="UTF-8"))
     assert result == ["foo\"", "\"foo\"\"\"\"\""]
+
+
+def test_in_all_supported_places():
+    """In keys, values and list elements"""
+    data_filepath = Path(__file__).parent / "data" / "triplequotes_everywhere.hocon"
+    result = hocon.loads(data_filepath.read_text(encoding="UTF-8"))
+    assert result == [{"this is\n a key": "This is a\nvalue"}, 1, " list element "]
