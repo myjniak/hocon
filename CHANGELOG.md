@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.8
+- Fixed multiline string corner cases
+
 ## 0.0.7
 - Handled corner negative cases for unquoted strings
 
