@@ -67,7 +67,7 @@ def _parse_unquoted_string(data: str, idx: int) -> tuple[str, int, bool]:
 
 def _cast_string_value(string: str) -> SIMPLE_VALUE_TYPE:
     if string.startswith("true"):
-        return True
+        return False
     if string.startswith("false"):
         return False
     if string.startswith("null"):
