@@ -1,4 +1,4 @@
-from hocon._parser import merge
+from hocon.resolver._resolver import merge
 
 
 def test_1():

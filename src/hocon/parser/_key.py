@@ -2,8 +2,8 @@ from typing import Union
 
 from ._eat import eat_comments, eat_whitespace
 from ._quoted_string import parse_quoted_string, parse_triple_quoted_string
-from .constants import UNQUOTED_STR_FORBIDDEN_CHARS, KEY_VALUE_SEPARATORS
-from .exceptions import HOCONDecodeError, HOCONUnexpectedSeparatorError, HOCONInvalidKeyError
+from hocon.constants import UNQUOTED_STR_FORBIDDEN_CHARS, KEY_VALUE_SEPARATORS
+from hocon.exceptions import HOCONDecodeError, HOCONUnexpectedSeparatorError, HOCONInvalidKeyError
 
 
 def parse_keypath(data: str, idx: int = 0) -> tuple[list[str], int]:

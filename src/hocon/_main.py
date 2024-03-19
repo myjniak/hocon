@@ -1,12 +1,19 @@
 import json
 from typing import Union
 
-from ._eat import eat_whitespace_and_comments, eat_whitespace, eat_comments
-from ._parser import parse_list, parse_dict
+from .parser._eat import eat_whitespace_and_comments, eat_whitespace, eat_comments
+from .parser._parser import parse_list, parse_dict
 from .exceptions import HOCONNoDataError, HOCONExcessiveDataError
+from .resolver._resolver import resolve
 
 
 def loads(data: str) -> Union[list, dict]:
+    parsed = parse(data)
+    resolved = resolve(parsed)
+    return resolved
+
+
+def parse(data: str) -> Union[list, dict]:
     if not data:
         raise HOCONNoDataError("Empty string provided")
     idx = eat_whitespace_and_comments(data, 0)

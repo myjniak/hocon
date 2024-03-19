@@ -1,5 +1,5 @@
-from .constants import INLINE_WHITE_CHARS, WHITE_CHARS, ELEMENT_SEPARATORS
-from .exceptions import HOCONUnexpectedBracesError, HOCONUnexpectedSeparatorError
+from hocon.constants import INLINE_WHITE_CHARS, WHITE_CHARS, ELEMENT_SEPARATORS
+from hocon.exceptions import HOCONUnexpectedBracesError, HOCONUnexpectedSeparatorError
 
 
 def eat_comments(data: str, idx: int) -> int:

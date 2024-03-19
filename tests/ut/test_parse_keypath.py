@@ -1,5 +1,5 @@
 import pytest
-from hocon._key import parse_keypath
+from hocon.parser._key import parse_keypath
 
 
 @pytest.mark.parametrize("data, expected", [
