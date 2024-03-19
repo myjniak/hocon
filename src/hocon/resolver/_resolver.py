@@ -2,7 +2,7 @@ from functools import reduce
 from typing import Union
 
 from hocon.constants import ANY_VALUE_TYPE
-from hocon.exceptions import HOCONDecodeError
+from hocon.exceptions import HOCONDecodeError, HOCONConcatenationError, HOCONDuplicateKeyMergeError
 from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue
 
 
@@ -54,9 +54,9 @@ def _resolve_dict(parsed: dict) -> dict:
 
 def concatenate(values: UnresolvedConcatenation) -> ANY_VALUE_TYPE:
     if not values:
-        raise HOCONDecodeError("Unresolved concatenation cannot be empty")
+        raise HOCONConcatenationError("Unresolved concatenation cannot be empty")
     if any(isinstance(value, (UnresolvedConcatenation, UnresolvedDuplicateValue)) for value in values):
-        raise HOCONDecodeError("Something went horribly wrong. This is a bug.")
+        raise HOCONConcatenationError("Something went horribly wrong. This is a bug.")
     if all(isinstance(value, str) for value in values):
         return "".join(values)
     if all(isinstance(value, list) for value in values):
@@ -67,12 +67,12 @@ def concatenate(values: UnresolvedConcatenation) -> ANY_VALUE_TYPE:
         return reduce(merge, resolved_dicts)
     if len(values) == 1:
         return values[0]
-    raise HOCONDecodeError("Multiple types concatenation not supported")
+    raise HOCONConcatenationError("Multiple types concatenation not supported")
 
 
 def deduplicate(values: UnresolvedDuplicateValue) -> ANY_VALUE_TYPE:
     if not values:
-        raise HOCONDecodeError("Unresolved duplicate key must contain at least 2 elements.")
+        raise HOCONDuplicateKeyMergeError("Unresolved duplicate key must contain at least 2 elements.")
     deduplicated = _resolve_value(values[-1])
     for value in reversed(values[:-1]):
         resolved_value = _resolve_value(value)
