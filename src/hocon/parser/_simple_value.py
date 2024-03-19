@@ -59,6 +59,7 @@ def _parse_unquoted_string(data: str, idx: int) -> tuple[str, int, bool]:
             return string.strip(), idx, idx != old_idx
         if char in unquoted_string_end:
             if not string:
+                print(f"{char=}")
                 raise HOCONUnquotedStringError("Error when parsing unquoted string")
             return string.strip(), idx, idx != old_idx
         string += char

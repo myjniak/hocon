@@ -1,5 +1,9 @@
-class HOCONDecodeError(Exception):
-    ...
+class HOCONError(Exception):
+    """Generic HOCON library error"""
+
+
+class HOCONDecodeError(HOCONError):
+    """Generic error when parsing HOCON"""
 
 
 class HOCONNoDataError(HOCONDecodeError):
@@ -24,3 +28,15 @@ class HOCONUnquotedStringError(HOCONDecodeError):
 
 class HOCONInvalidKeyError(HOCONDecodeError):
     """Objects and arrays do not make sense as field keys."""
+
+
+class HOCONResolveError(HOCONError):
+    """Generic HOCON resolve error"""
+
+
+class HOCONConcatenationError(HOCONResolveError):
+    """When unsupported concatenation happens"""
+
+
+class HOCONDuplicateKeyMergeError(HOCONResolveError):
+    """When duplicated keys cannot be merged"""
