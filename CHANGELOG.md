@@ -1,4 +1,6 @@
 # Changelog
+## 0.0.9
+- Split loads to parser and resolver
 
 ## 0.0.8
 - Fixed multiline string corner cases

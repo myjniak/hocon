@@ -3,9 +3,9 @@ from typing import Union
 
 from ._eat import eat_comments
 from ._quoted_string import parse_triple_quoted_string, parse_quoted_string
-from .constants import SIMPLE_VALUE_TYPE, ELEMENT_SEPARATORS, SECTION_CLOSURES, WHITE_CHARS, \
+from hocon.constants import SIMPLE_VALUE_TYPE, ELEMENT_SEPARATORS, SECTION_CLOSURES, WHITE_CHARS, \
     UNQUOTED_STR_FORBIDDEN_CHARS, _FLOAT_CONSTANTS, NUMBER_RE
-from .exceptions import HOCONUnexpectedSeparatorError, HOCONUnquotedStringError, HOCONUnexpectedBracesError
+from hocon.exceptions import HOCONUnexpectedSeparatorError, HOCONUnquotedStringError, HOCONUnexpectedBracesError
 
 
 def parse_simple_value(data: str, idx: int = 0) -> tuple[SIMPLE_VALUE_TYPE, int, bool]:
