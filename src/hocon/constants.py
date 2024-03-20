@@ -15,7 +15,8 @@ NUMBER_RE = re.compile(
     r'(-?(?:0|[1-9]\d*))(\.\d+)?([eE][-+]?\d+)?',
     (re.VERBOSE | re.MULTILINE | re.DOTALL))
 ELEMENT_SEPARATORS = ",\n"
-SECTION_CLOSURES = "}]"
+SECTION_OPENING = "{["
+SECTION_CLOSING = "}]"
 
 SIMPLE_VALUE_TYPE = Union[int, float, str, bool, None]
 ANY_VALUE_TYPE = Union[dict, list, int, float, str, bool, None]

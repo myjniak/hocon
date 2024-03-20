@@ -7,7 +7,6 @@ from ._value_utils import merge_unconcatenated
 
 
 def parse_dict(data: str, idx: int = 0) -> tuple[dict, int]:
-    # dictionary = {}
     unconcatenated_dictionary = {}
     while True:
         idx = eat_whitespace(data, idx)
@@ -30,34 +29,40 @@ def parse_list(data: str, idx: int = 0) -> tuple[list, int]:
         unconcatenated_list.append(unconcatenated_value)
 
 
-def parse_value_chunk(data: str, idx: int = 0) -> tuple[ANY_VALUE_TYPE, int, bool]:
+def parse_value_chunk(data: str, idx: int = 0) -> tuple[ANY_VALUE_TYPE, int]:
     char = data[idx]
     if char == "{":
         dictionary, idx = parse_dict(data, idx=idx + 1)
-        return dictionary, idx, False
+        return dictionary, idx
     elif char == "[":
         list_, idx = parse_list(data, idx=idx + 1)
-        return list_, idx, False
+        return list_, idx
     return parse_simple_value(data, idx)
 
 
 def parse_dict_value(data: str, idx: int) -> tuple[UnresolvedConcatenation, int]:
     values = UnresolvedConcatenation()
     while True:
+        old_idx = idx
         idx = eat_comments(data, idx)
-        value, idx, is_last_chunk = parse_value_chunk(data, idx=idx)
+        if values and old_idx != idx:
+            return values, idx
+        value, idx = parse_value_chunk(data, idx=idx)
         values.append(value)
         separator_found, idx = eat_dict_item_separators(data, idx)
-        if separator_found or is_last_chunk:
+        if separator_found:
             return values, idx
 
 
 def parse_list_element(data: str, idx: int) -> tuple[UnresolvedConcatenation, int]:
     values = UnresolvedConcatenation()
     while True:
+        old_idx = idx
         idx = eat_comments(data, idx)
-        value, idx, is_last_chunk = parse_value_chunk(data, idx=idx)
+        if values and old_idx != idx:
+            return values, idx
+        value, idx = parse_value_chunk(data, idx=idx)
         values.append(value)
         separator_found, idx = eat_list_item_separators(data, idx)
-        if separator_found or is_last_chunk:
+        if separator_found:
             return values, idx

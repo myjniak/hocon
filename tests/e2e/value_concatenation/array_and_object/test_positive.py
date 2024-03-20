@@ -16,7 +16,7 @@ def test_object_concatenation():
     """For objects, "concatenation" means "merging", so the second object overrides the first."""
     data = """
     // one object
-    a : { b : 1, c : 2 }    
+    a : { b : 1, c : 2 }  
     """
     data_2 = """
     // two objects that are merged via concatenation rules
