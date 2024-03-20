@@ -1,8 +1,10 @@
 from functools import reduce
 from typing import Union
 
-from hocon.constants import ANY_VALUE_TYPE
-from hocon.exceptions import HOCONDecodeError, HOCONConcatenationError, HOCONDuplicateKeyMergeError
+from hocon.constants import ANY_VALUE_TYPE, WHITE_CHARS
+from hocon.exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError
+from hocon.resolver._simple_value import resolve_simple_value
+from hocon.strings import UnquotedString
 from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue
 
 
@@ -58,16 +60,26 @@ def concatenate(values: UnresolvedConcatenation) -> ANY_VALUE_TYPE:
     if any(isinstance(value, (UnresolvedConcatenation, UnresolvedDuplicateValue)) for value in values):
         raise HOCONConcatenationError("Something went horribly wrong. This is a bug.")
     if all(isinstance(value, str) for value in values):
-        return "".join(values)
-    if all(isinstance(value, list) for value in values):
+        return resolve_simple_value(values)
+    if any(isinstance(value, list) for value in values):
+        values = filter_out_unquoted_space(values)
+        if not all(isinstance(value, list) for value in values):
+            raise HOCONConcatenationError(f"Arrays (lists) mixed with other value types not allowed")
         resolved_lists = [_resolve_list(value) for value in values]
         return sum(resolved_lists, [])
-    if all(isinstance(value, dict) for value in values):
+    if any(isinstance(value, dict) for value in values):
+        values = filter_out_unquoted_space(values)
+        if not all(isinstance(value, dict) for value in values):
+            raise HOCONConcatenationError(f"Objects (dictionaries) mixed with other value types not allowed")
         resolved_dicts = [_resolve_dict(value) for value in values]
         return reduce(merge, resolved_dicts)
     if len(values) == 1:
         return values[0]
-    raise HOCONConcatenationError("Multiple types concatenation not supported")
+    raise HOCONConcatenationError("Multiple types concatenation not allowed")
+
+
+def filter_out_unquoted_space(values: list[ANY_VALUE_TYPE]) -> list[ANY_VALUE_TYPE]:
+    return list(filter(lambda value: not isinstance(value, UnquotedString) or value.strip(WHITE_CHARS), values))
 
 
 def deduplicate(values: UnresolvedDuplicateValue) -> ANY_VALUE_TYPE:

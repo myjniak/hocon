@@ -45,7 +45,6 @@ def __eat_until_newline(data: str, idx: int) -> int:
 
 
 def __eat_item_separators(data: str, idx: int, struct_end: str, unexpected_brace: str) -> tuple[bool, int]:
-    chars_to_eat = WHITE_CHARS + ELEMENT_SEPARATORS
     separators_found = ""
     while True:
         char = data[idx]
@@ -53,10 +52,9 @@ def __eat_item_separators(data: str, idx: int, struct_end: str, unexpected_brace
             raise HOCONUnexpectedBracesError("Unexpected closure found")
         if char == struct_end:
             return True, idx
-        if char not in chars_to_eat:
+        if char not in ELEMENT_SEPARATORS:
             return bool(separators_found), idx
-        if char in ELEMENT_SEPARATORS:
-            separators_found += char
+        separators_found += char
         if separators_found.count(",") > 1:
             raise HOCONUnexpectedSeparatorError("Multiple commas found")
         idx += 1
