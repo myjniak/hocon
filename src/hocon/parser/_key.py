@@ -1,12 +1,11 @@
-from typing import Union
-
+from hocon.constants import KEY_VALUE_SEPARATORS
+from hocon.exceptions import HOCONDecodeError
 from ._eat import eat_comments, eat_whitespace
 from ._quoted_string import parse_quoted_string, parse_triple_quoted_string
-from hocon.constants import UNQUOTED_STR_FORBIDDEN_CHARS, KEY_VALUE_SEPARATORS
-from hocon.exceptions import HOCONDecodeError, HOCONUnexpectedSeparatorError, HOCONInvalidKeyError
+from ._unquoted_string import _parse_unquoted_string_key
 
 
-def parse_keypath(data: str, idx: int = 0) -> tuple[list[str], int]:
+def parse_keypath(data: str, idx: int = 0, keyend_indicator: str = KEY_VALUE_SEPARATORS + "{") -> tuple[list[str], int]:
     keychunks_list: list[list[str]] = [[]]
     while True:
         old_idx = idx
@@ -16,8 +15,9 @@ def parse_keypath(data: str, idx: int = 0) -> tuple[list[str], int]:
         char = data[idx]
         if idx == old_idx:
             keys = ["".join(chunks) for chunks in keychunks_list]
-            _raise_keypath_exception(data, idx, keys)
-        if char in KEY_VALUE_SEPARATORS or char == "{":
+            if "".join(keys).strip():
+                raise HOCONDecodeError(f"No key-value separator found for key {''.join(keys)}")
+        if char in keyend_indicator:
             if keychunk_is_unquoted:
                 keychunks_list[-1][-1] = keychunks_list[-1][-1].rstrip()
             keys = ["".join(chunks) for chunks in keychunks_list]
@@ -30,16 +30,6 @@ def parse_keypath(data: str, idx: int = 0) -> tuple[list[str], int]:
             keychunks_list.append([])
 
 
-def _raise_keypath_exception(data: str, idx: int, keys: list[str]):
-    if "".join(keys).strip():
-        raise HOCONDecodeError(f"No key-value separator found for key {''.join(keys)}")
-    if data[idx] == ",":
-        raise HOCONUnexpectedSeparatorError("Excessive leading dict field separator found.")
-    if data[idx] in "{[":
-        raise HOCONInvalidKeyError("Objects and arrays do not make sense as field keys.")
-    raise HOCONInvalidKeyError("Dictionary started with an invalid character.")
-
-
 def _parse_key_chunk(data: str, idx: int) -> tuple[str, int, bool]:
     char = data[idx]
     if data[idx:idx + 3] == "\"\"\"":
@@ -50,16 +40,3 @@ def _parse_key_chunk(data: str, idx: int) -> tuple[str, int, bool]:
         string, idx = _parse_unquoted_string_key(data, idx)
         return string, idx, True
     return string, idx, False
-
-
-def _parse_unquoted_string_key(data: str, idx: int) -> tuple[Union[str, list[str]], int]:
-    key_endings = UNQUOTED_STR_FORBIDDEN_CHARS + "."
-    key = ""
-    while True:
-        old_idx = idx
-        idx = eat_comments(data, idx)
-        char = data[idx]
-        if char in key_endings or idx != old_idx:
-            return key, idx
-        key += char
-        idx += 1
