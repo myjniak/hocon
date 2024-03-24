@@ -1,4 +1,7 @@
 # Changelog
+## 0.0.10
+- Added ${x} substitution parser 
+
 ## 0.0.9
 - Split loads to parser and resolver
 
