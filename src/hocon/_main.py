@@ -5,11 +5,13 @@ from .parser._eat import eat_whitespace_and_comments, eat_whitespace, eat_commen
 from .parser._parser import parse_list, parse_dict
 from .exceptions import HOCONNoDataError, HOCONExcessiveDataError
 from .resolver._resolver import resolve
+from .resolver._preresolver import preresolve
 
 
 def loads(data: str) -> Union[list, dict]:
     parsed = parse(data)
-    resolved = resolve(parsed)
+    preresolved = preresolve(parsed)
+    resolved = resolve(preresolved)
     return resolved
 
 
