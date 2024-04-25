@@ -1,4 +1,5 @@
 from hocon import loads
+from hocon._main import parse
 
 
 def test_1():
@@ -94,6 +95,8 @@ def test_8():
             c: 5
         }
         """
+    x = parse(hocon)
+    print(x)
     result = loads(hocon)
     assert result == {
         "a": {

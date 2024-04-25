@@ -23,8 +23,7 @@ def parse_keypath(data: str, idx: int = 0, keyend_indicator: str = KEY_VALUE_SEP
             keys = ["".join(chunks) for chunks in keychunks_list]
             if char == "{":
                 return keys, idx
-            idx = eat_whitespace(data, idx + 1)
-            return keys, idx
+            return keys, idx + 1
         if data[idx] == ".":
             idx += 1
             keychunks_list.append([])

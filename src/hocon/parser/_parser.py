@@ -14,6 +14,7 @@ def parse_dict(data: str, idx: int = 0) -> tuple[dict, int]:
             idx += 1
             return unconcatenated_dictionary, idx
         keys, idx = parse_keypath(data, idx=idx)
+        idx = eat_whitespace(data, idx)
         unconcatenated_value, idx = parse_dict_value(data, idx=idx)
         unconcatenated_dictionary = merge_unconcatenated(unconcatenated_dictionary, keys, unconcatenated_value)
 
