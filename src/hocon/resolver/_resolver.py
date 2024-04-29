@@ -2,11 +2,12 @@ from functools import reduce
 from typing import Union, Callable, Any
 
 from hocon.constants import ANY_VALUE_TYPE, WHITE_CHARS, SIMPLE_VALUE_TYPE, ROOT_TYPE, PreresolvedDuplicateValue, \
-    UnresolvedDictConcatenation
-from hocon.exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError
+    UnresolvedDictConcatenation, ANY_UNRESOLVED
+from hocon.exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError, HOCONSubstitutionCycleError
 from hocon.resolver._simple_value import resolve_simple_value
 from hocon.strings import UnquotedString
-from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution
+from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution, \
+    SubstitutionStatus
 
 
 def resolver_map() -> dict[str, Callable[[Any, ROOT_TYPE], Any]]:
@@ -26,7 +27,7 @@ def resolve(parsed: ROOT_TYPE) -> ROOT_TYPE:
         return _resolve_dict(parsed, parsed)
 
 
-def _resolve_value(value: ANY_VALUE_TYPE, parsed: ROOT_TYPE) -> ANY_VALUE_TYPE:
+def _resolve_value(value: ANY_UNRESOLVED, parsed: ROOT_TYPE) -> ANY_VALUE_TYPE:
     func = resolver_map().get(type(value).__name__, lambda x, _: x)
     return func(value, parsed)
 
@@ -81,27 +82,43 @@ def resolve_substitutions(values: UnresolvedConcatenation, parsed: ROOT_TYPE) ->
     return values_with_resolved_substitutions
 
 
-def _resolve_substitution(value: UnresolvedSubstitution, parsed: ROOT_TYPE) -> ANY_VALUE_TYPE:
-    to_consider: list = []
-    first_key = value.keys[0]
+def _resolve_substitution(substitution: UnresolvedSubstitution, parsed: ROOT_TYPE) -> ANY_VALUE_TYPE:
+    if substitution.status == SubstitutionStatus.RESOLVED:
+        return substitution.value
+    if substitution.status == SubstitutionStatus.RESOLVING:
+        raise HOCONSubstitutionCycleError("DUUUUUUUPAAAAAA")
+    substitution.status = SubstitutionStatus.RESOLVING
+    first_key = substitution.keys[0]
     if isinstance(parsed, list) and first_key.isdigit():
         subvalue = parsed[int(first_key)]
     elif isinstance(parsed, dict) and first_key in parsed:
         subvalue = parsed[first_key]
     else:
-        subvalue = get_from_env(value)
-    for key in value.keys[1:]:
+        subvalue = get_from_env(substitution)
+    for key in substitution.keys[1:]:
         if isinstance(subvalue, UnresolvedDuplicateValue):
             # subvalue: UnresolvedDuplicateValue[UnresolvedDictConcatenation | dict]
             for value in subvalue:
                 if isinstance(value, dict) and key in value:
-                    subvalue = value[key]
+                    subvalue = _resolve_value(value[key], parsed)
+                    print(f"Dup {value=} {subvalue=}")
+                else:
+                    subvalue = _resolve_value(subvalue, parsed)
+                    print(f"DupCon {value=} {subvalue=}")
+        elif isinstance(subvalue, UnresolvedSubstitution):
+            subvalue = _resolve_value(subvalue, parsed)
+            print(f"{value=} {subvalue=}")
+        elif isinstance(subvalue, UnresolvedConcatenation):
+            subvalue = _resolve_value(subvalue, parsed)
+            print(f"{value=} {subvalue=}")
         elif isinstance(subvalue, list) and key.isdigit():
             subvalue = subvalue[int(key)]
         elif isinstance(subvalue, dict) and key in subvalue:
             subvalue = subvalue[key]
         else:
             get_from_env(value)
+    substitution.value = subvalue
+    substitution.status = SubstitutionStatus.RESOLVED
     return subvalue
 
 
