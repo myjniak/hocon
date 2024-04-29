@@ -40,3 +40,7 @@ class HOCONConcatenationError(HOCONResolveError):
 
 class HOCONDuplicateKeyMergeError(HOCONResolveError):
     """When duplicated keys cannot be merged"""
+
+
+class HOCONSubstitutionCycleError(HOCONResolveError):
+    """When a cycle of ${} references is detected"""
