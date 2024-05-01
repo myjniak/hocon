@@ -4,14 +4,22 @@ from hocon import loads
 
 def test_1():
     data = """
-    d = {e: amen "jea", f.g: [hihi, {253: 78, 156: ${x}}, 2]}      ,
-    d = {e: egzakra}
-    a = ${d.f.g.1.156}
+    d = {e: 1, f.g: [3, {4: 4, 99: ${x}}, 6]}      ,
+    d = {e: 2}
+    a = ${d.f.g.1.99}
     x = ${d.e}
     """
-    x = parse(data)
-    y = resolve(x)
-    print(y)
+    result = loads(data)
+    assert result == {
+        'd': {
+            'e': 2,
+            'f': {
+                'g': [
+                    3, {'4': 4, '99': 2}, 6]
+            }
+        },
+        'a': 2,
+        'x': 2}
 
 
 def test_2():
@@ -20,7 +28,10 @@ def test_2():
     b: 3 
     """
     result = loads(data)
-    print(result)
+    assert result == {
+        "a": 3,
+        "b": 3
+    }
 
 
 def test_3():
@@ -46,6 +57,23 @@ def test_4():
             "a": 4,
             "b": 5,
             "c": 6
+        }
+    }
+    assert resolved == expected
+
+
+def test_5():
+    data = """
+            a: {a: 1} {b: ${x}} {c: ${x}}
+            a: {b: 2} {c: 3}
+            """
+    parsed = parse(data)
+    resolved = resolve(parsed)
+    expected = {
+        "a": {
+            "a": 1,
+            "b": 2,
+            "c": 3
         }
     }
     assert resolved == expected

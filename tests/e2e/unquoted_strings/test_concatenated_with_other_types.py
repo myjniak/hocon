@@ -1,7 +1,7 @@
 """
-truefoo parses as the boolean token true followed by the unquoted string foo.
-However, footrue parses as the unquoted string footrue.
-Similarly, 10.0bar is the number 10.0 then the unquoted string bar but bar10.0 is the unquoted string bar10.0.
+truefoo parses as the boolean token true followed by the unquoted string_ foo.
+However, footrue parses as the unquoted string_ footrue.
+Similarly, 10.0bar is the number 10.0 then the unquoted string_ bar but bar10.0 is the unquoted string_ bar10.0.
 (In practice, this distinction doesn't matter much because of value concatenation)
 """
 import hocon

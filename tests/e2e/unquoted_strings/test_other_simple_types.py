@@ -1,4 +1,4 @@
-"""Unquoted string, as its initial characters do not parse as true, false, null, or a number."""
+"""Unquoted string_, as its initial characters do not parse as true, false, null, or a number."""
 import hocon
 import pytest
 

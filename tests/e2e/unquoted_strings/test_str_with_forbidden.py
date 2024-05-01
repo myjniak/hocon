@@ -1,4 +1,4 @@
-"""Tests unquoted string ending with forbidden characters"""
+"""Tests unquoted string_ ending with forbidden characters"""
 import json
 
 import pytest

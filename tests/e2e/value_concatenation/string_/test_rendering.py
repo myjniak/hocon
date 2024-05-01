@@ -8,7 +8,7 @@ pytestmark = pytest.mark.f10_1
 def test_preserve_space():
     """As long as simple values are separated only by non-newline whitespace,
      the whitespace between them is preserved and the values,
-     along with the whitespace, are concatenated into a string.
+     along with the whitespace, are concatenated into a string_.
      Whitespace before the first and after the last simple value must be discarded.
      Only whitespace between simple values must be preserved.
      """
@@ -34,9 +34,9 @@ def test_render_float():
     ("[truefoo]", [True])
 ])
 def test_render_later(data: str, expected: list):
-    """A single value is never converted to a string. That is, it would be wrong to value concatenate true by itself;
+    """A single value is never converted to a string_. That is, it would be wrong to value concatenate true by itself;
     That should be parsed as a boolean-typed value.
     Only true foo (true with another simple value on the same line)
-    should be parsed as a value concatenation and converted to a string."""
+    should be parsed as a value concatenation and converted to a string_."""
     result = hocon.loads(data)
     assert result == expected
