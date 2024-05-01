@@ -22,7 +22,7 @@ For example tests for Array and object concatenation are marked with "f10_2" tag
 | f10_4      | [Note: Arrays without commas or newlines](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#note-arrays-without-commas-or-newlines)                             | :heavy_check_mark: |        :x:         |
 | f11        | [Path expressions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#path-expressions)                                                                          | :heavy_check_mark: |        :x:         |
 | f12        | [Paths as keys](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#paths-as-keys)                                                                                | :heavy_check_mark: |        :x:         |
-| f13        | [Substitutions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#substitutions)                                                                                |        :x:         |        :x:         |
+| f13        | [Substitutions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#substitutions)                                                                                |  :yellow_circle:   |        :x:         |
 | f13_1      | [Self-referential substitutions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#self-referential-substitutions)                                              |        :x:         |        :x:         |
 | f13_2      | [The `+=` field separator](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#the--field-separator)                                                              |        :x:         |        :x:         |
 | f13_3      | [Examples of Self-Referential Substitutions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#examples-of-self-referential-substitutions)                      |        :x:         |        :x:         |
@@ -34,7 +34,6 @@ For example tests for Array and object concatenation are marked with "f10_2" tag
 | f14_5      | [Include semantics: file formats and extensions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-semantics-file-formats-and-extensions)               |        :x:         |        :x:         |
 | f14_6      | [Include semantics: locating resources](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-semantics-locating-resources)                                 |        :x:         |        :x:         |
 | f15        | [Conversion of numerically-index objects to arrays](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conversion-of-numerically-indexed-objects-to-arrays)      |        :x:         |        :x:         |
-
 
 ## Additional requirements
 

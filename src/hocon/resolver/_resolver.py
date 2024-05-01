@@ -2,12 +2,12 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from functools import reduce
 from itertools import chain
-from typing import Callable, Any, Self, Union
+from typing import Callable, Any
 
-from ..constants import ANY_VALUE_TYPE, ROOT_TYPE, ANY_UNRESOLVED, SIMPLE_VALUE_TYPE
+from ..constants import ANY_VALUE_TYPE, ROOT_TYPE
 from ..exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError, HOCONSubstitutionCycleError
 from ..resolver._simple_value import resolve_simple_value
-from ..resolver._utils import filter_out_unquoted_space
+from ..resolver._utils import filter_out_unquoted_space, sanitize_unresolved_concatenation
 from ..unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution
 
 
@@ -68,6 +68,7 @@ class Resolver:
         return func(value)
 
     def concatenate(self, values: UnresolvedConcatenation) -> ANY_VALUE_TYPE:
+        values = sanitize_unresolved_concatenation(values)
         values = self.resolve_substitutions(values)
         if not values:
             raise HOCONConcatenationError("Unresolved concatenation cannot be empty")
@@ -76,15 +77,9 @@ class Resolver:
         if all(isinstance(value, str) for value in values):
             return resolve_simple_value(values)
         if any(isinstance(value, list) for value in values):
-            values = filter_out_unquoted_space(values)
-            if not all(isinstance(value, list) for value in values):
-                raise HOCONConcatenationError(f"Arrays (lists) mixed with other value types not allowed")
             resolved_lists = [self.resolve_list(value) for value in values]
             return sum(resolved_lists, [])
         if any(isinstance(value, dict) for value in values):
-            values = filter_out_unquoted_space(values)
-            if not all(isinstance(value, dict) for value in values):
-                raise HOCONConcatenationError(f"Objects (dictionaries) mixed with other value types not allowed")
             return self.resolve_value(reduce(self.merge, reversed(values)))
         if len(values) == 1:
             return values[0]

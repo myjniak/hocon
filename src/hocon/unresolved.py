@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 from itertools import count
-from enum import Enum, auto
 
 
 class UnresolvedConcatenation(list):
+
     def __repr__(self):
         list_str = super().__repr__()
         return "\n〈" + list_str[1:-1].replace("\n", "\n    ") + "〉\n"

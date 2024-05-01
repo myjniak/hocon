@@ -9,10 +9,10 @@ def _parse_unquoted_string_value(data: str, idx: int) -> tuple[UnquotedString, i
     while True:
         char = data[idx]
         if char in SECTION_OPENING:
-            raise HOCONUnquotedStringError(f"Forbidden opening '{char}' found when parsing unquoted string")
+            raise HOCONUnquotedStringError(f"Forbidden opening '{char}' found when parsing unquoted string_")
         if char in unquoted_string_end or data[idx:idx + 2] == "//":
             if not string:
-                raise HOCONUnquotedStringError("Error when parsing unquoted string")
+                raise HOCONUnquotedStringError("Error when parsing unquoted string_")
             return UnquotedString(string), idx
         string += char
         idx += 1

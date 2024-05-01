@@ -14,13 +14,13 @@ def test_empty():
 
 @pytest.mark.parametrize("data", [
     "15",
-    "\"string\"",
+    "\"string_\"",
     "-Infinity",
     "null",
     "true"
 ])
 def test_invalid_root(data):
-    """files containing only a non-array non-object value such as a string are invalid HOCONs."""
+    """files containing only a non-array non-object value such as a string_ are invalid HOCONs."""
     with pytest.raises(HOCONDecodeError):
         hocon.loads(data)
 
