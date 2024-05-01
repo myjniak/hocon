@@ -14,7 +14,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Intended Audience :: Developers",
     "Topic :: File Formats",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -22,7 +21,7 @@ classifiers = [
 dynamic = ["readme", "version"]
 
 dependencies = []
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 
 [project.urls]
 Homepage = 'https://github.com/myjniak/hocon'
