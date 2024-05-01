@@ -1,7 +1,7 @@
 import re
 from typing import Union
 
-from hocon.unresolved import UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplicateValue
+from .unresolved import UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplicateValue
 
 WHITE_HEXES = [0x00A0, 0x2007, 0x202F, 0xFEFF, 0x001C, 0x001D, 0x001E, 0x001F]
 INLINE_WHITE_CHARS = " \t\r\v\f" + "".join(map(chr, WHITE_HEXES))
@@ -23,9 +23,4 @@ SECTION_CLOSING = "}]"
 SIMPLE_VALUE_TYPE = Union[int, float, str, bool, None]
 ANY_VALUE_TYPE = Union[dict, list, int, float, str, bool, None]
 ROOT_TYPE = Union[list, dict]
-ANY_UNRESOLVED = Union[ANY_VALUE_TYPE, UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplicateValue]
-
-UnresolvedDictConcatenation = UnresolvedConcatenation[dict]
-UnresolvedStringConcatenation = UnresolvedConcatenation[str, UnresolvedSubstitution]
-
-PreresolvedDuplicateValue = UnresolvedDuplicateValue[UnresolvedDictConcatenation, dict]
+ANY_UNRESOLVED = Union[UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplicateValue]

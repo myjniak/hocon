@@ -1,174 +1,164 @@
+from dataclasses import dataclass
+from enum import Enum, auto
 from functools import reduce
-from typing import Union, Callable, Any
+from itertools import chain
+from typing import Callable, Any, Self, Union
 
-from hocon.constants import ANY_VALUE_TYPE, WHITE_CHARS, SIMPLE_VALUE_TYPE, ROOT_TYPE, PreresolvedDuplicateValue, \
-    UnresolvedDictConcatenation, ANY_UNRESOLVED
-from hocon.exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError, HOCONSubstitutionCycleError
-from hocon.resolver._simple_value import resolve_simple_value
-from hocon.strings import UnquotedString
-from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution, \
-    SubstitutionStatus
-
-
-def resolver_map() -> dict[str, Callable[[Any, ROOT_TYPE], Any]]:
-    return {
-        "dict": _resolve_dict,
-        "list": _resolve_list,
-        "UnresolvedConcatenation": concatenate,
-        "UnresolvedDuplicateValue": deduplicate,
-        "UnresolvedSubstitution": _resolve_substitution
-    }
+from ..constants import ANY_VALUE_TYPE, ROOT_TYPE, ANY_UNRESOLVED, SIMPLE_VALUE_TYPE
+from ..exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError, HOCONSubstitutionCycleError
+from ..resolver._simple_value import resolve_simple_value
+from ..resolver._utils import filter_out_unquoted_space
+from ..unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution
 
 
 def resolve(parsed: ROOT_TYPE) -> ROOT_TYPE:
     if isinstance(parsed, list):
-        return _resolve_list(parsed, parsed)
+        return Resolver(parsed).resolve_list(parsed)
     else:
-        return _resolve_dict(parsed, parsed)
+        return Resolver(parsed).resolve_dict(parsed)
 
 
-def _resolve_value(value: ANY_UNRESOLVED, parsed: ROOT_TYPE) -> ANY_VALUE_TYPE:
-    func = resolver_map().get(type(value).__name__, lambda x, _: x)
-    return func(value, parsed)
+class SubstitutionStatus(Enum):
+    UNRESOLVED = auto()
+    RESOLVING = auto()
+    RESOLVED = auto()
 
 
-def _resolve_list(values: list, parsed: ROOT_TYPE) -> list:
-    resolved_list = []
-    for element in values:
-        func = resolver_map().get(type(element).__name__, lambda x, _: x)
-        resolved_list.append(func(element, parsed))
-    return resolved_list
+@dataclass
+class Substitution:
+    value: ANY_VALUE_TYPE = None
+    status: SubstitutionStatus = SubstitutionStatus.UNRESOLVED
 
 
-def _resolve_dict(dictionary: dict, parsed: ROOT_TYPE) -> dict:
-    resolved_dict = {}
-    for key, value in dictionary.items():
-        func = resolver_map().get(type(value).__name__, lambda x, _: x)
-        resolved_dict[key] = func(value, parsed)
-    return resolved_dict
+class Resolver:
+    def __init__(self, parsed: ROOT_TYPE):
+        self._parsed = parsed
+        self.substitutions: dict[int, Substitution] = {}
 
+    @property
+    def parsed(self):
+        return self._parsed
 
-def concatenate(values: UnresolvedConcatenation, parsed: ROOT_TYPE) -> ANY_VALUE_TYPE:
-    values = resolve_substitutions(values, parsed)
-    if all(isinstance(value, dict) for value in values):
-        resolved_dicts = [_resolve_dict(value, parsed) for value in values]
-        return reduce(merge, resolved_dicts)
-    if all(isinstance(value, str) for value in values):
-        return resolve_simple_value(values)
-    raise HOCONConcatenationError("Concatenation of multiple data types not allowed")
+    def get_resolver(self, element: Any) -> Callable[[Any], Any]:
+        resolver_map: dict[str, Callable[[Any], Any]] = {
+            "dict": self.resolve_dict,
+            "list": self.resolve_list,
+            "UnresolvedConcatenation": self.concatenate,
+            "UnresolvedDuplicateValue": self.deduplicate,
+            "UnresolvedSubstitution": self.resolve_substitution
+        }
+        return resolver_map.get(type(element).__name__, lambda x: x)
 
+    def resolve_list(self, values: list) -> list:
+        resolved_list = []
+        for element in values:
+            func = self.get_resolver(element)
+            resolved_list.append(func(element))
+        return resolved_list
 
-def deduplicate(values: UnresolvedDuplicateValue, parsed: ROOT_TYPE) -> ANY_VALUE_TYPE:
-    if not all(isinstance(value, dict) for value in values):
-        raise HOCONDuplicateKeyMergeError("Unresolved duplicate value not preresolved. Expected dicts only.")
-    deduplicated = _resolve_value(values[-1], parsed)
-    for value in reversed(values[:-1]):
-        resolved_value = _resolve_value(value, parsed)
-        deduplicated = merge(resolved_value, deduplicated)
-    return deduplicated
+    def resolve_dict(self, dictionary: dict) -> dict:
+        resolved_dict = {}
+        for key, value in dictionary.items():
+            func = self.get_resolver(value)
+            resolved_dict[key] = func(value)
+        return resolved_dict
 
+    def resolve_value(self, value: Any) -> ANY_VALUE_TYPE:
+        func = self.get_resolver(value)
+        return func(value)
 
-def filter_out_unquoted_space(values: list[ANY_VALUE_TYPE]) -> list[ANY_VALUE_TYPE]:
-    return list(filter(lambda value: not isinstance(value, UnquotedString) or value.strip(WHITE_CHARS), values))
+    def concatenate(self, values: UnresolvedConcatenation) -> ANY_VALUE_TYPE:
+        values = self.resolve_substitutions(values)
+        if not values:
+            raise HOCONConcatenationError("Unresolved concatenation cannot be empty")
+        if any(isinstance(value, (UnresolvedConcatenation, UnresolvedDuplicateValue)) for value in values):
+            raise HOCONConcatenationError("Something went horribly wrong. This is a bug.")
+        if all(isinstance(value, str) for value in values):
+            return resolve_simple_value(values)
+        if any(isinstance(value, list) for value in values):
+            values = filter_out_unquoted_space(values)
+            if not all(isinstance(value, list) for value in values):
+                raise HOCONConcatenationError(f"Arrays (lists) mixed with other value types not allowed")
+            resolved_lists = [self.resolve_list(value) for value in values]
+            return sum(resolved_lists, [])
+        if any(isinstance(value, dict) for value in values):
+            values = filter_out_unquoted_space(values)
+            if not all(isinstance(value, dict) for value in values):
+                raise HOCONConcatenationError(f"Objects (dictionaries) mixed with other value types not allowed")
+            return self.resolve_value(reduce(self.merge, reversed(values)))
+        if len(values) == 1:
+            return values[0]
+        raise HOCONConcatenationError(f"Multiple types concatenation not allowed: {values}")
 
-
-def resolve_substitutions(values: UnresolvedConcatenation, parsed: ROOT_TYPE) -> UnresolvedConcatenation:
-    values_with_resolved_substitutions = UnresolvedConcatenation()
-    for value in values:
-        if isinstance(value, UnresolvedSubstitution):
-            values_with_resolved_substitutions.append(_resolve_substitution(value, parsed))
-        else:
-            values_with_resolved_substitutions.append(value)
-    return values_with_resolved_substitutions
-
-
-def _resolve_substitution(substitution: UnresolvedSubstitution, parsed: ROOT_TYPE) -> ANY_VALUE_TYPE:
-    if substitution.status == SubstitutionStatus.RESOLVED:
-        return substitution.value
-    if substitution.status == SubstitutionStatus.RESOLVING:
-        raise HOCONSubstitutionCycleError("DUUUUUUUPAAAAAA")
-    substitution.status = SubstitutionStatus.RESOLVING
-    first_key = substitution.keys[0]
-    if isinstance(parsed, list) and first_key.isdigit():
-        subvalue = parsed[int(first_key)]
-    elif isinstance(parsed, dict) and first_key in parsed:
-        subvalue = parsed[first_key]
-    else:
-        subvalue = get_from_env(substitution)
-    for key in substitution.keys[1:]:
-        if isinstance(subvalue, UnresolvedDuplicateValue):
-            # subvalue: UnresolvedDuplicateValue[UnresolvedDictConcatenation | dict]
-            for value in subvalue:
-                if isinstance(value, dict) and key in value:
-                    subvalue = _resolve_value(value[key], parsed)
-                    print(f"Dup {value=} {subvalue=}")
+    def deduplicate(self, values: UnresolvedDuplicateValue) -> ANY_VALUE_TYPE:
+        if not values:
+            raise HOCONDuplicateKeyMergeError("Unresolved duplicate key must contain at least 2 elements.")
+        deduplicated = self.resolve_value(values[-1])
+        for value in reversed(values[:-1]):
+            if isinstance(deduplicated, dict) and isinstance(value, UnresolvedConcatenation):
+                value = filter_out_unquoted_space(value)
+                if all(isinstance(elem, dict) for elem in value):
+                    deduplicated = reduce(self.merge, chain([deduplicated], reversed(value)))
                 else:
-                    subvalue = _resolve_value(subvalue, parsed)
-                    print(f"DupCon {value=} {subvalue=}")
-        elif isinstance(subvalue, UnresolvedSubstitution):
-            subvalue = _resolve_value(subvalue, parsed)
-            print(f"{value=} {subvalue=}")
-        elif isinstance(subvalue, UnresolvedConcatenation):
-            subvalue = _resolve_value(subvalue, parsed)
-            print(f"{value=} {subvalue=}")
-        elif isinstance(subvalue, list) and key.isdigit():
-            subvalue = subvalue[int(key)]
-        elif isinstance(subvalue, dict) and key in subvalue:
-            subvalue = subvalue[key]
-        else:
-            get_from_env(value)
-    substitution.value = subvalue
-    substitution.status = SubstitutionStatus.RESOLVED
-    return subvalue
+                    break
+            elif isinstance(deduplicated, dict) and isinstance(value, dict):
+                deduplicated = self.merge(deduplicated, value)
+            else:
+                break
+        return self.resolve_value(deduplicated)
+
+    def resolve_substitutions(self, values: UnresolvedConcatenation) -> UnresolvedConcatenation:
+        values_with_resolved_substitutions = UnresolvedConcatenation()
+        for value in values:
+            if isinstance(value, UnresolvedSubstitution):
+                values_with_resolved_substitutions.append(self.resolve_substitution(value))
+            else:
+                values_with_resolved_substitutions.append(value)
+        return values_with_resolved_substitutions
+
+    def resolve_substitution(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE | UnresolvedSubstitution:
+        resolved_sub = self.substitutions.get(substitution.identifier, Substitution())
+        if resolved_sub.status == SubstitutionStatus.RESOLVED:
+            return resolved_sub.value
+        if resolved_sub.status == SubstitutionStatus.RESOLVING:
+            return substitution
+        self.substitutions[substitution.identifier] = Substitution(status=SubstitutionStatus.RESOLVING)
+        subvalue = self.parsed
+        for key in substitution.keys:
+            if isinstance(subvalue, UnresolvedDuplicateValue):
+                subvalue = self.deduplicate(subvalue)
+            elif isinstance(subvalue, UnresolvedSubstitution):
+                subvalue = self.resolve_value(subvalue)
+            elif isinstance(subvalue, UnresolvedConcatenation):
+                subvalue = self.resolve_value(subvalue)
+            elif isinstance(subvalue, list) and key.isdigit():
+                subvalue = subvalue[int(key)]
+                subvalue = self.resolve_value(subvalue)
+            elif isinstance(subvalue, dict) and key in subvalue:
+                subvalue = subvalue[key]
+                subvalue = self.resolve_value(subvalue)
+            else:
+                subvalue = get_from_env(substitution)
+        if isinstance(subvalue, UnresolvedSubstitution):
+            raise HOCONSubstitutionCycleError(f"Could not resolve key {'.'.join(subvalue.keys)}")
+        resolved_sub.value = subvalue
+        resolved_sub.status = SubstitutionStatus.RESOLVED
+        self.substitutions[substitution.identifier] = resolved_sub
+        return subvalue
+
+    def merge(self, superior_dict: dict[str, ANY_VALUE_TYPE], inferior_dict: dict) -> dict:
+        """If both values are objects, then the objects are merged.
+        If keys overlap, the latter wins."""
+        for key, value in superior_dict.items():
+            if isinstance(value, dict) and isinstance(inferior_dict.get(key), dict):
+                inferior_dict[key] = self.merge(value, inferior_dict[key])
+            else:
+                inferior_dict[key] = self.resolve_value(value)
+        return inferior_dict
 
 
 def get_from_env(value: UnresolvedSubstitution) -> str:
     return "from env"
 
 
-def merge(dictionary: dict, superior_dict: dict[str, ANY_VALUE_TYPE]) -> dict:
-    """If both values are objects, then the objects are merged.
-    If keys overlap, the latter wins."""
-    for key, value in superior_dict.items():
-        if isinstance(value, dict) and isinstance(dictionary.get(key), dict):
-            dictionary[key] = merge(dictionary[key], value)
-        else:
-            dictionary[key] = value
-    return dictionary
 
-#
-#
-#     def concatenate(self, values: UnresolvedConcatenation) -> ANY_VALUE_TYPE:
-#         if not values:
-#             raise HOCONConcatenationError("Unresolved concatenation cannot be empty")
-#         # values = self.resolve_substitutions(values)
-#         if any(isinstance(value, (UnresolvedConcatenation, UnresolvedDuplicateValue)) for value in values):
-#             raise HOCONConcatenationError("Something went horribly wrong. This is a bug.")
-#         if all(isinstance(value, str) for value in values):
-#             return resolve_simple_value(values)
-#         if any(isinstance(value, list) for value in values):
-#             values = filter_out_unquoted_space(values)
-#             if not all(isinstance(value, list) for value in values):
-#                 raise HOCONConcatenationError(f"Arrays (lists) mixed with other value types not allowed")
-#             resolved_lists = [self._resolve_list(value) for value in values]
-#             return sum(resolved_lists, [])
-#         if any(isinstance(value, dict) for value in values):
-#             values = filter_out_unquoted_space(values)
-#             if not all(isinstance(value, dict) for value in values):
-#                 raise HOCONConcatenationError(f"Objects (dictionaries) mixed with other value types not allowed")
-#             resolved_dicts = [self._resolve_dict(value) for value in values]
-#             return reduce(merge, resolved_dicts)
-#         if len(values) == 1:
-#             return values[0]
-#         raise HOCONConcatenationError("Concatenation of multiple data types not allowed")
-#
-
-#
-#
-# def filter_out_unquoted_space(values: list[ANY_VALUE_TYPE]) -> list[ANY_VALUE_TYPE]:
-#     return list(filter(lambda value: not isinstance(value, UnquotedString) or value.strip(WHITE_CHARS), values))
-#
-#
-
-#
-#

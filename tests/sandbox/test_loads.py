@@ -95,8 +95,6 @@ def test_8():
             c: 5
         }
         """
-    x = parse(hocon)
-    print(x)
     result = loads(hocon)
     assert result == {
         "a": {
@@ -134,4 +132,63 @@ def test_10():
     result = loads(hocon)
     assert result == {
         "a": [1, 2, 3, 4, 5, 6]
+    }
+
+
+def test_11():
+    data = """
+        a: {a: 1}
+        a: 5
+        a: {b: 3} {b: 2}
+        a: {c: 3}
+        """
+    result = loads(data)
+    assert result == {
+        "a": {"b": 2, "c": 3}
+    }
+
+
+def test_12():
+    data = """
+        a: {a: 1}
+        a: {b: 2}
+        a: {c: 3}
+        """
+    result = loads(data)
+    assert result == {
+        "a": {"a": 1, "b": 2, "c": 3}
+    }
+
+
+def test_13():
+    data = """
+        a: {a: 1}
+        a: {b: 2}
+        a: {c: 3}
+        a: 10
+        """
+    result = loads(data)
+    assert result == {"a": 10}
+
+
+def test_14():
+    data = """
+            a = [1, 2] [3, 4] [
+              5,
+              6
+            ]
+            """
+    result = loads(data)
+    assert result == {
+        "a": [1, 2, 3, 4, 5, 6]
+    }
+
+
+def test_15():
+    data = """
+            a = {a: 1} {b:2} {c:3}
+            """
+    result = loads(data)
+    assert result == {
+        "a": {"a": 1, "b": 2, "c": 3}
     }

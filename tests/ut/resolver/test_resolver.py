@@ -1,4 +1,4 @@
-from hocon.resolver._resolver import filter_out_unquoted_space
+from hocon.resolver._utils import filter_out_unquoted_space
 from hocon.strings import UnquotedString
 
 
