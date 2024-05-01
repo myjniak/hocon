@@ -1,4 +1,4 @@
-from hocon.resolver._resolver import merge
+from hocon.resolver._resolver import Resolver
 
 
 def test_1():
@@ -27,7 +27,7 @@ def test_1():
             }
         }
     }
-    output = merge(dictionary, {key: value})
+    output = Resolver({}).merge({key: value}, dictionary)
     assert output == {
         "a": {
             "b": 0,
@@ -53,7 +53,7 @@ def test_2():
     }
     key = "a"
     value = 2
-    output = merge(dictionary, {key: value})
+    output = Resolver({}).merge({key: value}, dictionary)
     assert output == {
         "a": 2,
         "b": 1
@@ -67,7 +67,7 @@ def test_3():
     }
     key = "a"
     value = {}
-    output = merge(dictionary, {key: value})
+    output = Resolver({}).merge({key: value}, dictionary)
     assert output == {
         "a": {},
         "b": 1

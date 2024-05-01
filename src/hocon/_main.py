@@ -1,23 +1,23 @@
 import json
 from typing import Union
 
+from .constants import ROOT_TYPE
 from .parser._eat import eat_whitespace_and_comments, eat_whitespace, eat_comments
 from .parser._parser import parse_list, parse_dict
 from .exceptions import HOCONNoDataError, HOCONExcessiveDataError
 from .resolver._resolver import resolve
-from .resolver._preresolver import preresolve
 
 
-def loads(data: str) -> Union[list, dict]:
+def loads(data: str) -> ROOT_TYPE:
     parsed = parse(data)
-    preresolved = preresolve(parsed)
-    resolved = resolve(preresolved)
+    resolved = resolve(parsed)
     return resolved
 
 
-def parse(data: str) -> Union[list, dict]:
+def parse(data: str) -> ROOT_TYPE:
     if not data:
         raise HOCONNoDataError("Empty string provided")
+    result: ROOT_TYPE
     idx = eat_whitespace_and_comments(data, 0)
     if data[idx] == "[":
         result, idx = parse_list(data, idx=idx + 1)
@@ -30,7 +30,7 @@ def parse(data: str) -> Union[list, dict]:
     return result
 
 
-def dumps(hocon_: Union[list, dict]) -> str:
+def dumps(hocon_: ROOT_TYPE) -> str:
     return json.dumps(hocon_)
 
 

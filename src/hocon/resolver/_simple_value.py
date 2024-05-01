@@ -1,8 +1,8 @@
 import re
 from typing import Union
 
-from hocon.constants import SIMPLE_VALUE_TYPE, _FLOAT_CONSTANTS, NUMBER_RE
-from hocon.strings import QuotedString, UnquotedString
+from ..constants import SIMPLE_VALUE_TYPE, _FLOAT_CONSTANTS, NUMBER_RE
+from ..strings import QuotedString, UnquotedString
 
 
 def resolve_simple_value(chunks: list[str]) -> SIMPLE_VALUE_TYPE:

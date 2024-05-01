@@ -1,6 +1,6 @@
-from hocon.constants import WHITE_CHARS, UNQUOTED_STR_FORBIDDEN_CHARS, SECTION_OPENING
-from hocon.exceptions import HOCONUnquotedStringError, HOCONUnexpectedSeparatorError, HOCONInvalidKeyError
-from hocon.strings import UnquotedString
+from ..constants import WHITE_CHARS, UNQUOTED_STR_FORBIDDEN_CHARS, SECTION_OPENING
+from ..exceptions import HOCONUnquotedStringError, HOCONUnexpectedSeparatorError, HOCONInvalidKeyError
+from ..strings import UnquotedString
 
 
 def _parse_unquoted_string_value(data: str, idx: int) -> tuple[UnquotedString, int]:
@@ -18,7 +18,7 @@ def _parse_unquoted_string_value(data: str, idx: int) -> tuple[UnquotedString, i
         idx += 1
 
 
-def _parse_unquoted_string_key(data: str, idx: int) -> tuple[str, int]:
+def _parse_unquoted_string_key(data: str, idx: int) -> tuple[UnquotedString, int]:
     string_end = UNQUOTED_STR_FORBIDDEN_CHARS + "."
     string = ""
     while True:
@@ -26,7 +26,7 @@ def _parse_unquoted_string_key(data: str, idx: int) -> tuple[str, int]:
         if char in string_end or data[idx:idx + 2] == "//":
             if not string:
                 _raise_parse_key_exception(data, idx)
-            return string, idx
+            return UnquotedString(string), idx
         string += char
         idx += 1
 

@@ -1,7 +1,7 @@
 from typing import Union
 
-from hocon.constants import ELEMENT_SEPARATORS, SECTION_CLOSING, INLINE_WHITE_CHARS
-from hocon.exceptions import HOCONUnexpectedSeparatorError, HOCONUnexpectedBracesError
+from ..constants import ELEMENT_SEPARATORS, SECTION_CLOSING, INLINE_WHITE_CHARS
+from ..exceptions import HOCONUnexpectedSeparatorError, HOCONUnexpectedBracesError
 from ._key import parse_keypath
 from ._quoted_string import parse_triple_quoted_string, parse_quoted_string
 from ._unquoted_string import _parse_unquoted_string_value
@@ -45,5 +45,4 @@ def _parse_substitution(data: str, idx: int) -> tuple[UnresolvedSubstitution, in
         optional = False
     keys, idx = parse_keypath(data, idx, keyend_indicator="}")
     substitution = UnresolvedSubstitution(keys, optional)
-    print(data[idx])
     return substitution, idx
