@@ -28,7 +28,6 @@ def test_substitution_in_key():
         hocon.loads(data)
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize("key", [
     "a..b",
     ".a",
@@ -36,4 +35,5 @@ def test_substitution_in_key():
 ])
 def test_bad_dot_placement(key: str):
     data = f"{key}: x"
-    result = hocon.loads(data)
+    with pytest.raises(HOCONInvalidKeyError):
+        hocon.loads(data)
