@@ -1,4 +1,7 @@
 # Changelog
+## 0.0.11
+- Support for self-referential substitutions
+
 ## 0.0.10
 - Added ${x} substitution parser 
 
