@@ -47,12 +47,10 @@ def test_keypath_is_always_string():
     }
 
 
-@pytest.mark.xfail
-@pytest.mark.parametrize("key, expected", [
+@pytest.mark.parametrize("data, expected", [
     ('"": x', {"": "x"}),
     ('a."".b = x', {"a": {"": {"b": "x"}}})
 ])
-def test_keypath_as_empty_string(key: str, expected: dict):
-    data = f"{key}: x"
+def test_keypath_as_empty_string(data: str, expected: dict):
     result = hocon.loads(data)
     assert result == expected
