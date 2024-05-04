@@ -12,7 +12,7 @@ def _parse_unquoted_string_value(data: str, idx: int) -> tuple[UnquotedString, i
             raise HOCONUnquotedStringError(f"Forbidden opening '{char}' found when parsing unquoted string_")
         if char in unquoted_string_end or data[idx:idx + 2] == "//":
             if not string:
-                raise HOCONUnquotedStringError("Error when parsing unquoted string_")
+                raise HOCONUnquotedStringError("Error when parsing unquoted string")
             return UnquotedString(string), idx
         string += char
         idx += 1
@@ -36,4 +36,4 @@ def _raise_parse_key_exception(data: str, idx: int):
         raise HOCONUnexpectedSeparatorError("Excessive leading comma found in a dictionary.")
     if data[idx] in "{[":
         raise HOCONInvalidKeyError("Objects and arrays do not make sense as field keys.")
-    raise HOCONInvalidKeyError("Dictionary started with an invalid character.")
+    raise HOCONInvalidKeyError(f"Keypath contains an invalid character: {data[idx]}")
