@@ -1,10 +1,9 @@
 import json
-from typing import Union
 
 from .constants import ROOT_TYPE
+from .exceptions import HOCONNoDataError, HOCONExcessiveDataError
 from .parser._eat import eat_whitespace_and_comments, eat_whitespace, eat_comments
 from .parser._parser import parse_list, parse_dict
-from .exceptions import HOCONNoDataError, HOCONExcessiveDataError
 from .resolver._resolver import resolve
 
 

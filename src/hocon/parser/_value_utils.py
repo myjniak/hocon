@@ -2,7 +2,6 @@
 from copy import deepcopy
 from functools import reduce
 
-from ..constants import ANY_VALUE_TYPE
 from ..unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue
 
 
