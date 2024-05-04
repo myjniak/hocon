@@ -3,6 +3,7 @@ import pytest
 from hocon.exceptions import HOCONUnexpectedSeparatorError
 from hocon.parser._simple_value import parse_simple_value
 from hocon.strings import UnquotedString, QuotedString
+from hocon.unresolved import UnresolvedSubstitution
 
 
 def test_parse_simple_value():
@@ -23,3 +24,13 @@ def test_parse_simple_value():
     assert result == (UnquotedString(" "), 22)
     with pytest.raises(HOCONUnexpectedSeparatorError):
         parse_simple_value(data, 22)
+
+
+@pytest.mark.f13
+@pytest.mark.parametrize("data, expected", [
+    ("${path.expression}", UnresolvedSubstitution(["path", "expression"], optional=False)),
+    ("${?path.expression}", UnresolvedSubstitution(["path", "expression"], optional=True))
+])
+def test_parse_substitution(data: str, expected: UnresolvedSubstitution):
+    result, _ = parse_simple_value(data)
+    assert result == expected
