@@ -36,7 +36,7 @@ def test_2():
 
 def test_3():
     data = """
-            a = {a: 1} {b:${?a.a}} {c:3}
+            a = {a: 1} {b:${a.a}} {c:3}
             """
     parsed = parse(data)
     resolved = resolve(parsed)
@@ -50,8 +50,7 @@ def test_4():
             a = {a: 1} {b:hi ${a.a} mom} {c:3}
             a: {a: 4} {b: 5} {c: 6}
             """
-    parsed = parse(data)
-    resolved = resolve(parsed)
+    result = loads(data)
     expected = {
         "a": {
             "a": 4,
@@ -59,7 +58,7 @@ def test_4():
             "c": 6
         }
     }
-    assert resolved == expected
+    assert result == expected
 
 
 def test_5():
@@ -67,8 +66,7 @@ def test_5():
             a: {a: 1} {b: ${x}} {c: ${x}}
             a: {b: 2} {c: 3}
             """
-    parsed = parse(data)
-    resolved = resolve(parsed)
+    result = loads(data)
     expected = {
         "a": {
             "a": 1,
@@ -76,4 +74,16 @@ def test_5():
             "c": 3
         }
     }
-    assert resolved == expected
+    assert result == expected
+
+
+def test_6():
+    data = """
+            a : [ 1, 2 ]
+            a : ${a} [ 3, 4 ]
+            """
+    result = loads(data)
+    print(result)
+    # assert result == {
+    #     "a": [1, 2, 3, 4]
+    # }

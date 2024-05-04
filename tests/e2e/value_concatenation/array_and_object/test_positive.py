@@ -30,7 +30,6 @@ def test_object_concatenation():
     assert hocon.loads(data) == hocon.loads(data_2) == hocon.loads(data_3) == {"a": {"b": 1, "c": 2}}
 
 
-@pytest.mark.xfail
 def test_array_concatenation():
     data = """
     // one array
@@ -49,19 +48,17 @@ def test_array_concatenation():
     assert hocon.loads(data) == hocon.loads(data_2) == hocon.loads(data_3) == {"a": [1, 2, 3, 4]}
 
 
-@pytest.mark.xfail
 def test_inheritance():
     data = """
     data-center-generic = { cluster-size = 6 }
     data-center-east = ${data-center-generic} { name = "east" }
     """
     assert hocon.loads(data) == {
-        "data-center-generic": {"cluster-sice": 6},
-        "data-center-east": {"cluster-sice": 6, "name": "east"}
+        "data-center-generic": {"cluster-size": 6},
+        "data-center-east": {"cluster-size": 6, "name": "east"}
     }
 
 
-@pytest.mark.xfail
 def test_add_paths():
     data = """
     path = [ /bin ]

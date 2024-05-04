@@ -1,20 +1,19 @@
 from typing import Any
 
-from ._simple_value import _strip_string_list
 from ..constants import WHITE_CHARS
 from ..exceptions import HOCONConcatenationError
 from ..strings import UnquotedString
-from ..unresolved import UnresolvedConcatenation
+from ..unresolved import UnresolvedConcatenation, UnresolvedSubstitution
 
 
 def sanitize_unresolved_concatenation(concatenation: UnresolvedConcatenation) -> UnresolvedConcatenation:
     if any(isinstance(value, list) for value in concatenation):
         concatenation = filter_out_unquoted_space(concatenation)
-        if not all(isinstance(value, list) for value in concatenation):
+        if not all(isinstance(value, list | UnresolvedSubstitution) for value in concatenation):
             raise HOCONConcatenationError(f"Arrays (lists) mixed with other value types not allowed")
     if any(isinstance(value, dict) for value in concatenation):
         concatenation = filter_out_unquoted_space(concatenation)
-        if not all(isinstance(value, dict) for value in concatenation):
+        if not all(isinstance(value, dict | UnresolvedSubstitution) for value in concatenation):
             raise HOCONConcatenationError(f"Objects (dictionaries) mixed with other value types not allowed")
     if any(isinstance(value, str) for value in concatenation):
         concatenation = strip_unquoted_space(concatenation)

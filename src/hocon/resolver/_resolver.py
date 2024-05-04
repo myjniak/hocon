@@ -1,10 +1,11 @@
+from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum, auto
 from functools import reduce
 from itertools import chain
 from typing import Callable, Any
 
-from ..constants import ANY_VALUE_TYPE, ROOT_TYPE
+from ..constants import ANY_VALUE_TYPE, ROOT_TYPE, ANY_UNRESOLVED
 from ..exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError, HOCONSubstitutionCycleError
 from ..resolver._simple_value import resolve_simple_value
 from ..resolver._utils import filter_out_unquoted_space, sanitize_unresolved_concatenation
@@ -34,19 +35,28 @@ class Resolver:
     def __init__(self, parsed: ROOT_TYPE):
         self._parsed = parsed
         self.substitutions: dict[int, Substitution] = {}
+        self.lazy = False
 
     @property
     def parsed(self):
         return self._parsed
 
     def get_resolver(self, element: Any) -> Callable[[Any], Any]:
-        resolver_map: dict[str, Callable[[Any], Any]] = {
-            "dict": self.resolve_dict,
-            "list": self.resolve_list,
-            "UnresolvedConcatenation": self.concatenate,
-            "UnresolvedDuplicateValue": self.deduplicate,
-            "UnresolvedSubstitution": self.resolve_substitution
-        }
+        if self.lazy:
+            resolver_map: dict[str, Callable[[Any], Any]] = {
+                "dict": self.resolve_dict,
+                "list": self.resolve_list,
+                "UnresolvedConcatenation": self.concatenate,
+                "UnresolvedDuplicateValue": self.deduplicate
+            }
+        else:
+            resolver_map: dict[str, Callable[[Any], Any]] = {
+                "dict": self.resolve_dict,
+                "list": self.resolve_list,
+                "UnresolvedConcatenation": self.resolve_substitutions_and_concatenate,
+                "UnresolvedDuplicateValue": self.deduplicate,
+                "UnresolvedSubstitution": self.resolve_substitution
+            }
         return resolver_map.get(type(element).__name__, lambda x: x)
 
     def resolve_list(self, values: list) -> list:
@@ -67,9 +77,12 @@ class Resolver:
         func = self.get_resolver(value)
         return func(value)
 
+    def resolve_substitutions_and_concatenate(self, values: UnresolvedConcatenation) -> ANY_VALUE_TYPE:
+        values = self.resolve_substitutions(values)
+        return self.concatenate(values)
+
     def concatenate(self, values: UnresolvedConcatenation) -> ANY_VALUE_TYPE:
         values = sanitize_unresolved_concatenation(values)
-        values = self.resolve_substitutions(values)
         if not values:
             raise HOCONConcatenationError("Unresolved concatenation cannot be empty")
         if any(isinstance(value, (UnresolvedConcatenation, UnresolvedDuplicateValue)) for value in values):
@@ -77,13 +90,28 @@ class Resolver:
         if all(isinstance(value, str) for value in values):
             return resolve_simple_value(values)
         if any(isinstance(value, list) for value in values):
-            resolved_lists = [self.resolve_list(value) for value in values]
-            return sum(resolved_lists, [])
+            return self._concatenate_lists(values)
         if any(isinstance(value, dict) for value in values):
             return self.resolve_value(reduce(self.merge, reversed(values)))
         if len(values) == 1:
             return values[0]
         raise HOCONConcatenationError(f"Multiple types concatenation not allowed: {values}")
+
+    def _concatenate_lists(self, values: UnresolvedConcatenation) -> list:
+        resolved_lists = []
+        for value in values:
+            if isinstance(value, list):
+                resolved_lists.append(self.resolve_list(value))
+            elif isinstance(value, UnresolvedSubstitution):
+                resolved_list = self.resolve_substitution(value)
+                if not isinstance(resolved_list, list):
+                    raise HOCONConcatenationError(
+                        f"Attempted list concatenation with substitution {value} "
+                        f"that resolved to {type(resolved_list)}.")
+                resolved_lists.append(resolved_list)
+            else:
+                raise HOCONConcatenationError("Something went horribly wrong. This is a bug.")
+        return sum(resolved_lists, [])
 
     def deduplicate(self, values: UnresolvedDuplicateValue) -> ANY_VALUE_TYPE:
         if not values:
@@ -111,20 +139,23 @@ class Resolver:
                 values_with_resolved_substitutions.append(value)
         return values_with_resolved_substitutions
 
-    def resolve_substitution(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE | UnresolvedSubstitution:
+    def resolve_substitution(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
         resolved_sub = self.substitutions.get(substitution.identifier, Substitution())
         if resolved_sub.status == SubstitutionStatus.RESOLVED:
             return resolved_sub.value
         if resolved_sub.status == SubstitutionStatus.RESOLVING:
-            return substitution
+            result = self.resolve_sustitution_fallback(substitution)
+            resolved_sub.value = result
+            resolved_sub.status = SubstitutionStatus.RESOLVED
+            self.substitutions[substitution.identifier] = resolved_sub
+            self.lazy = False
+            return result
+            # raise HOCONSubstitutionCycleError(f"Could not resolve {substitution}")
+        self.lazy = True
         self.substitutions[substitution.identifier] = Substitution(status=SubstitutionStatus.RESOLVING)
         subvalue = self.parsed
         for key in substitution.keys:
-            if isinstance(subvalue, UnresolvedDuplicateValue):
-                subvalue = self.deduplicate(subvalue)
-            elif isinstance(subvalue, UnresolvedSubstitution):
-                subvalue = self.resolve_value(subvalue)
-            elif isinstance(subvalue, UnresolvedConcatenation):
+            if isinstance(subvalue, ANY_UNRESOLVED):
                 subvalue = self.resolve_value(subvalue)
             elif isinstance(subvalue, list) and key.isdigit():
                 subvalue = subvalue[int(key)]
@@ -134,11 +165,15 @@ class Resolver:
                 subvalue = self.resolve_value(subvalue)
             else:
                 subvalue = get_from_env(substitution)
+                break
+        if self.substitutions[substitution.identifier].status == SubstitutionStatus.RESOLVED:
+            return self.substitutions[substitution.identifier].value
         if isinstance(subvalue, UnresolvedSubstitution):
-            raise HOCONSubstitutionCycleError(f"Could not resolve key {'.'.join(subvalue.keys)}")
+            subvalue = self.resolve_substitution(subvalue)
         resolved_sub.value = subvalue
         resolved_sub.status = SubstitutionStatus.RESOLVED
         self.substitutions[substitution.identifier] = resolved_sub
+        self.lazy = False
         return subvalue
 
     def merge(self, superior_dict: dict[str, ANY_VALUE_TYPE], inferior_dict: dict) -> dict:
@@ -151,9 +186,53 @@ class Resolver:
                 inferior_dict[key] = self.resolve_value(value)
         return inferior_dict
 
+    def resolve_sustitution_fallback(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
+        """In case of self-referencial substitutions, try to resolve them by removing the self-reference, and
+        nodes after that.
+        For example for:
+
+        a : { a : { c : 1 } }
+        b : 1
+        a : ${a.a}
+        a : { a : 2 }
+        b : 5
+
+        Substitution ${a.a} will be attempted to resolve with the following object:
+        a : { a : { c : 1 } }
+        b : 1
+        b : 5
+        And ultimately return {c:1}
+        """
+        carved_parsed = cut_self_reference_and_fields_that_override_it(substitution, self.parsed)
+        result = Resolver(carved_parsed).resolve_substitution(substitution)
+        return result
+
 
 def get_from_env(value: UnresolvedSubstitution) -> str:
     return "from env"
 
 
+def cut_self_reference_and_fields_that_override_it(substitution: UnresolvedSubstitution, parsed: ROOT_TYPE) -> ROOT_TYPE:
+    def _cut(substitution: UnresolvedSubstitution, subtree: Any, keypath_index: int = 0):
+        for i, key in enumerate(substitution.keys[keypath_index:]):
+            if isinstance(subtree, (UnresolvedConcatenation, UnresolvedDuplicateValue)):
+                for index, item in enumerate(subtree):
+                    job_done = _cut(substitution, item, i)
+                    if item == substitution or job_done:
+                        for _ in range(len(subtree) - index):
+                            subtree.pop()
+                        return True
+            elif isinstance(subtree, dict) and key in subtree:
+                subtree = subtree[key]
+            elif isinstance(subtree, list) and key.isdigit():
+                subtree = subtree[int(key)]
+        if isinstance(subtree, (UnresolvedConcatenation, UnresolvedDuplicateValue)):
+            for index, item in enumerate(subtree):
+                if item == substitution or (isinstance(item, list) and substitution in item):
+                    for _ in range(len(subtree) - index):
+                        subtree.pop()
+                    return True
 
+    carved_parsed = deepcopy(parsed)
+    _cut(substitution, carved_parsed)
+    return carved_parsed

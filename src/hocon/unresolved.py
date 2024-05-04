@@ -31,3 +31,6 @@ class UnresolvedSubstitution:
         if not isinstance(other, UnresolvedSubstitution):
             return NotImplemented
         return self.keys == other.keys and self.optional == other.optional
+
+    def __hash__(self):
+        return hash((".".join(self.keys), self.optional, self.identifier))
