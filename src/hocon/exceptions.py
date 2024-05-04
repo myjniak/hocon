@@ -42,5 +42,9 @@ class HOCONDuplicateKeyMergeError(HOCONResolveError):
     """When duplicated keys cannot be merged"""
 
 
+class HOCONSubstitutionUndefinedError(HOCONResolveError):
+    """When a substitution of ${} could not be resolved in the document or external sources"""
+
+
 class HOCONSubstitutionCycleError(HOCONResolveError):
     """When a cycle of ${} references is detected"""
