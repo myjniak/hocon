@@ -11,7 +11,7 @@ For example tests for Array and object concatenation are marked with "f10_2" tag
 | f3         | [Omit root braces](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#omit-root-braces)                                                                          | :heavy_check_mark: | :heavy_check_mark: |
 | f4         | [Key-value separator](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#key-value-separator)                                                                    | :heavy_check_mark: | :heavy_check_mark: |
 | f5         | [Commas](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#commas)                                                                                              | :heavy_check_mark: | :heavy_check_mark: |
-| f6         | [Whitespace](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#whitespace)                                                                                      | :heavy_check_mark: |        :x:         |
+| f6         | [Whitespace](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#whitespace)                                                                                      | :heavy_check_mark: | :heavy_check_mark: |
 | f7         | [Duplicate keys and object merging](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#duplicate-keys-and-object-merging)                                        | :heavy_check_mark: | :heavy_check_mark: |
 | f8         | [Unquoted strings](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#unquoted-strings)                                                                          | :heavy_check_mark: | :heavy_check_mark: |
 | f9         | [Multi-line strings](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#multi-line-strings)                                                                      | :heavy_check_mark: | :heavy_check_mark: |
@@ -37,8 +37,8 @@ For example tests for Array and object concatenation are marked with "f10_2" tag
 
 ## Additional requirements
 
-There are several assumptions which are not defined by the spec but are essential to the library health.
+There are several assumptions which are not defined by the HOCON spec but are essential to the library health.
 
-| Requirement ID | Requirement                                                             |
-|----------------|-------------------------------------------------------------------------|
-| r1             | If data is an invalid hocon, HOCONDecodeError exception will be raised. |
+| Requirement ID | Requirement                                                       |
+|----------------|-------------------------------------------------------------------|
+| r1             | If data is an invalid hocon, HOCONError exception will be raised. |

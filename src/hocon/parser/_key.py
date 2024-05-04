@@ -1,4 +1,4 @@
-from ..constants import KEY_VALUE_SEPARATORS
+from ..constants import KEY_VALUE_SEPARATORS, WHITE_CHARS
 from ..exceptions import HOCONDecodeError
 from ._eat import eat_comments
 from ._quoted_string import parse_quoted_string, parse_triple_quoted_string
@@ -15,12 +15,10 @@ def parse_keypath(data: str, idx: int = 0, keyend_indicator: str = KEY_VALUE_SEP
         keychunks_list[-1].append(string)
         char = data[idx]
         if idx == old_idx:
-            keys = ["".join(chunks) for chunks in keychunks_list]
-            if "".join(keys).strip():
-                raise HOCONDecodeError(f"No key-value separator found for key {''.join(keys)}")
+            raise HOCONDecodeError(f"This is an exception preventing infinite loop and it's a bug. Please report it.")
         if char in keyend_indicator:
             if isinstance(string, UnquotedString):
-                keychunks_list[-1][-1] = keychunks_list[-1][-1].rstrip()
+                keychunks_list[-1][-1] = keychunks_list[-1][-1].rstrip(WHITE_CHARS)
             keys = ["".join(chunks) for chunks in keychunks_list]
             if char == "{":
                 return keys, idx
