@@ -80,7 +80,6 @@ def test_substitution_path_is_absolute():
     }
 
 
-@pytest.mark.xfail
 def test_substitution_from_env_var():
     """For substitutions which are not found in the configuration tree,
     implementations may try to resolve them by looking at system environment variables
@@ -88,7 +87,7 @@ def test_substitution_from_env_var():
     data = """
     key: ${MY_HOCON_ENV_VAR}
     """
-    with set_env(my_hocon_env_var="HELLO"):
+    with set_env(MY_HOCON_ENV_VAR="HELLO"):
         result = hocon.loads(data)
     assert result == {
         "key": "HELLO"

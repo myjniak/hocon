@@ -1,9 +1,10 @@
+import os
 from copy import deepcopy
-from typing import Any
+from typing import Any, Optional
 
 from ..constants import WHITE_CHARS, ROOT_TYPE
-from ..exceptions import HOCONConcatenationError
-from ..strings import UnquotedString
+from ..exceptions import HOCONConcatenationError, HOCONSubstitutionUndefinedError
+from ..strings import UnquotedString, QuotedString
 from ..unresolved import UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplicateValue
 
 
@@ -39,7 +40,10 @@ def strip_unquoted_space(values: UnresolvedConcatenation) -> UnresolvedConcatena
 
 
 def get_from_env(value: UnresolvedSubstitution) -> str:
-    return "from env"
+    value: Optional[str] = os.getenv(".".join(value.keys))
+    if value is None:
+        raise HOCONSubstitutionUndefinedError(f"Undefined substitution {value}.")
+    return QuotedString(value)
 
 
 def cut_self_reference_and_fields_that_override_it(substitution: UnresolvedSubstitution, parsed: ROOT_TYPE) -> ROOT_TYPE:
