@@ -1,4 +1,7 @@
 # Changelog
+## 0.0.13
+- Support for substitution fallback to env vars
+
 ## 0.0.12
 - Support for += operator
 

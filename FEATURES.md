@@ -51,7 +51,7 @@ For example tests for Array and object concatenation are marked with "f10_2" tag
 | f22        | [Java properties mapping](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#java-properties-mapping)                                                            |  :no_entry_sign:   |  :no_entry_sign:   |
 | f23        | [Conventional configuration files for JVM apps](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-configuration-files-for-jvm-apps)                |  :no_entry_sign:   |  :no_entry_sign:   |
 | f24        | [Conventional override by system properties](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-override-by-system-properties)                      |  :no_entry_sign:   |  :no_entry_sign:   |
-| f25        | [Substitution fallback to environment variables](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#substitution-fallback-to-environment-variables)              |        :x:         |        :x:         |
+| f25        | [Substitution fallback to environment variables](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#substitution-fallback-to-environment-variables)              | :heavy_check_mark: | :heavy_check_mark: |
 
 ## Additional requirements
 
