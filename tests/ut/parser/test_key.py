@@ -8,5 +8,5 @@ from hocon.parser._key import parse_keypath
     ("\"key  \"  : 0", ["key  "])
 ])
 def test_parse_keypath(data: str, expected: list[str]):
-    keys, idx = parse_keypath(data, 0)
-    assert keys == expected
+    keypath = parse_keypath(data, 0)
+    assert keypath.keys == expected

@@ -48,7 +48,6 @@ def test_parse_all_unresolved_types():
     assert result == expected
 
 
-@pytest.mark.xfail
 @pytest.mark.f13_2
 def test_parse_iadd():
     data = "a=[1,2], a=${?a}[3]"

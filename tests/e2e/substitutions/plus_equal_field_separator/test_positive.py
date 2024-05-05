@@ -8,7 +8,6 @@ import hocon
 pytestmark = pytest.mark.f13_2
 
 
-@pytest.mark.xfail
 def test_iadd():
     data = """
     a = [1, 2]

@@ -6,7 +6,6 @@ from hocon.exceptions import HOCONConcatenationError
 pytestmark = pytest.mark.f13_2
 
 
-@pytest.mark.xfail
 def test_iadd_non_array():
     """If the previous value was not an array, an error will result
     just as it would in the long form a = ${?a} [3]"""

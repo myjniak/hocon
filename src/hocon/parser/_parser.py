@@ -1,11 +1,10 @@
 from typing import Any
 
-from ..constants import ANY_VALUE_TYPE
-from ..unresolved import UnresolvedConcatenation
 from ._eat import eat_comments, eat_dict_item_separators, eat_whitespace, eat_list_item_separators
 from ._key import parse_keypath
 from ._simple_value import parse_simple_value
-from ._value_utils import merge_unconcatenated
+from ._value_utils import merge_unconcatenated, convert_iadd_to_self_referential_substitution
+from ..unresolved import UnresolvedConcatenation, UnresolvedSubstitution
 
 
 def parse_dict(data: str, idx: int = 0) -> tuple[dict, int]:
@@ -15,10 +14,12 @@ def parse_dict(data: str, idx: int = 0) -> tuple[dict, int]:
         if data[idx] == "}":
             idx += 1
             return unconcatenated_dictionary, idx
-        keys, idx = parse_keypath(data, idx=idx)
-        idx = eat_whitespace(data, idx)
+        keypath = parse_keypath(data, idx=idx)
+        idx = eat_whitespace(data, keypath.end_idx)
         unconcatenated_value, idx = parse_dict_value(data, idx=idx)
-        unconcatenated_dictionary = merge_unconcatenated(unconcatenated_dictionary, keys, unconcatenated_value)
+        if keypath.iadd:
+            unconcatenated_value = convert_iadd_to_self_referential_substitution(keypath.keys, unconcatenated_value)
+        unconcatenated_dictionary = merge_unconcatenated(unconcatenated_dictionary, keypath.keys, unconcatenated_value)
 
 
 def parse_list(data: str, idx: int = 0) -> tuple[list, int]:

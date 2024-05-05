@@ -1,12 +1,21 @@
-from ..constants import KEY_VALUE_SEPARATORS, WHITE_CHARS
-from ..exceptions import HOCONDecodeError
+from dataclasses import dataclass
+
 from ._eat import eat_comments
 from ._quoted_string import parse_quoted_string, parse_triple_quoted_string
 from ._unquoted_string import _parse_unquoted_string_key
-from ..strings import QuotedString, UnquotedString
+from ..constants import WHITE_CHARS
+from ..exceptions import HOCONDecodeError
+from ..strings import UnquotedString
 
 
-def parse_keypath(data: str, idx: int = 0, keyend_indicator: str = KEY_VALUE_SEPARATORS + "{") -> tuple[list[str], int]:
+@dataclass
+class Keypath:
+    keys: list[str]
+    end_idx: int
+    iadd: bool = False
+
+
+def parse_keypath(data: str, idx: int = 0, keyend_indicator: str = ":={") -> Keypath:
     keychunks_list: list[list[str]] = [[]]
     while True:
         old_idx = idx
@@ -16,13 +25,15 @@ def parse_keypath(data: str, idx: int = 0, keyend_indicator: str = KEY_VALUE_SEP
         char = data[idx]
         if idx == old_idx:
             raise HOCONDecodeError(f"This is an exception preventing infinite loop and it's a bug. Please report it.")
-        if char in keyend_indicator:
+        if data[idx] in keyend_indicator or data[idx:idx + 2] == "+=":
             if isinstance(string, UnquotedString):
                 keychunks_list[-1][-1] = keychunks_list[-1][-1].rstrip(WHITE_CHARS)
             keys = ["".join(chunks) for chunks in keychunks_list]
             if char == "{":
-                return keys, idx
-            return keys, idx + 1
+                return Keypath(keys, idx)
+            if char == "+":
+                return Keypath(keys, idx + 2, iadd=True)
+            return Keypath(keys, idx + 1)
         if data[idx] == ".":
             idx += 1
             keychunks_list.append([])
