@@ -15,17 +15,9 @@ Just like in python json module, you can load a string to python dictionary/list
 ```python
 import hocon
 
-data = """{
-    a: {
-        b: {
-            c = 5
-        }
-    }
-    a.b {
-        c = 7
-        d = 8
-    }
-}
+data = """
+animal.favorite: badger
+key : ${animal.favorite} is my favorite animal
 """
 dictionary = hocon.loads(data)
 ```
@@ -35,12 +27,8 @@ And you can dump it back to string:
 ```pycon
 >>> print(hocon.dumps(dictionary, indent=4))
 {
-    "a": {
-        "b": {
-            "c": 7,
-            "d": 8
-        }
-    }
+    "animal": {"favorite": "badger"},
+    "key": "badger is my favorite animal"
 }
 ```
 

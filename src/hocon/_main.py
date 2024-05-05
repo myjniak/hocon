@@ -15,7 +15,7 @@ def loads(data: str) -> ROOT_TYPE:
 
 def parse(data: str) -> ROOT_TYPE:
     if not data:
-        raise HOCONNoDataError("Empty string_ provided")
+        raise HOCONNoDataError("Empty string provided")
     result: ROOT_TYPE
     idx = eat_whitespace_and_comments(data, 0)
     if data[idx] == "[":
