@@ -23,7 +23,7 @@ class HOCONUnexpectedSeparatorError(HOCONDecodeError):
 
 
 class HOCONUnquotedStringError(HOCONDecodeError):
-    """When forbidden character is used within an unquoted string_"""
+    """When forbidden character is used within an unquoted string"""
 
 
 class HOCONInvalidKeyError(HOCONDecodeError):

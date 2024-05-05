@@ -3,7 +3,7 @@ import pytest
 from hocon.exceptions import HOCONUnexpectedSeparatorError
 from hocon.parser._simple_value import parse_simple_value
 from hocon.strings import UnquotedString, QuotedString
-from hocon.unresolved import UnresolvedSubstitution
+from hocon.unresolved import UnresolvedSubstitution, UnresolvedDuplicateValue, UnresolvedConcatenation
 
 
 def test_parse_simple_value():
