@@ -1,4 +1,7 @@
 # Changelog
+## 0.0.14
+- Support for optional ${?x} substitutions
+
 ## 0.0.13
 - Support for substitution fallback to env vars
 

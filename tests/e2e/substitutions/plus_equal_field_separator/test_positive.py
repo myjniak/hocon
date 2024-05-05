@@ -19,7 +19,6 @@ def test_iadd():
     }
 
 
-@pytest.mark.xfail
 def test_iadd_no_previous_value():
     data = """
     a += 3
