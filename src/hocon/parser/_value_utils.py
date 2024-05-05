@@ -2,7 +2,7 @@
 from copy import deepcopy
 from functools import reduce
 
-from ..unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue
+from ..unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution
 
 
 def merge_unconcatenated(unconcatenated_dictionary: dict, keys: list, unconcatenated_value: UnresolvedConcatenation):
@@ -25,3 +25,15 @@ def merge_unconcatenated(unconcatenated_dictionary: dict, keys: list, unconcaten
     else:
         last_nest[keys[-1]] = unconcatenated_value
     return deepcopy(unconcatenated_dictionary)
+
+
+def convert_iadd_to_self_referential_substitution(keys: list[str], concatenation: UnresolvedConcatenation):
+    """Basically it turns this expression:
+    a += 1
+    To this:
+    a = ${?a} [1]
+    """
+    return UnresolvedConcatenation([
+        UnresolvedSubstitution(keys, optional=True),
+        [concatenation]
+    ])

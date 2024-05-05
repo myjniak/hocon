@@ -1,4 +1,7 @@
 # Changelog
+## 0.0.12
+- Support for += operator
+
 ## 0.0.11
 - Support for self-referential substitutions
 

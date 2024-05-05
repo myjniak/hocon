@@ -43,6 +43,6 @@ def _parse_substitution(data: str, idx: int) -> tuple[UnresolvedSubstitution, in
         idx += 1
     else:
         optional = False
-    keys, idx = parse_keypath(data, idx, keyend_indicator="}")
-    substitution = UnresolvedSubstitution(keys, optional)
-    return substitution, idx
+    keypath = parse_keypath(data, idx, keyend_indicator="}")
+    substitution = UnresolvedSubstitution(keypath.keys, optional)
+    return substitution, keypath.end_idx

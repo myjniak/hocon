@@ -8,7 +8,6 @@ WHITE_HEXES = [0x00A0, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0
                0x001C, 0x001D, 0x001E, 0x001F, 0x2028, 0x2029]
 INLINE_WHITE_CHARS = " \t\r\v\f" + "".join(map(chr, WHITE_HEXES))
 WHITE_CHARS: str = INLINE_WHITE_CHARS + "\n"
-KEY_VALUE_SEPARATORS = ":="
 UNQUOTED_STR_FORBIDDEN_CHARS = '$"{}[]:=,+#`^?!@*&\\'
 _FLOAT_CONSTANTS = {
     '-Infinity': float('-inf'),
