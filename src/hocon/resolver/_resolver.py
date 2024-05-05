@@ -8,7 +8,8 @@ from typing import Callable, Any
 from ..constants import ANY_VALUE_TYPE, ROOT_TYPE, ANY_UNRESOLVED
 from ..exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError, HOCONSubstitutionCycleError
 from ..resolver._simple_value import resolve_simple_value
-from ..resolver._utils import filter_out_unquoted_space, sanitize_unresolved_concatenation
+from ..resolver._utils import filter_out_unquoted_space, sanitize_unresolved_concatenation, \
+    cut_self_reference_and_fields_that_override_it, get_from_env
 from ..unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution
 
 
@@ -206,33 +207,3 @@ class Resolver:
         carved_parsed = cut_self_reference_and_fields_that_override_it(substitution, self.parsed)
         result = Resolver(carved_parsed).resolve_substitution(substitution)
         return result
-
-
-def get_from_env(value: UnresolvedSubstitution) -> str:
-    return "from env"
-
-
-def cut_self_reference_and_fields_that_override_it(substitution: UnresolvedSubstitution, parsed: ROOT_TYPE) -> ROOT_TYPE:
-    def _cut(substitution: UnresolvedSubstitution, subtree: Any, keypath_index: int = 0):
-        for i, key in enumerate(substitution.keys[keypath_index:]):
-            if isinstance(subtree, (UnresolvedConcatenation, UnresolvedDuplicateValue)):
-                for index, item in enumerate(subtree):
-                    job_done = _cut(substitution, item, i)
-                    if item == substitution or job_done:
-                        for _ in range(len(subtree) - index):
-                            subtree.pop()
-                        return True
-            elif isinstance(subtree, dict) and key in subtree:
-                subtree = subtree[key]
-            elif isinstance(subtree, list) and key.isdigit():
-                subtree = subtree[int(key)]
-        if isinstance(subtree, (UnresolvedConcatenation, UnresolvedDuplicateValue)):
-            for index, item in enumerate(subtree):
-                if item == substitution or (isinstance(item, list) and substitution in item):
-                    for _ in range(len(subtree) - index):
-                        subtree.pop()
-                    return True
-
-    carved_parsed = deepcopy(parsed)
-    _cut(substitution, carved_parsed)
-    return carved_parsed

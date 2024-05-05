@@ -1,9 +1,10 @@
+from copy import deepcopy
 from typing import Any
 
-from ..constants import WHITE_CHARS
+from ..constants import WHITE_CHARS, ROOT_TYPE
 from ..exceptions import HOCONConcatenationError
 from ..strings import UnquotedString
-from ..unresolved import UnresolvedConcatenation, UnresolvedSubstitution
+from ..unresolved import UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplicateValue
 
 
 def sanitize_unresolved_concatenation(concatenation: UnresolvedConcatenation) -> UnresolvedConcatenation:
@@ -35,3 +36,33 @@ def strip_unquoted_space(values: UnresolvedConcatenation) -> UnresolvedConcatena
     if last == 0:
         return UnresolvedConcatenation(values[first:])
     return UnresolvedConcatenation(values[first:last])
+
+
+def get_from_env(value: UnresolvedSubstitution) -> str:
+    return "from env"
+
+
+def cut_self_reference_and_fields_that_override_it(substitution: UnresolvedSubstitution, parsed: ROOT_TYPE) -> ROOT_TYPE:
+    def _cut(sub: UnresolvedSubstitution, subtree: Any, keypath_index: int = 0):
+        for i, key in enumerate(sub.keys[keypath_index:]):
+            if isinstance(subtree, (UnresolvedConcatenation, UnresolvedDuplicateValue)):
+                for index, item in enumerate(subtree):
+                    job_done = _cut(sub, item, i)
+                    if item == sub or job_done:
+                        for _ in range(len(subtree) - index):
+                            subtree.pop()
+                        return True
+            elif isinstance(subtree, dict) and key in subtree:
+                subtree = subtree[key]
+            elif isinstance(subtree, list) and key.isdigit():
+                subtree = subtree[int(key)]
+        if isinstance(subtree, (UnresolvedConcatenation, UnresolvedDuplicateValue)):
+            for index, item in enumerate(subtree):
+                if item == sub or (isinstance(item, list) and sub in item):
+                    for _ in range(len(subtree) - index):
+                        subtree.pop()
+                    return True
+
+    carved_parsed = deepcopy(parsed)
+    _cut(substitution, carved_parsed)
+    return carved_parsed
