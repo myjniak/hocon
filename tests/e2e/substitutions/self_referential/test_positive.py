@@ -3,8 +3,11 @@ substitutions normally "look forward" and use the final value for their path exp
 when this would create a cycle, when possible the cycle must be broken by looking backward only
 (thus removing one of the substitutions that's a link in the cycle)"""
 
-import hocon
 import pytest
+
+import hocon
+
+pytestmark = pytest.mark.f13_1
 
 
 def test_basic():

@@ -2,10 +2,12 @@
 An object or array with a substitution inside it is not considered self-referential for this purpose.
 """
 
-import hocon
 import pytest
 
+import hocon
 from hocon.exceptions import HOCONSubstitutionCycleError, HOCONSubstitutionUndefinedError
+
+pytestmark = pytest.mark.f13_1
 
 
 def test_unbreakable_cycle_dict():
