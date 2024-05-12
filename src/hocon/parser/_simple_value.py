@@ -1,5 +1,6 @@
 from typing import Union, Optional
 
+from ._data import ParserInput
 from ..constants import ELEMENT_SEPARATORS, SECTION_CLOSING, INLINE_WHITE_CHARS
 from ..exceptions import HOCONUnexpectedSeparatorError, HOCONUnexpectedBracesError, HOCONSubstitutionCycleError
 from ._key import parse_keypath
@@ -9,7 +10,7 @@ from ..strings import UnquotedString, QuotedString
 from ..unresolved import UnresolvedSubstitution
 
 
-def parse_simple_value(data: str, idx: int = 0, current_keypath: Optional[list[str]] = None) -> tuple[Union[UnquotedString, QuotedString, UnresolvedSubstitution], int]:
+def parse_simple_value(data: ParserInput, idx: int = 0, current_keypath: Optional[list[str]] = None) -> tuple[Union[UnquotedString, QuotedString, UnresolvedSubstitution], int]:
     char = data[idx]
     if char == ",":
         raise HOCONUnexpectedSeparatorError("Unexpected ',' found.")
@@ -27,7 +28,7 @@ def parse_simple_value(data: str, idx: int = 0, current_keypath: Optional[list[s
         return _parse_unquoted_string_value(data, idx)
 
 
-def _parse_whitespace_chunk(data: str, idx: int) -> tuple[UnquotedString, int]:
+def _parse_whitespace_chunk(data: ParserInput, idx: int) -> tuple[UnquotedString, int]:
     string = ""
     while True:
         char = data[idx]
@@ -37,7 +38,7 @@ def _parse_whitespace_chunk(data: str, idx: int) -> tuple[UnquotedString, int]:
         idx += 1
 
 
-def _parse_substitution(data: str, idx: int, current_keypath: Optional[list[str]] = None) -> tuple[UnresolvedSubstitution, int]:
+def _parse_substitution(data: ParserInput, idx: int, current_keypath: Optional[list[str]] = None) -> tuple[UnresolvedSubstitution, int]:
     if data[idx] == "?":
         optional = True
         idx += 1

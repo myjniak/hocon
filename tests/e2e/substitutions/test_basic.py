@@ -94,9 +94,9 @@ def test_substitution_from_env_var():
     }
 
 
-@pytest.mark.xfail
 def test_retrieve_value_from_another_file():
-    result = hocon.loads(Path("data/main.conf").read_text())
+    conf_filepath = Path(__file__).parent / "data" / "main.conf"
+    result = hocon.load(open(conf_filepath))
     assert result == {
         "key": "badger is my favorite animal",
         "animal": {

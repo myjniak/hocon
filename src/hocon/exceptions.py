@@ -30,6 +30,10 @@ class HOCONInvalidKeyError(HOCONDecodeError):
     """Objects and arrays do not make sense as field keys."""
 
 
+class HOCONIncludeError(HOCONDecodeError):
+    """when include feature is used in an unsupported way."""
+
+
 class HOCONResolveError(HOCONError):
     """Generic HOCON resolve error"""
 
