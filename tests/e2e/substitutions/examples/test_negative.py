@@ -1,7 +1,9 @@
-import hocon
 import pytest
 
+import hocon
 from hocon.exceptions import HOCONSubstitutionUndefinedError, HOCONSubstitutionCycleError
+
+pytestmark = pytest.mark.f13_3
 
 
 def test_circular_reference_missing():

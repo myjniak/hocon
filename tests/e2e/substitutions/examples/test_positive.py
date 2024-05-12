@@ -1,4 +1,8 @@
+import pytest
+
 import hocon
+
+pytestmark = pytest.mark.f13_3
 
 
 def test_regular_fallback():

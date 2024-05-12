@@ -1,6 +1,11 @@
+import pytest
+
 from hocon._main import parse, resolve
 from hocon.resolver._utils import cut_self_reference_and_fields_that_override_it
 from hocon.unresolved import UnresolvedSubstitution, UnresolvedConcatenation
+
+
+pytestmark = pytest.mark.f13
 
 
 def test_1():
