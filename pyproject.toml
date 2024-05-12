@@ -62,6 +62,7 @@ dependencies = [
 
 [tool.hatch.envs.test.scripts]
 coverage = "python -m pytest -vs --cov hocon --junitxml=junit/test-results.xml-{env:PYTHON_VERSION}.xml"
+black = "python -m black --check src/"
 
 [tool.black]
 line-length = 120
