@@ -31,9 +31,8 @@ def parse_dict(data: ParserInput, idx: int = 0, current_keypath: Optional[list[s
         unconcatenated_value, idx = parse_dict_value(data, idx=idx, current_keypath=current_keypath + keypath.keys)
         if keypath.iadd:
             unconcatenated_value = convert_iadd_to_self_referential_substitution(
-                keypath.keys,
-                unconcatenated_value,
-                current_keypath=current_keypath + keypath.keys)
+                keypath.keys, unconcatenated_value, current_keypath=current_keypath + keypath.keys
+            )
         unconcatenated_dictionary = merge_unconcatenated(unconcatenated_dictionary, keypath.keys, unconcatenated_value)
 
 
@@ -92,8 +91,8 @@ def parse_list_element(data: ParserInput, idx: int, current_keypath: list[str]) 
 
 def parse_include(data: ParserInput, idx: int, current_keypath: list[str]) -> tuple[dict, int]:
     """We start parsing right after 'include' phrase here."""
-    if data[idx] == "\"":
-        string, idx = parse_quoted_string(data, idx+1)
+    if data[idx] == '"':
+        string, idx = parse_quoted_string(data, idx + 1)
     else:
         raise HOCONIncludeError("Only single quoted include filepaths are currently supported.")
     external_filepath = Path(data.absolute_filepath).parent / string
@@ -102,10 +101,7 @@ def parse_include(data: ParserInput, idx: int, current_keypath: list[str]) -> tu
             external_file_content = conf.read()
     except FileNotFoundError:
         return UNDEFINED
-    external_input = ParserInput(
-        data=external_file_content,
-        absolute_filepath=external_filepath
-    )
+    external_input = ParserInput(data=external_file_content, absolute_filepath=external_filepath)
     if external_input[0] == "{":
         external_dict, _ = parse_dict(external_input, idx=1, current_keypath=current_keypath)
     else:

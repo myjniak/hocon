@@ -1,5 +1,4 @@
-class QuotedString(str):
-    ...
+class QuotedString(str): ...
 
 
 class UnquotedString(str):

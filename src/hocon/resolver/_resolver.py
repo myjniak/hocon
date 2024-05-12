@@ -3,11 +3,21 @@ from itertools import chain
 from typing import Callable, Any
 from functools import singledispatchmethod
 from ..constants import ANY_VALUE_TYPE, ROOT_TYPE, ANY_UNRESOLVED, UNDEFINED
-from ..exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError, HOCONSubstitutionUndefinedError, \
-    HOCONSubstitutionCycleError
+from ..exceptions import (
+    HOCONConcatenationError,
+    HOCONDuplicateKeyMergeError,
+    HOCONSubstitutionUndefinedError,
+    HOCONSubstitutionCycleError,
+)
 from ..resolver._simple_value import resolve_simple_value
-from ..resolver._utils import filter_out_unquoted_space, sanitize_unresolved_concatenation, \
-    cut_self_reference_and_fields_that_override_it, get_from_env, Substitution, SubstitutionStatus
+from ..resolver._utils import (
+    filter_out_unquoted_space,
+    sanitize_unresolved_concatenation,
+    cut_self_reference_and_fields_that_override_it,
+    get_from_env,
+    Substitution,
+    SubstitutionStatus,
+)
 from ..unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution
 
 
@@ -34,7 +44,7 @@ class Resolver:
                 "dict": self.resolve_dict,
                 "list": self.resolve_list,
                 "UnresolvedConcatenation": self.concatenate,
-                "UnresolvedDuplicateValue": self.deduplicate
+                "UnresolvedDuplicateValue": self.deduplicate,
             }
         else:
             resolver_map: dict[str, Callable[[Any], Any]] = {
@@ -42,7 +52,7 @@ class Resolver:
                 "list": self.resolve_list,
                 "UnresolvedConcatenation": self.resolve_substitutions_and_concatenate,
                 "UnresolvedDuplicateValue": self.deduplicate,
-                "UnresolvedSubstitution": self.resolve_substitution
+                "UnresolvedSubstitution": self.resolve_substitution,
             }
         return resolver_map.get(type(element).__name__, lambda x: x)
 
@@ -105,7 +115,8 @@ class Resolver:
                 if not isinstance(resolved_list, list):
                     raise HOCONConcatenationError(
                         f"Attempted list concatenation with substitution {value} "
-                        f"that resolved to {type(resolved_list)}.")
+                        f"that resolved to {type(resolved_list)}."
+                    )
                 resolved_lists.append(resolved_list)
             else:
                 raise HOCONConcatenationError("Something went horribly wrong. This is a bug.")
@@ -171,7 +182,10 @@ class Resolver:
                 resolved_sub = get_from_env(substitution)
                 if resolved_sub.status == SubstitutionStatus.UNDEFINED and substitution.optional is False:
                     resolving_status = self.substitutions[substitution.identifier].status
-                    if resolving_status == SubstitutionStatus.FALLBACK_RESOLVING and substitution.keys != substitution.location:
+                    if (
+                        resolving_status == SubstitutionStatus.FALLBACK_RESOLVING
+                        and substitution.keys != substitution.location
+                    ):
                         raise HOCONSubstitutionCycleError(f"Cycle occurred when resolving {substitution}")
                     else:
                         raise HOCONSubstitutionUndefinedError(f"Could not resolve substitution {substitution}.")

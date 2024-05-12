@@ -14,8 +14,14 @@ def resolve_simple_value(chunks: list[str]) -> SIMPLE_VALUE_TYPE:
 
 
 def _strip_string_list(values: list[str]) -> list[str]:
-    first = next(index for index, value in enumerate(values) if value.strip(WHITE_CHARS) or isinstance(value, QuotedString))
-    last = -1 * next(index for index, value in enumerate(reversed(values)) if value.strip(WHITE_CHARS) or isinstance(value, QuotedString))
+    first = next(
+        index for index, value in enumerate(values) if value.strip(WHITE_CHARS) or isinstance(value, QuotedString)
+    )
+    last = -1 * next(
+        index
+        for index, value in enumerate(reversed(values))
+        if value.strip(WHITE_CHARS) or isinstance(value, QuotedString)
+    )
     if last == 0:
         return values[first:]
     return values[first:last]

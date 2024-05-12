@@ -5,7 +5,7 @@ from ..exceptions import HOCONUnexpectedBracesError, HOCONUnexpectedSeparatorErr
 
 def eat_comments(data: ParserInput, idx: int) -> int:
     while True:
-        if data[idx] == "#" or data[idx:idx + 2] == "//":
+        if data[idx] == "#" or data[idx : idx + 2] == "//":
             idx = __eat_until_newline(data, idx) + 1
             idx = eat_whitespace(data, idx)
         else:
@@ -24,7 +24,7 @@ def eat_whitespace_and_comments(data: ParserInput, idx: int) -> int:
     while True:
         old_idx = idx
         idx = eat_whitespace(data, idx)
-        if data[idx] == "#" or data[idx:idx+2] == "//":
+        if data[idx] == "#" or data[idx : idx + 2] == "//":
             idx = __eat_until_newline(data, idx) + 1
         if old_idx == idx:
             return idx
