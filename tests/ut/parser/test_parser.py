@@ -1,5 +1,6 @@
 import pytest
 
+from hocon.parser._data import ParserInput
 from hocon.strings import UnquotedString, QuotedString
 from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution
 from hocon.parser._parser import parse_dict_value
@@ -7,7 +8,8 @@ from hocon._main import parse
 
 
 def test_1():
-    value, _ = parse_dict_value("{c: 3} {d: 4},}", idx=0, current_keypath=[])
+    parser_input = ParserInput("{c: 3} {d: 4},}", "")
+    value, _ = parse_dict_value(parser_input, idx=0, current_keypath=[])
     assert value == UnresolvedConcatenation([
         {"c": UnresolvedConcatenation(["3"])},
         UnquotedString(" "),
@@ -16,7 +18,8 @@ def test_1():
 
 
 def test_2():
-    value, _ = parse_dict_value("""  I "like"  pancakes , """, idx=0, current_keypath=[])
+    parser_input = ParserInput("""  I "like"  pancakes , """, "")
+    value, _ = parse_dict_value(parser_input, idx=0, current_keypath=[])
     assert value == UnresolvedConcatenation((
         UnquotedString("  "),
         UnquotedString("I"),

@@ -1,4 +1,6 @@
 import pytest
+
+from hocon.parser._data import ParserInput
 from hocon.parser._key import parse_keypath
 
 
@@ -8,5 +10,6 @@ from hocon.parser._key import parse_keypath
     ("\"key  \"  : 0", ["key  "])
 ])
 def test_parse_keypath(data: str, expected: list[str]):
-    keypath = parse_keypath(data, 0)
+    parser_input = ParserInput(data, "")
+    keypath = parse_keypath(parser_input, 0)
     assert keypath.keys == expected

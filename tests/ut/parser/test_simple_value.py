@@ -1,13 +1,14 @@
 import pytest
 
 from hocon.exceptions import HOCONUnexpectedSeparatorError
+from hocon.parser._data import ParserInput
 from hocon.parser._simple_value import parse_simple_value
 from hocon.strings import UnquotedString, QuotedString
 from hocon.unresolved import UnresolvedSubstitution, UnresolvedDuplicateValue, UnresolvedConcatenation
 
 
 def test_parse_simple_value():
-    data = """  I  "like"  pancakes ,"""
+    data = ParserInput("""  I  "like"  pancakes ,""", absolute_filepath="")
     result = parse_simple_value(data, 0)
     assert result == (UnquotedString("  "), 2)
     result = parse_simple_value(data, 2)
@@ -32,5 +33,6 @@ def test_parse_simple_value():
     ("${?path.expression}", UnresolvedSubstitution(["path", "expression"], optional=True))
 ])
 def test_parse_substitution(data: str, expected: UnresolvedSubstitution):
-    result, _ = parse_simple_value(data)
+    parser_input = ParserInput(data, "")
+    result, _ = parse_simple_value(parser_input)
     assert result == expected

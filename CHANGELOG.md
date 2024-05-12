@@ -1,4 +1,7 @@
 # Changelog
+## 0.0.17
+- Very basic implementation of include statement: {include "path/to/file.conf"} syntax supported only
+
 ## 0.0.16
 - More tests for self-referential substitutions and cycle exceptions
 - Fixed string concatenation with undefined substitutions
