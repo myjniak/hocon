@@ -56,8 +56,10 @@ def filter_out_unquoted_space(values: UnresolvedConcatenation) -> UnresolvedConc
 def strip_unquoted_space(values: UnresolvedConcatenation) -> UnresolvedConcatenation:
     def is_unquoted_string_with_space_only(value: Any) -> bool:
         return isinstance(value, UnquotedString) and not value.strip(WHITE_CHARS)
-
-    first = next(index for index, value in enumerate(values) if not is_unquoted_string_with_space_only(value))
+    try:
+        first = next(index for index, value in enumerate(values) if not is_unquoted_string_with_space_only(value))
+    except StopIteration:
+        return UnresolvedConcatenation([])
     last = -1 * next(
         index for index, value in enumerate(reversed(values)) if not is_unquoted_string_with_space_only(value))
     if last == 0:

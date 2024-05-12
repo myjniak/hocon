@@ -1,4 +1,8 @@
 # Changelog
+## 0.0.16
+- More tests for self-referential substitutions and cycle exceptions
+- Fixed string concatenation with undefined substitutions
+
 ## 0.0.15
 - Substitutions now store their location in the document
 - Exception will be now raised when substitution points to its ancestor
