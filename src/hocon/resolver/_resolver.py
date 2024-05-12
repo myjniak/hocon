@@ -3,7 +3,8 @@ from itertools import chain
 from typing import Callable, Any
 from functools import singledispatchmethod
 from ..constants import ANY_VALUE_TYPE, ROOT_TYPE, ANY_UNRESOLVED, UNDEFINED
-from ..exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError, HOCONSubstitutionUndefinedError
+from ..exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError, HOCONSubstitutionUndefinedError, \
+    HOCONSubstitutionCycleError
 from ..resolver._simple_value import resolve_simple_value
 from ..resolver._utils import filter_out_unquoted_space, sanitize_unresolved_concatenation, \
     cut_self_reference_and_fields_that_override_it, get_from_env, Substitution, SubstitutionStatus
@@ -77,15 +78,19 @@ class Resolver:
             return UNDEFINED
         if any(isinstance(value, (UnresolvedConcatenation, UnresolvedDuplicateValue)) for value in values):
             raise HOCONConcatenationError("Something went horribly wrong. This is a bug.")
-        if all(isinstance(value, str) for value in values):
-            return resolve_simple_value(values)
         if any(isinstance(value, list) for value in values):
             return self._concatenate_lists(values)
         if any(isinstance(value, dict) for value in values):
             return self.resolve_value(reduce(self.merge, reversed(values)))
+        if any(isinstance(value, str) for value in values):
+            return self._concatenate_simple_values(values)
         if len(values) == 1:
             return values[0]
         raise HOCONConcatenationError(f"Multiple types concatenation not allowed: {values}")
+
+    def _concatenate_simple_values(self, values: UnresolvedConcatenation) -> str:
+        values = self.resolve_substitutions(values)
+        return resolve_simple_value(values)
 
     def _concatenate_lists(self, values: UnresolvedConcatenation) -> list:
         resolved_lists = []
@@ -131,9 +136,8 @@ class Resolver:
         values_with_resolved_substitutions = UnresolvedConcatenation()
         for value in values:
             if isinstance(value, UnresolvedSubstitution):
-                values_with_resolved_substitutions.append(self.resolve_substitution(value))
-            else:
-                values_with_resolved_substitutions.append(value)
+                value = self.resolve_substitution(value)
+            values_with_resolved_substitutions.append(value)
         return values_with_resolved_substitutions
 
     def resolve_substitution(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
@@ -141,29 +145,31 @@ class Resolver:
         if resolved_sub.status == SubstitutionStatus.RESOLVED:
             return resolved_sub.value
         if resolved_sub.status == SubstitutionStatus.RESOLVING:
+            resolved_sub.status = SubstitutionStatus.FALLBACK_UNRESOLVED
             result = self.resolve_sustitution_fallback(substitution)
             resolved_sub.value = result
             resolved_sub.status = SubstitutionStatus.RESOLVED
             self.substitutions[substitution.identifier] = resolved_sub
             self.lazy = False
             return result
-            # raise HOCONSubstitutionCycleError(f"Could not resolve {substitution}")
+        if resolved_sub.status == SubstitutionStatus.FALLBACK_RESOLVING:
+            raise HOCONSubstitutionCycleError(f"Could not resolve {substitution}.\n{self.parsed}")
         self.lazy = True
-        self.substitutions[substitution.identifier] = Substitution(status=SubstitutionStatus.RESOLVING)
+        if resolved_sub.status == SubstitutionStatus.UNRESOLVED:
+            self.substitutions[substitution.identifier] = Substitution(status=SubstitutionStatus.RESOLVING)
+        else:
+            self.substitutions[substitution.identifier] = Substitution(status=SubstitutionStatus.FALLBACK_RESOLVING)
         subvalue = self.parsed
         for key in substitution.keys:
             if isinstance(subvalue, ANY_UNRESOLVED):
                 subvalue = self.resolve_value(subvalue)
-            elif isinstance(subvalue, list) and key.isdigit():
-                subvalue = subvalue[int(key)]
-                subvalue = self.resolve_value(subvalue)
-            elif isinstance(subvalue, dict) and key in subvalue:
+            if isinstance(subvalue, dict) and key in subvalue:
                 subvalue = subvalue[key]
                 subvalue = self.resolve_value(subvalue)
             else:
                 resolved_sub = get_from_env(substitution)
                 if resolved_sub.status == SubstitutionStatus.UNDEFINED and substitution.optional is False:
-                    raise HOCONSubstitutionUndefinedError(f"Undefined substitution {substitution}.")
+                    raise HOCONSubstitutionUndefinedError(f"Could not resolve substitution {substitution}.")
                 self.substitutions[substitution.identifier] = resolved_sub
                 self.lazy = False
                 return resolved_sub.value
@@ -212,5 +218,7 @@ class Resolver:
         And ultimately return {c:1}
         """
         carved_parsed = cut_self_reference_and_fields_that_override_it(substitution, self.parsed)
-        result = Resolver(carved_parsed).resolve_substitution(substitution)
+        resolver = Resolver(carved_parsed)
+        resolver.substitutions = self.substitutions
+        result = resolver.resolve_substitution(substitution)
         return result

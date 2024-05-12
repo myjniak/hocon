@@ -7,7 +7,7 @@ from hocon._main import parse
 
 
 def test_1():
-    value, _ = parse_dict_value("{c: 3} {d: 4},}", idx=0)
+    value, _ = parse_dict_value("{c: 3} {d: 4},}", idx=0, current_keypath=[])
     assert value == UnresolvedConcatenation([
         {"c": UnresolvedConcatenation(["3"])},
         UnquotedString(" "),
@@ -16,7 +16,7 @@ def test_1():
 
 
 def test_2():
-    value, _ = parse_dict_value("""  I "like"  pancakes , """, idx=0)
+    value, _ = parse_dict_value("""  I "like"  pancakes , """, idx=0, current_keypath=[])
     assert value == UnresolvedConcatenation((
         UnquotedString("  "),
         UnquotedString("I"),

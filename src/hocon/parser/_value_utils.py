@@ -27,13 +27,14 @@ def merge_unconcatenated(unconcatenated_dictionary: dict, keys: list, unconcaten
     return deepcopy(unconcatenated_dictionary)
 
 
-def convert_iadd_to_self_referential_substitution(keys: list[str], concatenation: UnresolvedConcatenation):
+def convert_iadd_to_self_referential_substitution(keys: list[str], concatenation: UnresolvedConcatenation,
+                                                  current_keypath: list[str]):
     """Basically it turns this expression:
     a += 1
     To this:
     a = ${?a} [1]
     """
     return UnresolvedConcatenation([
-        UnresolvedSubstitution(keys, optional=True),
+        UnresolvedSubstitution(keys, optional=True, location=current_keypath),
         [concatenation]
     ])
