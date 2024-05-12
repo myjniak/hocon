@@ -56,12 +56,14 @@ def filter_out_unquoted_space(values: UnresolvedConcatenation) -> UnresolvedConc
 def strip_unquoted_space(values: UnresolvedConcatenation) -> UnresolvedConcatenation:
     def is_unquoted_string_with_space_only(value: Any) -> bool:
         return isinstance(value, UnquotedString) and not value.strip(WHITE_CHARS)
+
     try:
         first = next(index for index, value in enumerate(values) if not is_unquoted_string_with_space_only(value))
     except StopIteration:
         return UnresolvedConcatenation([])
     last = -1 * next(
-        index for index, value in enumerate(reversed(values)) if not is_unquoted_string_with_space_only(value))
+        index for index, value in enumerate(reversed(values)) if not is_unquoted_string_with_space_only(value)
+    )
     if last == 0:
         return UnresolvedConcatenation(values[first:])
     return UnresolvedConcatenation(values[first:last])
@@ -74,8 +76,9 @@ def get_from_env(substitution: UnresolvedSubstitution) -> Substitution:
     return Substitution(value=QuotedString(env_value), status=SubstitutionStatus.RESOLVED)
 
 
-def cut_self_reference_and_fields_that_override_it(substitution: UnresolvedSubstitution,
-                                                   parsed: ROOT_TYPE) -> ROOT_TYPE:
+def cut_self_reference_and_fields_that_override_it(
+    substitution: UnresolvedSubstitution, parsed: ROOT_TYPE
+) -> ROOT_TYPE:
     class Cutter:
         def __init__(self, sub: UnresolvedSubstitution):
             self.is_sub_found: bool = False
@@ -102,8 +105,7 @@ def cut_self_reference_and_fields_that_override_it(substitution: UnresolvedSubst
             if not subtree_item:
                 subtree.pop(key)
 
-        def _scan_concatenation(self, concatenation: UnresolvedConcatenation,
-                                keypath_index: int):
+        def _scan_concatenation(self, concatenation: UnresolvedConcatenation, keypath_index: int):
             for index, item in enumerate(concatenation):
                 if isinstance(item, ROOT_TYPE) and keypath_index + 1 < len(self.sub.location):
                     self.cut(item, keypath_index=keypath_index + 1)

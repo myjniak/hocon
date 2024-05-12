@@ -11,7 +11,7 @@ def _parse_unquoted_string_value(data: ParserInput, idx: int) -> tuple[UnquotedS
         char = data[idx]
         if char in SECTION_OPENING:
             raise HOCONUnquotedStringError(f"Forbidden opening '{char}' found when parsing unquoted string.")
-        if char in unquoted_string_end or data[idx:idx + 2] == "//":
+        if char in unquoted_string_end or data[idx : idx + 2] == "//":
             if not string:
                 raise HOCONUnquotedStringError("Error when parsing unquoted string")
             return UnquotedString(string), idx
@@ -26,7 +26,7 @@ def _parse_unquoted_string_key(data: ParserInput, idx: int) -> tuple[UnquotedStr
         char = data[idx]
         if char == "\n":
             raise HOCONInvalidKeyError("Encountered newline before key-value separator.")
-        if char in string_end or data[idx:idx + 2] == "//":
+        if char in string_end or data[idx : idx + 2] == "//":
             if not string:
                 _raise_parse_key_exception(data, idx)
             return UnquotedString(string), idx
