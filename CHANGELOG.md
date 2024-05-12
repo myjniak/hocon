@@ -1,4 +1,9 @@
 # Changelog
+## 0.0.15
+- Substitutions now store their location in the document
+- Exception will be now raised when substitution points to its ancestor
+- Self-referential substitution fallback fixed and covered with tests
+
 ## 0.0.14
 - Support for optional ${?x} substitutions
 
