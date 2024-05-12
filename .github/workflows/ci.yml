@@ -20,10 +20,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-timeout pytest-cov
           pip install .
+          pip install hatch
       - name: Pytest
-        run: python -m pytest -vs --cov hocon --junitxml=junit/test-results.xml-${{ matrix.python-version }}.xml
+        run: export PYTHON_VERSION=${{ matrix.python-version }} && hatch run test:coverage
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
         with:
