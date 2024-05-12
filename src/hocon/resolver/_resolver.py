@@ -90,6 +90,7 @@ class Resolver:
 
     def _concatenate_simple_values(self, values: UnresolvedConcatenation) -> str:
         values = self.resolve_substitutions(values)
+        values = list(filter(lambda item: item is not UNDEFINED, values))
         return resolve_simple_value(values)
 
     def _concatenate_lists(self, values: UnresolvedConcatenation) -> list:
@@ -169,7 +170,11 @@ class Resolver:
             else:
                 resolved_sub = get_from_env(substitution)
                 if resolved_sub.status == SubstitutionStatus.UNDEFINED and substitution.optional is False:
-                    raise HOCONSubstitutionUndefinedError(f"Could not resolve substitution {substitution}.")
+                    resolving_status = self.substitutions[substitution.identifier].status
+                    if resolving_status == SubstitutionStatus.FALLBACK_RESOLVING and substitution.keys != substitution.location:
+                        raise HOCONSubstitutionCycleError(f"Cycle occurred when resolving {substitution}")
+                    else:
+                        raise HOCONSubstitutionUndefinedError(f"Could not resolve substitution {substitution}.")
                 self.substitutions[substitution.identifier] = resolved_sub
                 self.lazy = False
                 return resolved_sub.value
