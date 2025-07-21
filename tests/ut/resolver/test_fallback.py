@@ -56,3 +56,19 @@ def test_4():
             "a": 1, "b": 2
         }
     }
+
+
+def test_5():
+    data = """
+    a {
+        a: 1
+        b: c${a.a}
+    }
+    """
+    parsed = parse(data)
+    sub = parsed["a"][0]["b"][1]
+    carved = cut_self_reference_and_fields_that_override_it(sub, parsed)
+    print(carved)
+    # result = resolve(carved)
+    # print(result)
+    # assert result == {"a": [1, 2]}

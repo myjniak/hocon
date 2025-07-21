@@ -1,5 +1,5 @@
 from ._data import ParserInput
-from ..constants import INLINE_WHITE_CHARS, WHITE_CHARS, ELEMENT_SEPARATORS
+from ..constants import WHITE_CHARS, ELEMENT_SEPARATORS
 from ..exceptions import HOCONUnexpectedBracesError, HOCONUnexpectedSeparatorError
 
 
