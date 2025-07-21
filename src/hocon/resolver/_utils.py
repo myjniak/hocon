@@ -91,7 +91,7 @@ def cut_self_reference_and_fields_that_override_it(
             elif isinstance(subtree, list) and key.isdigit():
                 subtree_item = subtree[int(key)]
             else:
-                raise HOCONSubstitutionUndefinedError("Something went horribly wrong. This is a bug.")
+                raise HOCONSubstitutionUndefinedError(f"Something went horribly wrong. This is a bug.")
             if isinstance(subtree_item, UnresolvedDuplicateValue):
                 for index, item in enumerate(subtree_item):
                     assert isinstance(item, UnresolvedConcatenation)
@@ -109,7 +109,7 @@ def cut_self_reference_and_fields_that_override_it(
             for index, item in enumerate(concatenation):
                 if isinstance(item, ROOT_TYPE) and keypath_index + 1 < len(self.sub.location):
                     self.cut(item, keypath_index=keypath_index + 1)
-                if item == self.sub or self.is_sub_found:
+                if item == self.sub:  # or self.is_sub_found:
                     self.is_sub_found = True
                     for _ in range(len(concatenation) - index):
                         concatenation.pop()

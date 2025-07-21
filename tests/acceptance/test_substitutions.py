@@ -82,7 +82,34 @@ def test_6():
             a : ${a} [ 3, 4 ]
             """
     result = loads(data)
-    print(result)
-    # assert result == {
-    #     "a": [1, 2, 3, 4]
-    # }
+    assert result == {
+        "a": [1, 2, 3, 4]
+    }
+
+
+def test_7():
+    data = """
+        a: 1
+        b: c${a}
+    """
+    result = loads(data)
+    assert result == {
+        "a": 1,
+        "b": "c1"
+    }
+
+
+def test_8():
+    data = """
+    a {
+        a: 1
+        b: c${a.a}
+    }
+    """
+    result = loads(data)
+    assert result == {
+        "a": {
+            "a": 1,
+            "b": "c1"
+        }
+    }
