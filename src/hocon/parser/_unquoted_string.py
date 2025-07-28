@@ -25,7 +25,9 @@ def _parse_unquoted_string_key(data: ParserInput, idx: int) -> tuple[UnquotedStr
     while True:
         char = data[idx]
         if char == "\n":
-            raise HOCONInvalidKeyError("Encountered newline before key-value separator.")
+            if string == "include":
+                return UnquotedString(string), idx
+            raise HOCONInvalidKeyError(f"Encountered newline before key-value separator.")
         if char in string_end or data[idx : idx + 2] == "//":
             if not string:
                 _raise_parse_key_exception(data, idx)

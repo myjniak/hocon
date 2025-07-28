@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from ._data import ParserInput
-from ._eat import eat_comments, eat_dict_item_separators, eat_whitespace, eat_list_item_separators
+from ._eat import eat_comments, eat_dict_item_separators, eat_whitespace, eat_list_item_separators, eat_whitespace_and_comments
 from ._key import parse_keypath
 from ._quoted_string import parse_quoted_string
 from ._simple_value import parse_simple_value
@@ -91,10 +91,10 @@ def parse_list_element(data: ParserInput, idx: int, current_keypath: list[str]) 
 
 def parse_include(data: ParserInput, idx: int, current_keypath: list[str]) -> tuple[dict, int]:
     """We start parsing right after 'include' phrase here."""
-    if data[idx] == '"':
-        string, idx = parse_quoted_string(data, idx + 1)
-    else:
-        raise HOCONIncludeError("Only single quoted include filepaths are currently supported.")
+    idx = eat_whitespace_and_comments(data, idx)
+    if data[idx:idx+3] == '"""' or data[idx] != '"':
+        raise HOCONIncludeError("Only single quoted include filepaths are supported.")
+    string, idx = parse_quoted_string(data, idx + 1)
     external_filepath = Path(data.absolute_filepath).parent / string
     try:
         with open(external_filepath) as conf:
