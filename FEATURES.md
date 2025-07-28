@@ -6,13 +6,13 @@ For example tests for Array and object concatenation are marked with "f10_2" tag
 
 :heavy_check_mark: Done
 
-:yellow_circle: Partially done
+:yellow_circle: Partially implemented
 
 :x: Not done
 
 :no_entry_sign: Not applicable for python / not planned for implementation
 
-| Feature ID | Items                                                                                                                                                                  |    Implemented     |  Covered in tests  |
+| Feature ID | Item                                                                                                                                                                   |    Implemented     |  Covered in tests  |
 |------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------:|:------------------:|
 | f1         | [Unchanged from JSON](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#unchanged-from-json)                                                                    | :heavy_check_mark: | :heavy_check_mark: |
 | f2         | [Comments](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#comments)                                                                                          | :heavy_check_mark: | :heavy_check_mark: |
@@ -34,8 +34,8 @@ For example tests for Array and object concatenation are marked with "f10_2" tag
 | f13_1      | [Self-referential substitutions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#self-referential-substitutions)                                              | :heavy_check_mark: | :heavy_check_mark: |
 | f13_2      | [The `+=` field separator](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#the--field-separator)                                                              | :heavy_check_mark: | :heavy_check_mark: |
 | f13_3      | [Examples of Self-Referential Substitutions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#examples-of-self-referential-substitutions)                      | :heavy_check_mark: | :heavy_check_mark: |
-| f14        | [Includes](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#includes)                                                                                          |  :yellow_circle:   |        :x:         |
-| f14_1      | [Include syntax](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-syntax)                                                                              |  :yellow_circle:   |        :x:         |
+| f14        | [Includes](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#includes)                                                                                          |  :yellow_circle:   |  :yellow_circle:   |
+| f14_1      | [Include syntax](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-syntax)                                                                              |  :yellow_circle:   | :heavy_check_mark: |
 | f14_2      | [Include semantics: merging](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-semantics-merging)                                                       |  :yellow_circle:   |        :x:         |
 | f14_3      | [Include semantics: substitution](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-semantics-substitution)                                             |  :yellow_circle:   |        :x:         |
 | f14_4      | [Include semantics: missing files and required files](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-semantics-missing-files-and-required-files)     |        :x:         |        :x:         |
@@ -47,11 +47,24 @@ For example tests for Array and object concatenation are marked with "f10_2" tag
 | f18        | [Duration format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#duration-format)                                                                            |  :no_entry_sign:   |  :no_entry_sign:   |
 | f19        | [Period format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#period-format)                                                                                |  :no_entry_sign:   |  :no_entry_sign:   |
 | f20        | [Size in bytes format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#size-in-bytes-format)                                                                  |  :no_entry_sign:   |  :no_entry_sign:   |
-| f21        | [Config object merging and file merging](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#config-object-merging-and-file-merging)                              |  :no_entry_sign:   |  :no_entry_sign:   |
-| f22        | [Java properties mapping](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#java-properties-mapping)                                                            |  :no_entry_sign:   |  :no_entry_sign:   |
+| f21        | [Config object merging and file merging](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#config-object-merging-and-file-merging)                              |        :x:         |        :x:         |
+| f22        | [Java properties mapping](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#java-properties-mapping)                                                            |        :x:         |        :x:         |
 | f23        | [Conventional configuration files for JVM apps](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-configuration-files-for-jvm-apps)                |  :no_entry_sign:   |  :no_entry_sign:   |
 | f24        | [Conventional override by system properties](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-override-by-system-properties)                      |  :no_entry_sign:   |  :no_entry_sign:   |
 | f25        | [Substitution fallback to environment variables](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#substitution-fallback-to-environment-variables)              | :heavy_check_mark: | :heavy_check_mark: |
+
+## Notes
+
+| Feature ID | Item                                                                                                                                                    |                                          Notes                                          |
+|------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------:|
+| f14_1      | [Includes](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#includes)                                                                           |         url(), file(), classpath() and required() keywords are not implemented.         |
+| f16        | [Automatic type conversions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#automatic-type-conversions)                                       | This library does not implement API features. Type conversions can be done by the user. |
+| f17        | [Units format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#units-format)                                                                   |             This library does not support "asking for data types". See f16.             |
+| f18        | [Duration format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#duration-format)                                                             |             This library does not support "asking for data types". See f16.             |
+| f19        | [Period format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#period-format)                                                                 |             This library does not support "asking for data types". See f16.             |
+| f20        | [Size in bytes format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#size-in-bytes-format)                                                   |             This library does not support "asking for data types". See f16.             | 
+| f23        | [Conventional configuration files for JVM apps](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-configuration-files-for-jvm-apps) |      Feature intertwines too much with Java ecosystem to be implemented in python.      |
+| f24        | [Conventional override by system properties](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-override-by-system-properties)       |      Feature intertwines too much with Java ecosystem to be implemented in python.      |
 
 ## Additional requirements
 

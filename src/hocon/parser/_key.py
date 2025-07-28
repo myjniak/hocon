@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from ._data import ParserInput
-from ._eat import eat_comments
+from ._eat import eat_comments, eat_whitespace
 from ._quoted_string import parse_quoted_string, parse_triple_quoted_string
 from ._unquoted_string import _parse_unquoted_string_key
 from ..constants import WHITE_CHARS
@@ -23,7 +23,7 @@ def parse_keypath(data: ParserInput, idx: int = 0, keyend_indicator: str = ":={"
         old_idx = idx
         idx = eat_comments(data, idx)
         string, idx = _parse_key_chunk(data, idx)
-        if not keychunks_list[-1] and UnquotedString("include") in string:
+        if not keychunks_list[-1] and string.startswith("include") and type(string) is UnquotedString:
             return Keypath(keys=[], end_idx=idx, include=True)
         keychunks_list[-1].append(string)
         char = data[idx]

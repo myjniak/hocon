@@ -1,13 +1,14 @@
 import json
 import os
-from typing import IO
 from pathlib import Path
+from typing import IO
+
 from .constants import ROOT_TYPE
 from .exceptions import HOCONNoDataError, HOCONExcessiveDataError
+from .parser._data import ParserInput
 from .parser._eat import eat_whitespace_and_comments, eat_whitespace, eat_comments
 from .parser._parser import parse_list, parse_dict
 from .resolver._resolver import resolve
-from .parser._data import ParserInput
 
 
 def load(fp: IO) -> ROOT_TYPE:
