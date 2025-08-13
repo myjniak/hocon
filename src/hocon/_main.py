@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import IO
 
 from .constants import ROOT_TYPE
-from .exceptions import HOCONNoDataError, HOCONExcessiveDataError
+from .exceptions import HOCONNoDataError
 from .parser._data import ParserInput
-from .parser._eat import eat_whitespace_and_comments, eat_whitespace, eat_comments
-from .parser._parser import parse_list, parse_dict
+from .parser._eat import eat_whitespace_and_comments
+from .parser._parser import parse_list, parse_dict, _assert_no_content_left
 from .resolver._resolver import resolve
 
 
@@ -35,21 +35,9 @@ def parse(data: str, root_filepath: str | os.PathLike = os.getcwd()) -> ROOT_TYP
     else:
         data_object.data += "\n}"
         result, idx = parse_dict(data_object, idx=idx)
-    __assert_no_content_left(data_object, idx)
+    _assert_no_content_left(data_object, idx)
     return result
 
 
 def dumps(hocon_: ROOT_TYPE) -> str:
     return json.dumps(hocon_)
-
-
-def __assert_no_content_left(data: ParserInput, idx: int) -> None:
-    try:
-        while True:
-            old_idx = idx
-            idx = eat_whitespace(data, idx)
-            idx = eat_comments(data, idx)
-            if idx == old_idx:
-                raise HOCONExcessiveDataError("Excessive meaningful data outside of the HOCON structure.")
-    except IndexError:
-        return

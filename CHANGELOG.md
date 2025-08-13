@@ -1,4 +1,8 @@
 # Changelog
+## 0.0.18
+- include statement and filepath can now be separated by newline
+- Proper exception is raised if included file is an array
+
 ## 0.0.17
 - Very basic implementation of include statement: {include "path/to/file.conf"} syntax supported only
 
