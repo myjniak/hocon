@@ -36,7 +36,7 @@ def test_2():
 
 
 def test_3():
-    sub = UnresolvedSubstitution(["a"], optional=False, location=["a"])
+    sub = UnresolvedSubstitution(["a"], optional=False, relative_location=["a"])
     parsed = {"a": UnresolvedConcatenation([sub])}
     result = cut_self_reference_and_fields_that_override_it(sub, parsed)
     assert resolve(result) == {}
@@ -48,7 +48,7 @@ def test_4():
     a: {a: 3, b: { c: ${a.a}, d: 4} {c: 6}}
     a: {a: 5, b: {c: 7}}
     """
-    sub = UnresolvedSubstitution(["a", "a"], optional=False, location=["a", "b", "c"])
+    sub = UnresolvedSubstitution(["a", "a"], optional=False, relative_location=["a", "b", "c"])
     parsed = parse(data)
     result = cut_self_reference_and_fields_that_override_it(sub, parsed)
     assert resolve(result) == {

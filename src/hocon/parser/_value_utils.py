@@ -29,7 +29,7 @@ def merge_unconcatenated(unconcatenated_dictionary: dict, keys: list, unconcaten
 
 
 def convert_iadd_to_self_referential_substitution(
-    keys: list[str], concatenation: UnresolvedConcatenation, current_keypath: list[str]
+    keys: list[str], concatenation: UnresolvedConcatenation, current_keypath: list[str], root_location: list[str]
 ):
     """Basically it turns this expression:
     a += 1
@@ -37,5 +37,5 @@ def convert_iadd_to_self_referential_substitution(
     a = ${?a} [1]
     """
     return UnresolvedConcatenation(
-        [UnresolvedSubstitution(keys, optional=True, location=current_keypath), [concatenation]]
+        [UnresolvedSubstitution(keys, optional=True, relative_location=current_keypath, including_root=root_location), [concatenation]]
     )

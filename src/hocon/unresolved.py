@@ -20,8 +20,17 @@ class UnresolvedDuplicateValue(list):
 class UnresolvedSubstitution:
     keys: list[str]
     optional: bool
-    location: Optional[list[str]] = None
+    relative_location: Optional[list[str]] = None
+    including_root: Optional[list[str]] = None
     identifier: int = field(default_factory=count().__next__)
+
+    def __post_init__(self):
+        if self.including_root is None:
+            self.including_root = []
+
+    @property
+    def location(self):
+        return self.including_root + self.relative_location
 
     def __str__(self):
         return r"${" + ("?" if self.optional else "") + ".".join(self.keys) + r"}"

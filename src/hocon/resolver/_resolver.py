@@ -183,54 +183,61 @@ class Resolver:
         return values_with_resolved_substitutions
 
     def resolve_substitution(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
-        resolved_sub = self.substitutions.get(substitution.identifier, Substitution())
-        if resolved_sub.status == SubstitutionStatus.RESOLVED:
-            return resolved_sub.value
-        if resolved_sub.status == SubstitutionStatus.RESOLVING:
-            resolved_sub.status = SubstitutionStatus.FALLBACK_UNRESOLVED
-            result = self.resolve_sustitution_fallback(substitution)
-            resolved_sub.value = result
-            resolved_sub.status = SubstitutionStatus.RESOLVED
-            self.substitutions[substitution.identifier] = resolved_sub
+        cached_sub = self.substitutions.get(substitution.identifier, Substitution())
+        if cached_sub.status == SubstitutionStatus.RESOLVED:
+            return cached_sub.value
+        if cached_sub.status == SubstitutionStatus.RESOLVING:
+            cached_sub.status = SubstitutionStatus.FALLBACK_UNRESOLVED
+            result = self.resolve_substitution_fallback(substitution)
+            self.substitutions[substitution.identifier] = Substitution(value=result, status=SubstitutionStatus.RESOLVED)
             self.lazy = False
             return result
-        if resolved_sub.status == SubstitutionStatus.FALLBACK_RESOLVING:
-            raise HOCONSubstitutionCycleError(f"Could not resolve {substitution}.\n{self.parsed}")
-        self.lazy = True
-        if resolved_sub.status == SubstitutionStatus.UNRESOLVED:
-            self.substitutions[substitution.identifier] = Substitution(status=SubstitutionStatus.RESOLVING)
-        else:
-            self.substitutions[substitution.identifier] = Substitution(status=SubstitutionStatus.FALLBACK_RESOLVING)
+        self._turn_to_resolving_state(substitution, cached_sub.status)
         subvalue = self.parsed
+        self.lazy = True
         for key in substitution.keys:
             if isinstance(subvalue, ANY_UNRESOLVED):
                 subvalue = self.resolve_value(subvalue)
             if isinstance(subvalue, dict) and key in subvalue:
-                subvalue = subvalue[key]
-                subvalue = self.resolve_value(subvalue)
+                subvalue = self.resolve_value(subvalue[key])
             else:
-                resolved_sub = get_from_env(substitution)
-                if resolved_sub.status == SubstitutionStatus.UNDEFINED and substitution.optional is False:
-                    resolving_status = self.substitutions[substitution.identifier].status
-                    if (
-                        resolving_status == SubstitutionStatus.FALLBACK_RESOLVING
-                        and substitution.keys != substitution.location
-                    ):
-                        raise HOCONSubstitutionCycleError(f"Cycle occurred when resolving {substitution}")
-                    else:
-                        raise HOCONSubstitutionUndefinedError(f"Could not resolve substitution {substitution}.")
-                self.substitutions[substitution.identifier] = resolved_sub
-                self.lazy = False
-                return resolved_sub.value
+                subvalue = self._resolve_sub_from_env(substitution)
+                break
         if self.substitutions[substitution.identifier].status == SubstitutionStatus.RESOLVED:
+            self.lazy = False
             return self.substitutions[substitution.identifier].value
+
+        ## gdzieś tu for key in substitution.root + substitution.keys
+
         if isinstance(subvalue, UnresolvedSubstitution):
             subvalue = self.resolve_substitution(subvalue)
-        resolved_sub.value = subvalue
-        resolved_sub.status = SubstitutionStatus.RESOLVED
-        self.substitutions[substitution.identifier] = resolved_sub
+
+        self.substitutions[substitution.identifier] = Substitution(value=subvalue, status=SubstitutionStatus.RESOLVED)
         self.lazy = False
         return subvalue
+
+    def _turn_to_resolving_state(self, substitution: UnresolvedSubstitution, status: SubstitutionStatus) -> None:
+        if status == SubstitutionStatus.FALLBACK_RESOLVING:
+            raise HOCONSubstitutionCycleError(f"Could not resolve {substitution}.\n{self.parsed}")
+        if status == SubstitutionStatus.UNRESOLVED:
+            self.substitutions[substitution.identifier] = Substitution(status=SubstitutionStatus.RESOLVING)
+        else:
+            self.substitutions[substitution.identifier] = Substitution(status=SubstitutionStatus.FALLBACK_RESOLVING)
+
+    def _resolve_sub_from_env(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
+        resolved_sub = get_from_env(substitution)
+        if resolved_sub.status == SubstitutionStatus.UNDEFINED and substitution.optional is False:
+            resolving_status = self.substitutions[substitution.identifier].status
+            if (
+                    resolving_status == SubstitutionStatus.FALLBACK_RESOLVING
+                    and substitution.keys != substitution.location
+                    and substitution.keys != substitution.relative_location
+            ):
+                raise HOCONSubstitutionCycleError(f"Cycle occurred when resolving {substitution}")
+            else:
+                raise HOCONSubstitutionUndefinedError(f"Could not resolve substitution {substitution}.")
+        self.substitutions[substitution.identifier] = resolved_sub
+        return resolved_sub.value
 
     def merge(self, superior: dict, inferior: dict | UnresolvedSubstitution) -> dict:
         """If both values are objects, then the objects are merged.
@@ -249,7 +256,7 @@ class Resolver:
                     inferior[key] = resolved_value
         return inferior
 
-    def resolve_sustitution_fallback(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
+    def resolve_substitution_fallback(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
         """In case of self-referencial substitutions, try to resolve them by removing the self-reference, and
         nodes after that.
         For example for:

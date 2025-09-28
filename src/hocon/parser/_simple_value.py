@@ -49,7 +49,7 @@ def _parse_substitution(
     else:
         optional = False
     keypath = parse_keypath(data, idx, keyend_indicator="}")
-    substitution = UnresolvedSubstitution(keypath.keys, optional, location=current_keypath)
+    substitution = UnresolvedSubstitution(keypath.keys, optional, relative_location=current_keypath, including_root=data.root_path)
     if (
         current_keypath is not None
         and ".".join(current_keypath).startswith(".".join(keypath.keys))
