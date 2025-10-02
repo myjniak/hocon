@@ -43,4 +43,4 @@ def _raise_parse_key_exception(data: ParserInput, idx: int):
         raise HOCONInvalidKeyError("Objects and arrays do not make sense as field keys.")
     if data[idx] == ".":
         raise HOCONInvalidKeyError("Keypath separator '.' used in an invalid way.")
-    raise HOCONInvalidKeyError(f"Unexpected character found when parsing keypath: '{data[idx]}'")
+    raise HOCONInvalidKeyError(f"Unexpected ({idx}th) character found when parsing keypath: '{data[idx]}'")

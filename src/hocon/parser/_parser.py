@@ -23,7 +23,7 @@ def parse_dict(data: ParserInput, idx: int = 0, current_keypath: Optional[list[s
         current_keypath = []
     unconcatenated_dictionary: dict = {}
     while True:
-        idx = eat_whitespace(data, idx)
+        idx = eat_whitespace_and_comments(data, idx)
         if data[idx] == "}":
             idx += 1
             return unconcatenated_dictionary, idx
