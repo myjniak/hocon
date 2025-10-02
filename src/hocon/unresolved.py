@@ -22,7 +22,7 @@ class UnresolvedSubstitution:
     optional: bool
     relative_location: Optional[list[str]] = None
     including_root: Optional[list[str]] = None
-    identifier: int = field(default_factory=count().__next__)
+    id_: int = field(default_factory=count().__next__)
 
     def __post_init__(self):
         if self.including_root is None:
@@ -44,4 +44,4 @@ class UnresolvedSubstitution:
         return self.keys == other.keys and self.optional == other.optional
 
     def __hash__(self):
-        return hash((".".join(self.keys), self.optional, self.location, self.identifier))
+        return hash((".".join(self.keys), self.optional, self.location, self.id_))

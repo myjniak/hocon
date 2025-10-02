@@ -4,21 +4,16 @@ from functools import singledispatchmethod
 from itertools import chain
 from typing import Callable, Any, Type, get_args
 
-from ..constants import ANY_VALUE_TYPE, ROOT_TYPE, ANY_UNRESOLVED, UNDEFINED, SIMPLE_VALUE_TYPE
+from ._substitution_resolver import SubstitutionResolver
+from ..constants import ANY_VALUE_TYPE, ROOT_TYPE, UNDEFINED, SIMPLE_VALUE_TYPE
 from ..exceptions import (
     HOCONConcatenationError,
     HOCONDuplicateKeyMergeError,
-    HOCONSubstitutionUndefinedError,
-    HOCONSubstitutionCycleError,
 )
 from ..resolver._simple_value import resolve_simple_value
 from ..resolver._utils import (
     filter_out_unquoted_space,
     sanitize_unresolved_concatenation,
-    cut_self_reference_and_fields_that_override_it,
-    get_from_env,
-    Substitution,
-    SubstitutionStatus,
 )
 from ..unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution
 
@@ -31,8 +26,8 @@ def resolve(parsed: ROOT_TYPE) -> ROOT_TYPE:
 class Resolver:
     def __init__(self, parsed: ROOT_TYPE):
         self._parsed = parsed
-        self.substitutions: dict[int, Substitution] = {}
-        self.lazy = False
+        self.lazy: bool = False
+        self.resolve_substitution = SubstitutionResolver(parsed, self.resolve_value, self.lazy_resolve_value)
 
     @property
     def parsed(self):
@@ -79,6 +74,12 @@ class Resolver:
             if resolved_value is not UNDEFINED:
                 resolved_dict[key] = resolved_value
         return resolved_dict
+
+    def lazy_resolve_value(self, value: Any) -> ANY_VALUE_TYPE:
+        self.lazy = True
+        result = self.resolve_value(value)
+        self.lazy = False
+        return result
 
     def resolve_value(self, value: Any) -> ANY_VALUE_TYPE:
         func = self.get_resolver(value)
@@ -174,71 +175,6 @@ class Resolver:
                 break
         return self.resolve_value(deduplicated)
 
-    def resolve_substitutions(self, values: UnresolvedConcatenation) -> UnresolvedConcatenation:
-        values_with_resolved_substitutions = UnresolvedConcatenation()
-        for value in values:
-            if isinstance(value, UnresolvedSubstitution):
-                value = self.resolve_substitution(value)
-            values_with_resolved_substitutions.append(value)
-        return values_with_resolved_substitutions
-
-    def resolve_substitution(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
-        cached_sub = self.substitutions.get(substitution.identifier, Substitution())
-        if cached_sub.status == SubstitutionStatus.RESOLVED:
-            return cached_sub.value
-        if cached_sub.status == SubstitutionStatus.RESOLVING:
-            cached_sub.status = SubstitutionStatus.FALLBACK_UNRESOLVED
-            result = self.resolve_substitution_fallback(substitution)
-            self.substitutions[substitution.identifier] = Substitution(value=result, status=SubstitutionStatus.RESOLVED)
-            self.lazy = False
-            return result
-        self._turn_to_resolving_state(substitution, cached_sub.status)
-        subvalue = self.parsed
-        self.lazy = True
-        for key in substitution.keys:
-            if isinstance(subvalue, ANY_UNRESOLVED):
-                subvalue = self.resolve_value(subvalue)
-            if isinstance(subvalue, dict) and key in subvalue:
-                subvalue = self.resolve_value(subvalue[key])
-            else:
-                subvalue = self._resolve_sub_from_env(substitution)
-                break
-        if self.substitutions[substitution.identifier].status == SubstitutionStatus.RESOLVED:
-            self.lazy = False
-            return self.substitutions[substitution.identifier].value
-
-        ## gdzieś tu for key in substitution.root + substitution.keys
-
-        if isinstance(subvalue, UnresolvedSubstitution):
-            subvalue = self.resolve_substitution(subvalue)
-
-        self.substitutions[substitution.identifier] = Substitution(value=subvalue, status=SubstitutionStatus.RESOLVED)
-        self.lazy = False
-        return subvalue
-
-    def _turn_to_resolving_state(self, substitution: UnresolvedSubstitution, status: SubstitutionStatus) -> None:
-        if status == SubstitutionStatus.FALLBACK_RESOLVING:
-            raise HOCONSubstitutionCycleError(f"Could not resolve {substitution}.\n{self.parsed}")
-        if status == SubstitutionStatus.UNRESOLVED:
-            self.substitutions[substitution.identifier] = Substitution(status=SubstitutionStatus.RESOLVING)
-        else:
-            self.substitutions[substitution.identifier] = Substitution(status=SubstitutionStatus.FALLBACK_RESOLVING)
-
-    def _resolve_sub_from_env(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
-        resolved_sub = get_from_env(substitution)
-        if resolved_sub.status == SubstitutionStatus.UNDEFINED and substitution.optional is False:
-            resolving_status = self.substitutions[substitution.identifier].status
-            if (
-                    resolving_status == SubstitutionStatus.FALLBACK_RESOLVING
-                    and substitution.keys != substitution.location
-                    and substitution.keys != substitution.relative_location
-            ):
-                raise HOCONSubstitutionCycleError(f"Cycle occurred when resolving {substitution}")
-            else:
-                raise HOCONSubstitutionUndefinedError(f"Could not resolve substitution {substitution}.")
-        self.substitutions[substitution.identifier] = resolved_sub
-        return resolved_sub.value
-
     def merge(self, superior: dict, inferior: dict | UnresolvedSubstitution) -> dict:
         """If both values are objects, then the objects are merged.
         If keys overlap, the latter wins."""
@@ -256,25 +192,10 @@ class Resolver:
                     inferior[key] = resolved_value
         return inferior
 
-    def resolve_substitution_fallback(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
-        """In case of self-referencial substitutions, try to resolve them by removing the self-reference, and
-        nodes after that.
-        For example for:
-
-        a : { a : { c : 1 } }
-        b : 1
-        a : ${a.a}
-        a : { a : 2 }
-        b : 5
-
-        Substitution ${a.a} will be attempted to resolve with the following object:
-        a : { a : { c : 1 } }
-        b : 1
-        b : 5
-        And ultimately return {c:1}
-        """
-        carved_parsed = cut_self_reference_and_fields_that_override_it(substitution, self.parsed)
-        resolver = Resolver(carved_parsed)
-        resolver.substitutions = self.substitutions
-        result = resolver.resolve_substitution(substitution)
-        return result
+    def resolve_substitutions(self, values: UnresolvedConcatenation) -> UnresolvedConcatenation:
+        values_with_resolved_substitutions = UnresolvedConcatenation()
+        for value in values:
+            if isinstance(value, UnresolvedSubstitution):
+                value = self.resolve_substitution(value)
+            values_with_resolved_substitutions.append(value)
+        return values_with_resolved_substitutions

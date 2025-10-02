@@ -2,7 +2,7 @@ import os
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any, Optional, Self
 
 from ..constants import WHITE_CHARS, ROOT_TYPE, ANY_VALUE_TYPE, UNDEFINED
 from ..exceptions import HOCONConcatenationError, HOCONSubstitutionUndefinedError
@@ -17,6 +17,15 @@ class SubstitutionStatus(Enum):
     FALLBACK_RESOLVING = auto()
     RESOLVED = auto()
     UNDEFINED = auto()
+
+    def to_resolving(self, exc: Exception) -> Optional[Self]:
+        state_change_map = {
+            SubstitutionStatus.UNRESOLVED: SubstitutionStatus.RESOLVING,
+            SubstitutionStatus.FALLBACK_UNRESOLVED: SubstitutionStatus.FALLBACK_RESOLVING
+        }
+        if self not in state_change_map:
+            raise exc
+        return state_change_map[self]
 
 
 @dataclass
