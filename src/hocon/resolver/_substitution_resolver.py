@@ -2,13 +2,23 @@ from typing import Callable, Any
 
 from hocon.constants import ANY_VALUE_TYPE, ANY_UNRESOLVED, ROOT_TYPE
 from hocon.exceptions import HOCONSubstitutionUndefinedError, HOCONSubstitutionCycleError
-from hocon.resolver._utils import cut_self_reference_and_fields_that_override_it, SubstitutionStatus, get_from_env, \
-    Substitution
+from hocon.resolver._utils import (
+    cut_self_reference_and_fields_that_override_it,
+    SubstitutionStatus,
+    get_from_env,
+    Substitution,
+)
 from hocon.unresolved import UnresolvedSubstitution
 
 
 class SubstitutionResolver:
-    def __init__(self, parsed: ROOT_TYPE, resolve_value_func: Callable[[Any], ANY_VALUE_TYPE], lazy_resolve_value_func: Callable[[Any], ANY_VALUE_TYPE], substitutions: dict[int, Substitution] = None):
+    def __init__(
+        self,
+        parsed: ROOT_TYPE,
+        resolve_value_func: Callable[[Any], ANY_VALUE_TYPE],
+        lazy_resolve_value_func: Callable[[Any], ANY_VALUE_TYPE],
+        substitutions: dict[int, Substitution] = None,
+    ):
         self._parsed = parsed
         self.resolve_value = resolve_value_func
         self.lazy_resolve_value = lazy_resolve_value_func
@@ -16,7 +26,7 @@ class SubstitutionResolver:
 
     def __call__(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
         cached_sub = self.subs.get(substitution.id_, Substitution())
-        if cached_sub.status == SubstitutionStatus.RESOLVED:
+        if cached_sub.status.is_resolved:
             return cached_sub.value
         if cached_sub.status == SubstitutionStatus.RESOLVING:
             cached_sub.status = SubstitutionStatus.FALLBACK_UNRESOLVED
@@ -25,10 +35,10 @@ class SubstitutionResolver:
             return result
         self._turn_to_resolving_state(substitution, cached_sub.status)
         subvalue = self._try_resolve(substitution)
-        if self.subs[substitution.id_].status == SubstitutionStatus.RESOLVED:
+        if self.subs[substitution.id_].status.is_resolved:
             return self.subs[substitution.id_].value
 
-        ## gdzieś tu for key in substitution.root + substitution.keys
+        ## somewhere here for key in substitution.root + substitution.keys
 
         self.subs[substitution.id_] = Substitution(value=subvalue, status=SubstitutionStatus.RESOLVED)
         return subvalue
@@ -49,8 +59,9 @@ class SubstitutionResolver:
         return value
 
     def _turn_to_resolving_state(self, substitution: UnresolvedSubstitution, status: SubstitutionStatus) -> None:
-        exc = HOCONSubstitutionCycleError(f"Could not resolve {substitution}.")
-        new_status = status.to_resolving(exc)
+        new_status = status.to_resolving()
+        if new_status is None:
+            raise HOCONSubstitutionCycleError(f"Could not resolve {substitution}.")
         self.subs[substitution.id_] = Substitution(status=new_status)
 
     def _resolve_sub_from_env(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
@@ -58,9 +69,9 @@ class SubstitutionResolver:
         if resolved_sub.status == SubstitutionStatus.UNDEFINED and substitution.optional is False:
             resolving_status = self.subs[substitution.id_].status
             if (
-                    resolving_status == SubstitutionStatus.FALLBACK_RESOLVING
-                    and substitution.keys != substitution.location
-                    and substitution.keys != substitution.relative_location
+                resolving_status == SubstitutionStatus.FALLBACK_RESOLVING
+                and substitution.keys != substitution.location
+                and substitution.keys != substitution.relative_location
             ):
                 raise HOCONSubstitutionCycleError(f"Cycle occurred when resolving {substitution}")
             else:
@@ -86,6 +97,11 @@ class SubstitutionResolver:
         And ultimately return {c:1}
         """
         carved_parsed = cut_self_reference_and_fields_that_override_it(substitution, self._parsed)
-        sub_resolver = SubstitutionResolver(carved_parsed, resolve_value_func=self.resolve_value, lazy_resolve_value_func=self.lazy_resolve_value, substitutions=self.subs)
+        sub_resolver = SubstitutionResolver(
+            carved_parsed,
+            resolve_value_func=self.resolve_value,
+            lazy_resolve_value_func=self.lazy_resolve_value,
+            substitutions=self.subs,
+        )
         result = sub_resolver(substitution)
         return result

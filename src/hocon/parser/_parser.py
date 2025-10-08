@@ -37,7 +37,10 @@ def parse_dict(data: ParserInput, idx: int = 0, current_keypath: Optional[list[s
         unconcatenated_value, idx = parse_dict_value(data, idx=idx, current_keypath=current_keypath + keypath.keys)
         if keypath.iadd:
             unconcatenated_value = convert_iadd_to_self_referential_substitution(
-                keypath.keys, unconcatenated_value, current_keypath=current_keypath + keypath.keys, root_location=data.root_path
+                keypath.keys,
+                unconcatenated_value,
+                current_keypath=current_keypath + keypath.keys,
+                root_location=data.root_path,
             )
         unconcatenated_dictionary = merge_unconcatenated(unconcatenated_dictionary, keypath.keys, unconcatenated_value)
 

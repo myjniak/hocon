@@ -37,5 +37,10 @@ def convert_iadd_to_self_referential_substitution(
     a = ${?a} [1]
     """
     return UnresolvedConcatenation(
-        [UnresolvedSubstitution(keys, optional=True, relative_location=current_keypath, including_root=root_location), [concatenation]]
+        [
+            UnresolvedSubstitution(
+                keys, optional=True, relative_location=current_keypath, including_root=root_location
+            ),
+            [concatenation],
+        ]
     )
