@@ -49,11 +49,13 @@ def _parse_substitution(
     else:
         optional = False
     keypath = parse_keypath(data, idx, keyend_indicator="}")
-    substitution = UnresolvedSubstitution(keypath.keys, optional, relative_location=current_keypath, including_root=data.root_path)
+    substitution = UnresolvedSubstitution(
+        keypath.keys, optional, relative_location=current_keypath, including_root=data.root_path
+    )
     if (
         current_keypath is not None
         and len(current_keypath) > len(keypath.keys)
-        and current_keypath[:len(keypath.keys)] == keypath.keys
+        and current_keypath[: len(keypath.keys)] == keypath.keys
     ):
         raise HOCONSubstitutionCycleError(
             f"Substitution {substitution} located at [{'.'.join(current_keypath)}] points to its ancestor node."
