@@ -1,4 +1,9 @@
 # Changelog
+## 0.0.19
+- Separated substitution resolving to a separate module
+- Fixed a bug where substitution was incorrectly detecting a cycle (bad detecting of pointing to self parent)
+- Fixed a bug where comments can stuck key reading till the end of the config
+
 ## 0.0.18
 - include statement and filepath can now be separated by newline
 - Proper exception is raised if included file is an array
