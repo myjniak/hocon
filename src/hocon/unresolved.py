@@ -27,6 +27,8 @@ class UnresolvedSubstitution:
     def __post_init__(self):
         if self.including_root is None:
             self.including_root = []
+        if self.relative_location is None:
+            self.relative_location = []
 
     @property
     def location(self):

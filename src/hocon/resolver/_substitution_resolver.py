@@ -51,7 +51,13 @@ class SubstitutionResolver:
             if isinstance(value, dict) and key in value:
                 value = self.lazy_resolve_value(value[key])
             elif isinstance(value, ROOT_TYPE):
-                value = self._resolve_sub_from_env(substitution)
+                if substitution.including_root:
+                    substitution.keys = substitution.including_root + substitution.keys
+                    substitution.including_root = None
+                    self.subs.pop(substitution.id_)
+                    value = self(substitution)
+                else:
+                    value = self._resolve_sub_from_env(substitution)
         if isinstance(value, ROOT_TYPE):
             value = self.resolve_value(value)
         if isinstance(value, UnresolvedSubstitution):

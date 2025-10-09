@@ -1,4 +1,7 @@
 # Changelog
+## 0.1.0
+- Substitutions are looking at app root config as 1st priority AND (NEW) at relative included file keypath as 2nd priority.
+
 ## 0.0.19
 - Separated substitution resolving to a separate module
 - Fixed a bug where substitution was incorrectly detecting a cycle (bad detecting of pointing to self parent)
