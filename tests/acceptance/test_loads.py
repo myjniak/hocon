@@ -192,3 +192,21 @@ def test_15():
     assert result == {
         "a": {"a": 1, "b": 2, "c": 3}
     }
+
+
+def test_16():
+    data = """
+    a: {a: 1, b: 2}
+    a: {a: 3, b: { c: ${a.a}, d: 4} {c: 6}}
+    a: {a: 5, b: {c: 7}}
+    """
+    result = loads(data)
+    assert result == {
+        "a": {
+            "a": 5,
+            "b": {
+                "c": 7
+            }
+        }
+
+    }

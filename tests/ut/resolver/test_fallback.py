@@ -1,7 +1,9 @@
 import pytest
 
-from hocon._main import parse, resolve
-from hocon.resolver._utils import cut_self_reference_and_fields_that_override_it
+import hocon
+from hocon._main import parse
+from hocon.resolver._resolver import Resolver, resolve
+from hocon.resolver._fallback import cut_self_reference_and_fields_that_override_it
 from hocon.unresolved import UnresolvedSubstitution, UnresolvedConcatenation
 
 
@@ -42,22 +44,6 @@ def test_3():
     assert resolve(result) == {}
 
 
-def test_4():
-    data = """
-    a: {a: 1, b: 2}
-    a: {a: 3, b: { c: ${a.a}, d: 4} {c: 6}}
-    a: {a: 5, b: {c: 7}}
-    """
-    sub = UnresolvedSubstitution(["a", "a"], optional=False, relative_location=["a", "b", "c"])
-    parsed = parse(data)
-    result = cut_self_reference_and_fields_that_override_it(sub, parsed)
-    assert resolve(result) == {
-        "a": {
-            "a": 1, "b": 2
-        }
-    }
-
-
 def test_5():
     data = """
     a {
@@ -68,7 +54,31 @@ def test_5():
     parsed = parse(data)
     sub = parsed["a"][0]["b"][1]
     carved = cut_self_reference_and_fields_that_override_it(sub, parsed)
+    result = resolve(carved)
+    assert result == {"a": {"a": 1, "b": "c"}}
+
+
+@pytest.mark.xfail
+def test_6():
+    data = """
+    a.c: ${?a.b} "42"
+    a {b: 1}
+    """
+    print(hocon.loads(data))
+    parsed = parse(data)
+    sub = parsed["a"][0]["c"][0]
+    carved = cut_self_reference_and_fields_that_override_it(sub, parsed)
     print(carved)
-    # result = resolve(carved)
-    # print(result)
-    # assert result == {"a": [1, 2]}
+
+
+@pytest.mark.xfail
+def test_7():
+    data = """
+    a.c: ${?a.b} "42"
+    a {b: 1}
+    """
+    parsed = parse(data)
+    resolver = Resolver(parsed)
+    resolver.lazy = True
+    result = resolver.resolve(parsed)
+    print(result)
