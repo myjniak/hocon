@@ -2,12 +2,8 @@ from typing import Callable, Any
 
 from hocon.constants import ANY_VALUE_TYPE, ANY_UNRESOLVED, ROOT_TYPE
 from hocon.exceptions import HOCONSubstitutionUndefinedError, HOCONSubstitutionCycleError
-from hocon.resolver._utils import (
-    cut_self_reference_and_fields_that_override_it,
-    SubstitutionStatus,
-    get_from_env,
-    Substitution,
-)
+from hocon.resolver._utils import SubstitutionStatus, get_from_env, Substitution
+from hocon.resolver._fallback import cut_self_reference_and_fields_that_override_it
 from hocon.unresolved import UnresolvedSubstitution
 
 
