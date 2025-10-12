@@ -13,5 +13,5 @@ def test_iadd_non_array():
     a = 12
     a += 3
     """
-    with pytest.raises(HOCONConcatenationError, match="Attempted list concatenation"):
+    with pytest.raises(HOCONConcatenationError, match="Concatenation of multiple types"):
         hocon.loads(data)

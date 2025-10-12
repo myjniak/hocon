@@ -1,4 +1,14 @@
 # Changelog
+
+## 0.2.0
+- Various bugfixes in resolving self-referential substitutions
+- Changes in Exception raises in certain scenarios
+- Big change in resolve algorithm approach:
+  1. parse
+  2. resolve what can be resolved without touching substitutions
+  3. resolve all substitutions
+- Step 2 has been added to get rid of self.lazy attribute and self.lazy ifology in Resolver.
+
 ## 0.1.0
 - Substitutions are looking at app root config as 1st priority AND (NEW) at relative included file keypath as 2nd priority.
 

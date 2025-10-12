@@ -105,4 +105,9 @@ def test_deduplicate_undefined():
     a = ${?x}
     """
     result = hocon.loads(data)
-    print(result)
+    assert result == {
+        "a": {
+            "a": 1,
+            "b": 2
+        }
+    }

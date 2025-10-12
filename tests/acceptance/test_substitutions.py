@@ -1,3 +1,5 @@
+import json
+
 from hocon._main import parse, resolve
 from hocon import loads
 
@@ -113,3 +115,24 @@ def test_8():
             "b": "c1"
         }
     }
+
+
+def test_9():
+    data = """
+    a.c: ${?a.b} "42"
+    a {b: 1}
+    """
+    assert loads(data) == {
+        "a": {
+            "b": 1,
+            "c": "1 42"
+        }
+    }
+
+
+def test_concatenation_with_undefined_subs():
+    data = """url: "https://"${?predomain}google"."com"""
+    assert loads(data) == {
+        "url": "https://google.com"
+    }
+

@@ -48,6 +48,16 @@ def test_array_concatenation():
     assert hocon.loads(data) == hocon.loads(data_2) == hocon.loads(data_3) == {"a": [1, 2, 3, 4]}
 
 
+def test_array_deduplication():
+    data = """
+    a : [ 1, 2, 3, 4 ]
+    // second array should override the first one
+    a : [ 5, 6 ] [ 7, 8 ]
+    """
+    assert hocon.loads(data) == {"a": [5, 6, 7, 8]}
+
+
+
 def test_inheritance():
     data = """
     data-center-generic = { cluster-size = 6 }

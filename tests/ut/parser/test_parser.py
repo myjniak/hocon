@@ -43,7 +43,7 @@ def test_parse_all_unresolved_types():
                 ]
             ]),
             UnresolvedConcatenation([
-                UnresolvedSubstitution(["a"], optional=True),
+                UnresolvedSubstitution(["a"], optional=True, relative_location=["a"]),
                 [UnresolvedConcatenation(["3"])]
             ])
         ])

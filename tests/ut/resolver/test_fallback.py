@@ -1,11 +1,9 @@
 import pytest
 
-import hocon
 from hocon._main import parse
-from hocon.resolver._resolver import Resolver, resolve
-from hocon.resolver._fallback import cut_self_reference_and_fields_that_override_it
+from hocon.resolver._resolver import resolve
+from hocon.resolver._self_reference import cut_self_reference_and_fields_that_override_it
 from hocon.unresolved import UnresolvedSubstitution, UnresolvedConcatenation
-
 
 pytestmark = pytest.mark.f13
 
@@ -44,7 +42,7 @@ def test_3():
     assert resolve(result) == {}
 
 
-def test_5():
+def test_4():
     data = """
     a {
         a: 1
@@ -58,27 +56,13 @@ def test_5():
     assert result == {"a": {"a": 1, "b": "c"}}
 
 
-@pytest.mark.xfail
-def test_6():
+def test_5():
     data = """
     a.c: ${?a.b} "42"
     a {b: 1}
     """
-    print(hocon.loads(data))
     parsed = parse(data)
     sub = parsed["a"][0]["c"][0]
     carved = cut_self_reference_and_fields_that_override_it(sub, parsed)
-    print(carved)
-
-
-@pytest.mark.xfail
-def test_7():
-    data = """
-    a.c: ${?a.b} "42"
-    a {b: 1}
-    """
-    parsed = parse(data)
-    resolver = Resolver(parsed)
-    resolver.lazy = True
-    result = resolver.resolve(parsed)
-    print(result)
+    result = resolve(carved)
+    assert result == {"a": {"b": 1}}

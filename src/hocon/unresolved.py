@@ -5,7 +5,7 @@ from typing import Optional, Type, Union, Any
 from typing_extensions import Self
 
 from hocon.constants import SIMPLE_VALUE_TYPE, UNDEFINED
-from hocon.exceptions import HOCONConcatenationError
+from hocon.exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError
 from hocon.strings import UnquotedString
 
 
@@ -22,8 +22,11 @@ class UnresolvedConcatenation(list):
             return str
         if len(concat_types) > 1:
             type_names = [concat_type.__name__ for concat_type in concat_types]
-            raise HOCONConcatenationError(f"Multiple types concatenation not allowed: {type_names}")
-        return concat_types.pop()
+            raise HOCONConcatenationError(f"Concatenation of multiple types not allowed: {type_names}")
+        concat_type = concat_types.pop()
+        if not concat_type in [list, dict]:
+            raise HOCONConcatenationError(f"Concatenation of type {concat_type.__name__} not supported!")
+        return concat_type
 
     def has_substitutions(self) -> bool:
         concat_types = set(type(value) for value in self)
@@ -66,6 +69,14 @@ class UnresolvedDuplicateValue(list):
         list_str = super().__repr__()
         return "\n【\n" + list_str[1:-1].replace("\n", "\n    ") + "\n】\n"
 
+    def sanitize(self) -> Self:
+        if len(self) == 0:
+            raise HOCONDuplicateKeyMergeError("Unresolved duplicate key must contain at least 2 elements.")
+        for index in reversed(range(len(self))):
+            if not isinstance(self[index], (dict, ANY_UNRESOLVED)):
+                return UnresolvedDuplicateValue([self[index + 1 :]] or [self[-1]])
+        return self
+
 
 @dataclass
 class UnresolvedSubstitution:
@@ -94,7 +105,7 @@ class UnresolvedSubstitution:
     def __eq__(self, other: object):
         if not isinstance(other, UnresolvedSubstitution):
             return NotImplemented
-        return self.keys == other.keys and self.optional == other.optional
+        return self.keys == other.keys and self.optional == other.optional and self.location == other.location
 
     def __hash__(self):
         return hash((".".join(self.keys), self.optional, self.location, self.id_))
