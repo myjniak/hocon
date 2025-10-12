@@ -5,23 +5,29 @@ from ..constants import SIMPLE_VALUE_TYPE, _FLOAT_CONSTANTS, NUMBER_RE, WHITE_CH
 from ..strings import QuotedString, UnquotedString
 
 
-def resolve_simple_value(chunks: list[str]) -> SIMPLE_VALUE_TYPE:
-    stripped_values = _strip_string_list(chunks)
-    joined = "".join(stripped_values)
-    if len(stripped_values) == 1 and isinstance(stripped_values[0], UnquotedString):
+def resolve_simple_value(chunks: list[str], strip_left: bool = True, strip_right: bool = True) -> SIMPLE_VALUE_TYPE:
+    chunks = _strip_string_list(chunks, strip_left, strip_right)
+    joined = "".join(chunks)
+    if len(chunks) == 1 and isinstance(chunks[0], UnquotedString):
         return _cast_string_value(joined)
     return joined
 
 
-def _strip_string_list(values: list[str]) -> list[str]:
-    first = next(
-        index for index, value in enumerate(values) if value.strip(WHITE_CHARS) or isinstance(value, QuotedString)
-    )
-    last = -1 * next(
-        index
-        for index, value in enumerate(reversed(values))
-        if value.strip(WHITE_CHARS) or isinstance(value, QuotedString)
-    )
+def _strip_string_list(values: list[str], left: bool = True, right: bool = True) -> list[str]:
+    if left:
+        first = next(
+            index for index, value in enumerate(values) if value.strip(WHITE_CHARS) or isinstance(value, QuotedString)
+        )
+    else:
+        first = 0
+    if right:
+        last = -1 * next(
+            index
+            for index, value in enumerate(reversed(values))
+            if value.strip(WHITE_CHARS) or isinstance(value, QuotedString)
+        )
+    else:
+        last = 0
     if last == 0:
         return values[first:]
     return values[first:last]

@@ -61,13 +61,12 @@ def test_recursive_merge():
             }
             """
     result = hocon.loads(data)
-    print(result)
-    # assert result == {
-    #     "a": {
-    #         "b": {
-    #             "c": 7,
-    #             "d": 8,
-    #             "e": 9
-    #         }
-    #     }
-    # }
+    assert result == {
+        "a": {
+            "b": {
+                "c": 7,
+                "d": 8,
+                "e": 9
+            }
+        }
+    }

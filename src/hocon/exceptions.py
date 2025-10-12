@@ -42,13 +42,21 @@ class HOCONConcatenationError(HOCONResolveError):
     """When unsupported concatenation happens"""
 
 
-class HOCONDuplicateKeyMergeError(HOCONResolveError):
+class HOCONDeduplicationError(HOCONResolveError):
+    """When key duplication resolving fails"""
+
+
+class HOCONDuplicateKeyMergeError(HOCONDeduplicationError):
     """When duplicated keys cannot be merged"""
 
 
-class HOCONSubstitutionUndefinedError(HOCONResolveError):
+class HOCONSubstitutionError(HOCONResolveError):
+    """Generic substitution Error"""
+
+
+class HOCONSubstitutionUndefinedError(HOCONSubstitutionError):
     """When a substitution of ${} could not be resolved in the document or external sources"""
 
 
-class HOCONSubstitutionCycleError(HOCONResolveError):
+class HOCONSubstitutionCycleError(HOCONSubstitutionError):
     """When a cycle of ${} references is detected"""

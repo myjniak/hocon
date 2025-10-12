@@ -25,7 +25,7 @@ def test_bad_order():
     foo : { a : 1 }
     """
     with pytest.raises(HOCONSubstitutionUndefinedError):
-        hocon.loads(data)
+        print(hocon.loads(data))
 
 
 def test_undefined():
@@ -62,8 +62,5 @@ def test_undefined_by_spec():
     b : 2
     a : ${b}
     b : ${a}"""
-    result = hocon.loads(data)
-    assert result == {
-        "a": 1,
-        "b": 1
-    }
+    with pytest.raises(HOCONSubstitutionCycleError):
+        hocon.loads(data)

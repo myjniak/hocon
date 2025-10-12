@@ -15,7 +15,7 @@ from ._simple_value import parse_simple_value
 from ._value_utils import merge_unconcatenated, convert_iadd_to_self_referential_substitution
 from ..constants import UNDEFINED
 from ..exceptions import HOCONIncludeError, HOCONExcessiveDataError
-from ..unresolved import UnresolvedConcatenation, UnresolvedSubstitution
+from ..unresolved import UnresolvedConcatenation
 
 
 def parse_dict(data: ParserInput, idx: int = 0, current_keypath: Optional[list[str]] = None) -> tuple[dict, int]:
@@ -106,7 +106,7 @@ def parse_include(data: ParserInput, idx: int, current_keypath: list[str]) -> tu
     string, idx = parse_quoted_string(data, idx + 1)
     external_filepath = Path(data.absolute_filepath).parent / string
     try:
-        with open(external_filepath) as conf:
+        with open(external_filepath, encoding=data.encoding) as conf:
             external_file_content = conf.read()
     except FileNotFoundError:
         return UNDEFINED

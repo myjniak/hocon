@@ -8,6 +8,7 @@ class ParserInput:
     data: str
     absolute_filepath: str | os.PathLike
     root_path: Optional[list[str]] = None
+    encoding: str = "UTF-8"
 
     def __post_init__(self):
         if self.root_path is None:
