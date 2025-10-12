@@ -1,7 +1,6 @@
 import re
 from typing import Union
 
-from .unresolved import UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplicateValue
 
 WHITE_HEXES = [
     0x00A0,
@@ -44,5 +43,4 @@ SECTION_CLOSING = "}]"
 SIMPLE_VALUE_TYPE = Union[int, float, str, bool, None]
 ANY_VALUE_TYPE = Union[dict, list, int, float, str, bool, None]
 ROOT_TYPE = Union[list, dict]
-ANY_UNRESOLVED = Union[UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplicateValue]
 UNDEFINED = object()

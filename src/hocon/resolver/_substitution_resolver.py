@@ -1,10 +1,12 @@
-from typing import Callable, Any
+import os
+from typing import Callable, Any, Optional
 
-from hocon.constants import ANY_VALUE_TYPE, ANY_UNRESOLVED, ROOT_TYPE
+from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, UNDEFINED
 from hocon.exceptions import HOCONSubstitutionUndefinedError, HOCONSubstitutionCycleError
-from hocon.resolver._utils import SubstitutionStatus, get_from_env, Substitution
+from hocon.resolver._substitution import SubstitutionStatus, Substitution
 from hocon.resolver._fallback import cut_self_reference_and_fields_that_override_it
-from hocon.unresolved import UnresolvedSubstitution
+from hocon.strings import QuotedString
+from hocon.unresolved import UnresolvedSubstitution, ANY_UNRESOLVED
 
 
 class SubstitutionResolver:
@@ -107,3 +109,10 @@ class SubstitutionResolver:
         )
         result = sub_resolver(substitution)
         return result
+
+
+def get_from_env(substitution: UnresolvedSubstitution) -> Substitution:
+    env_value: Optional[str] = os.getenv(".".join(substitution.keys))
+    if env_value is None:
+        return Substitution(value=UNDEFINED, status=SubstitutionStatus.UNDEFINED)
+    return Substitution(value=QuotedString(env_value), status=SubstitutionStatus.RESOLVED)
