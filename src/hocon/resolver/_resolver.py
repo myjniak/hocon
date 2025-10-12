@@ -11,10 +11,6 @@ from ..exceptions import (
     HOCONDuplicateKeyMergeError,
 )
 from ..resolver._simple_value import resolve_simple_value
-from ..resolver._utils import (
-    filter_out_unquoted_space,
-    sanitize_unresolved_concatenation,
-)
 from ..unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution
 
 
@@ -90,14 +86,14 @@ class Resolver:
         return self.concatenate(values)
 
     def concatenate(self, values: UnresolvedConcatenation) -> ANY_VALUE_TYPE:
-        values = sanitize_unresolved_concatenation(values)
+        values = values.sanitize()
         if any(isinstance(value, (UnresolvedConcatenation, UnresolvedDuplicateValue)) for value in values):
             raise HOCONConcatenationError("Something went horribly wrong. This is a bug.")
         if not values:
             return UNDEFINED
         if len(values) == 1 and type(values[0]) in get_args(SIMPLE_VALUE_TYPE) + (UnresolvedSubstitution,):
             return values[0]
-        concat_type = self._get_concatenation_type(values)
+        concat_type = values.get_type()
         concatenate_functions: dict[Type[list | dict | str], Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]] = {
             list: self._concatenate_lists,
             dict: self._concatenate_dicts,
@@ -107,16 +103,6 @@ class Resolver:
         if concatenate_function is not None:
             return concatenate_functions[concat_type](values)
         raise HOCONConcatenationError(f"Multiple types concatenation not allowed: {values}")
-
-    @staticmethod
-    def _get_concatenation_type(values: UnresolvedConcatenation) -> Type[list | dict | str]:
-        concat_types = set(type(value) for value in values)
-        concat_types.discard(UnresolvedSubstitution)
-        if all(issubclass(concat_type, SIMPLE_VALUE_TYPE) for concat_type in concat_types):
-            return str
-        if len(concat_types) > 1:
-            raise HOCONConcatenationError(f"Multiple types concatenation not allowed: {concat_types}")
-        return concat_types.pop()
 
     def _concatenate_dicts(self, values: UnresolvedConcatenation) -> dict:
         return self.resolve_value(reduce(self.merge, reversed(values)))
@@ -164,7 +150,7 @@ class Resolver:
                 break
         for value in reversed(values[:-1]):
             if isinstance(deduplicated, dict) and isinstance(value, UnresolvedConcatenation):
-                value = filter_out_unquoted_space(value)
+                value = value.filter_out_unquoted_space()
                 if all(isinstance(elem, (dict, UnresolvedSubstitution)) for elem in value):
                     deduplicated = reduce(self.merge, chain([deduplicated], reversed(value)))
                 else:
