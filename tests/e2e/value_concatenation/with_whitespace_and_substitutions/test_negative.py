@@ -16,7 +16,7 @@ def test_quoted_whitespace_between_dicts():
         bar = {b: b}
         c = ${foo}"  "${bar}
         """
-    with pytest.raises(HOCONConcatenationError, match="dictionaries"):
+    with pytest.raises(HOCONConcatenationError, match="dict"):
         hocon.loads(data)
 
 
@@ -26,5 +26,5 @@ def test_quoted_whitespace_between_lists():
         bar = [b]
         c = ${foo}"  "${bar}
         """
-    with pytest.raises(HOCONConcatenationError, match="lists"):
+    with pytest.raises(HOCONConcatenationError, match="list"):
         hocon.loads(data)

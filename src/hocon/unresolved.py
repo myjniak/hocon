@@ -21,7 +21,8 @@ class UnresolvedConcatenation(list):
         if all(issubclass(concat_type, SIMPLE_VALUE_TYPE) for concat_type in concat_types):
             return str
         if len(concat_types) > 1:
-            raise HOCONConcatenationError(f"Multiple types concatenation not allowed: {concat_types}")
+            type_names = [concat_type.__name__ for concat_type in concat_types]
+            raise HOCONConcatenationError(f"Multiple types concatenation not allowed: {type_names}")
         return concat_types.pop()
 
     def has_substitutions(self) -> bool:
@@ -30,16 +31,11 @@ class UnresolvedConcatenation(list):
 
     def sanitize(self) -> Self:
         concatenation = self._filter_out_undefined_substitutions()
-        if any(isinstance(value, list) for value in concatenation):
+        if any(isinstance(value, (list, dict)) for value in concatenation):
             concatenation = concatenation.filter_out_unquoted_space()
-            if not all(isinstance(value, list | UnresolvedSubstitution) for value in concatenation):
-                raise HOCONConcatenationError(f"Arrays (lists) mixed with other value types not allowed")
-        if any(isinstance(value, dict) for value in concatenation):
-            concatenation = concatenation.filter_out_unquoted_space()
-            if not all(isinstance(value, dict | UnresolvedSubstitution) for value in concatenation):
-                raise HOCONConcatenationError(f"Objects (dictionaries) mixed with other value types not allowed")
-        if any(isinstance(value, str) for value in concatenation):
+        elif any(isinstance(value, str) for value in concatenation):
             concatenation = concatenation._strip_unquoted_space()
+        concatenation.get_type()
         return concatenation
 
     def filter_out_unquoted_space(self) -> Self:
