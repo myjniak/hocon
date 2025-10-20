@@ -4,7 +4,7 @@ build-backend = 'hatchling.build'
 
 [project]
 
-name = "hocon"
+name = "hocon2"
 authors = [
     { name = "Michał Szajkowski", email = "myjniak@gmail.com"}
 ]
@@ -41,17 +41,17 @@ include = [
     "/tests",
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = [
+    "/src/hocon"
+]
+
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
 content-type = 'text/markdown'
 fragments = [
     {path = "README.md"},
     {path = "CHANGELOG.md"},
 ]
-
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["hocon*"]
 
 [tool.hatch.envs.test]
 dependencies = [
