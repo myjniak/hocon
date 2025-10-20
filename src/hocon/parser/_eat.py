@@ -1,6 +1,6 @@
+from hocon.constants import WHITE_CHARS, ELEMENT_SEPARATORS
+from hocon.exceptions import HOCONUnexpectedBracesError, HOCONUnexpectedSeparatorError
 from ._data import ParserInput
-from ..constants import WHITE_CHARS, ELEMENT_SEPARATORS
-from ..exceptions import HOCONUnexpectedBracesError, HOCONUnexpectedSeparatorError
 
 
 def eat_comments(data: ParserInput, idx: int) -> int:

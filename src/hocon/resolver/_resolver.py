@@ -11,7 +11,7 @@ from ..exceptions import (
     HOCONDeduplicationError,
 )
 from ..resolver._simple_value import resolve_simple_value
-from ..unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution, ANY_UNRESOLVED
+from ..unresolved import UnresolvedConcatenation, UnresolvedDuplication, UnresolvedSubstitution, ANY_UNRESOLVED
 
 
 def resolve(parsed: ROOT_TYPE) -> ROOT_TYPE:
@@ -34,7 +34,7 @@ class Resolver:
             dict: self.resolve,
             list: self.resolve,
             UnresolvedConcatenation: self.resolve,
-            UnresolvedDuplicateValue: self.resolve,
+            UnresolvedDuplication: self.resolve,
             UnresolvedSubstitution: self.resolve_substitution,
         }
         return resolver_map.get(type(element), lambda x: x)
@@ -67,7 +67,7 @@ class Resolver:
     def _(self, values: UnresolvedConcatenation) -> ANY_VALUE_TYPE:
         values = self.resolve_substitutions(values)
         values = values.sanitize()
-        if any(isinstance(value, (UnresolvedConcatenation, UnresolvedDuplicateValue)) for value in values):
+        if any(isinstance(value, (UnresolvedConcatenation, UnresolvedDuplication)) for value in values):
             raise HOCONConcatenationError("Something went horribly wrong. This is a bug.")
         if not values:
             return UNDEFINED
@@ -82,7 +82,7 @@ class Resolver:
         return concatenate_functions[concat_type](values)
 
     @resolve.register
-    def _(self, values: UnresolvedDuplicateValue) -> ANY_VALUE_TYPE:
+    def _(self, values: UnresolvedDuplication) -> ANY_VALUE_TYPE:
         """Resolve duplication values starting from the last (latest overrides/merges with the rest).
         If it's a SIMPLE_VALUE_TYPE or a list, it overrides the rest.
         If it's a dict type, objects will merge.
@@ -122,7 +122,7 @@ class Resolver:
             resolved_lists.append(self.resolve(value))
         return sum(resolved_lists, [])
 
-    def _resolve_latest_unresolved_duplication_element(self, values: UnresolvedDuplicateValue) -> ANY_VALUE_TYPE:
+    def _resolve_latest_unresolved_duplication_element(self, values: UnresolvedDuplication) -> ANY_VALUE_TYPE:
         while True:
             deduplicated = self.resolve_value(values[-1])
             if deduplicated is UNDEFINED:
@@ -171,7 +171,7 @@ class LazyResolver:
             dict: self.resolve,
             list: self.resolve,
             UnresolvedConcatenation: self.concatenate,
-            UnresolvedDuplicateValue: self.deduplicate,
+            UnresolvedDuplication: self.deduplicate,
         }
         return resolver_map.get(type(element), lambda x: x)
 
@@ -293,7 +293,7 @@ class LazyResolver:
             resolved_lists.append(self.resolve(value))
         return sum(resolved_lists, [])
 
-    def deduplicate(self, values: UnresolvedDuplicateValue) -> ANY_VALUE_TYPE | UnresolvedDuplicateValue:
+    def deduplicate(self, values: UnresolvedDuplication) -> ANY_VALUE_TYPE | UnresolvedDuplication:
         """Resolve duplication values starting from the last (latest overrides/merges with the rest).
         If it's a SIMPLE_VALUE_TYPE or a list, it overrides the rest.
         If it's a dict type, objects will merge.
@@ -301,7 +301,7 @@ class LazyResolver:
         """
         values = values.sanitize()
         last_value = self.resolve_value(values[-1])
-        deduplicated = UnresolvedDuplicateValue([last_value])
+        deduplicated = UnresolvedDuplication([last_value])
         if not isinstance(last_value, (dict, ANY_UNRESOLVED)):
             return last_value
         for value in reversed(values[:-1]):

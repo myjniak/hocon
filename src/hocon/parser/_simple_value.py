@@ -1,13 +1,13 @@
 from typing import Union, Optional
 
+from hocon.constants import ELEMENT_SEPARATORS, SECTION_CLOSING, INLINE_WHITE_CHARS
+from hocon.exceptions import HOCONUnexpectedSeparatorError, HOCONUnexpectedBracesError, HOCONSubstitutionCycleError
+from hocon.strings import UnquotedString, QuotedString
+from hocon.unresolved import UnresolvedSubstitution
 from ._data import ParserInput
-from ..constants import ELEMENT_SEPARATORS, SECTION_CLOSING, INLINE_WHITE_CHARS
-from ..exceptions import HOCONUnexpectedSeparatorError, HOCONUnexpectedBracesError, HOCONSubstitutionCycleError
 from ._key import parse_keypath
 from ._quoted_string import parse_triple_quoted_string, parse_quoted_string
 from ._unquoted_string import _parse_unquoted_string_value
-from ..strings import UnquotedString, QuotedString
-from ..unresolved import UnresolvedSubstitution
 
 
 def parse_simple_value(

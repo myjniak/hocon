@@ -1,6 +1,10 @@
+import os
 from pathlib import Path
 from typing import Any, Optional
 
+from hocon.constants import UNDEFINED, ROOT_TYPE
+from hocon.exceptions import HOCONIncludeError, HOCONExcessiveDataError, HOCONNoDataError
+from hocon.unresolved import UnresolvedConcatenation
 from ._data import ParserInput
 from ._eat import (
     eat_comments,
@@ -13,9 +17,23 @@ from ._key import parse_keypath
 from ._quoted_string import parse_quoted_string
 from ._simple_value import parse_simple_value
 from ._value_utils import merge_unconcatenated, convert_iadd_to_self_referential_substitution
-from ..constants import UNDEFINED
-from ..exceptions import HOCONIncludeError, HOCONExcessiveDataError
-from ..unresolved import UnresolvedConcatenation
+
+
+def parse(data: str, root_filepath: str | os.PathLike = os.getcwd(), encoding: str = "UTF-8") -> ROOT_TYPE:
+    if not data:
+        raise HOCONNoDataError("Empty string provided")
+    data_object = ParserInput(data, Path(root_filepath), encoding=encoding)
+    result: ROOT_TYPE
+    idx = eat_whitespace_and_comments(data_object, 0)
+    if data[idx] == "[":
+        result, idx = parse_list(data_object, idx=idx + 1)
+    elif data[idx] == "{":
+        result, idx = parse_dict(data_object, idx=idx + 1)
+    else:
+        data_object.data += "\n}"
+        result, idx = parse_dict(data_object, idx=idx)
+    _assert_no_content_left(data_object, idx)
+    return result
 
 
 def parse_dict(data: ParserInput, idx: int = 0, current_keypath: Optional[list[str]] = None) -> tuple[dict, int]:

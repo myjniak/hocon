@@ -1,8 +1,8 @@
 from copy import deepcopy
 
 from ..constants import ROOT_TYPE
-from ..exceptions import HOCONSubstitutionUndefinedError, HOCONSubstitutionError
-from ..unresolved import UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplicateValue
+from ..exceptions import HOCONSubstitutionUndefinedError
+from ..unresolved import UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplication
 
 
 class Cutter:
@@ -13,7 +13,7 @@ class Cutter:
     def cut(self, subtree: ROOT_TYPE, keypath_index: int = 0):
         is_past_last_key = keypath_index == len(self.sub.location)
         if is_past_last_key:
-            if isinstance(subtree, UnresolvedDuplicateValue):
+            if isinstance(subtree, UnresolvedDuplication):
                 for index, item in enumerate(subtree):
                     if isinstance(item, UnresolvedConcatenation):
                         self.cut(item, keypath_index)
@@ -38,7 +38,7 @@ class Cutter:
             raise HOCONSubstitutionUndefinedError(subtree)
         key = self.sub.location[keypath_index]
         is_last_key = keypath_index + 1 == len(self.sub.location)
-        if isinstance(subtree, (UnresolvedDuplicateValue, UnresolvedConcatenation)):
+        if isinstance(subtree, (UnresolvedDuplication, UnresolvedConcatenation)):
             for item in subtree:
                 self.cut(item, keypath_index)
         if not is_last_key:

@@ -3,7 +3,7 @@ import pytest
 from hocon.constants import UNDEFINED
 from hocon.exceptions import HOCONDeduplicationError, HOCONConcatenationError
 from hocon.resolver._resolver import Resolver, LazyResolver
-from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue
+from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication
 
 
 def test_resolve_unsupported_type():
@@ -31,7 +31,7 @@ def test_resolve_empty_concatenation():
 
 
 def test_resolve_duplication_with_no_elements():
-    duplication = UnresolvedDuplicateValue([])
+    duplication = UnresolvedDuplication([])
     with pytest.raises(HOCONDeduplicationError):
         Resolver({}).resolve_value(duplication)
 

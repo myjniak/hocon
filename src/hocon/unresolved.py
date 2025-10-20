@@ -64,7 +64,7 @@ class UnresolvedConcatenation(list):
         return isinstance(value, UnquotedString) and value.is_empty()
 
 
-class UnresolvedDuplicateValue(list):
+class UnresolvedDuplication(list):
     def __repr__(self):
         list_str = super().__repr__()
         return "\n【\n" + list_str[1:-1].replace("\n", "\n    ") + "\n】\n"
@@ -74,7 +74,7 @@ class UnresolvedDuplicateValue(list):
             raise HOCONDuplicateKeyMergeError("Unresolved duplicate key must contain at least 2 elements.")
         for index in reversed(range(len(self))):
             if not isinstance(self[index], (dict, ANY_UNRESOLVED)):
-                return UnresolvedDuplicateValue([self[index + 1 :]] or [self[-1]])
+                return UnresolvedDuplication([self[index + 1 :]] or [self[-1]])
         return self
 
 
@@ -111,4 +111,4 @@ class UnresolvedSubstitution:
         return hash((".".join(self.keys), self.optional, self.location, self.id_))
 
 
-ANY_UNRESOLVED = Union[UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplicateValue]
+ANY_UNRESOLVED = Union[UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplication]

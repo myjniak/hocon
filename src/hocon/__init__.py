@@ -1,3 +1,3 @@
-from ._main import loads, dumps, load
+from ._main import loads, load
 
-__all__ = ("load", "loads", "dumps")
+__all__ = ("load", "loads")

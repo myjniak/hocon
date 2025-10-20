@@ -3,10 +3,10 @@ from typing import Callable, Any, Optional
 
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, UNDEFINED
 from hocon.exceptions import HOCONSubstitutionUndefinedError, HOCONSubstitutionCycleError
-from hocon.resolver._substitution import SubstitutionStatus, Substitution
-from hocon.resolver._self_reference import cut_self_reference_and_fields_that_override_it
 from hocon.strings import QuotedString
 from hocon.unresolved import UnresolvedSubstitution, ANY_UNRESOLVED
+from ._self_reference import cut_self_reference_and_fields_that_override_it
+from ._substitution import SubstitutionStatus, Substitution
 
 
 class SubstitutionResolver:

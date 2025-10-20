@@ -2,7 +2,7 @@ import pytest
 
 from hocon.parser._data import ParserInput
 from hocon.strings import UnquotedString, QuotedString
-from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue, UnresolvedSubstitution
+from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication, UnresolvedSubstitution
 from hocon.parser._parser import parse_dict_value
 from hocon._main import parse
 
@@ -35,7 +35,7 @@ def test_parse_all_unresolved_types():
     data = "a=[1,2], a=${?a}[3]"
     result = parse(data)
     expected = {
-        "a": UnresolvedDuplicateValue([
+        "a": UnresolvedDuplication([
             UnresolvedConcatenation([
                 [
                     UnresolvedConcatenation(["1"]),
