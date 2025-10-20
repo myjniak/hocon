@@ -10,7 +10,7 @@ pip install hocon
 
 ## Usage
 
-Just like in python json module, you can load a string to python dictionary/list:
+Just like in python json module, you can load from a file or from a string to python dictionary/list:
 
 ```python
 import hocon
@@ -25,7 +25,8 @@ dictionary = hocon.loads(data)
 And you can dump it back to string:
 
 ```pycon
->>> print(hocon.dumps(dictionary, indent=4))
+>>> import json
+>>> print(json.dumps(dictionary, indent=4))
 {
     "animal": {"favorite": "badger"},
     "key": "badger is my favorite animal"

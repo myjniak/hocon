@@ -2,7 +2,7 @@ import pytest
 
 from hocon.exceptions import HOCONDuplicateKeyMergeError
 from hocon.strings import UnquotedString
-from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplicateValue
+from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication
 
 
 def test_sanitize_empty_concatenation():
@@ -12,7 +12,7 @@ def test_sanitize_empty_concatenation():
 
 
 def test_sanitize_empty_duplication():
-    concatenation = UnresolvedDuplicateValue([])
+    concatenation = UnresolvedDuplication([])
     with pytest.raises(HOCONDuplicateKeyMergeError):
         concatenation.sanitize()
 

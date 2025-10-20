@@ -1,7 +1,7 @@
 from json import JSONDecoder
 
+from hocon.strings import QuotedString
 from ._data import ParserInput
-from ..strings import QuotedString
 
 
 def parse_quoted_string(data: ParserInput, idx: int) -> tuple[QuotedString, int]:

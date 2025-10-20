@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 
+from hocon.constants import WHITE_CHARS
+from hocon.exceptions import HOCONDecodeError
+from hocon.strings import UnquotedString
 from ._data import ParserInput
-from ._eat import eat_comments, eat_whitespace
+from ._eat import eat_comments
 from ._quoted_string import parse_quoted_string, parse_triple_quoted_string
 from ._unquoted_string import _parse_unquoted_string_key
-from ..constants import WHITE_CHARS
-from ..exceptions import HOCONDecodeError
-from ..strings import UnquotedString
 
 
 @dataclass

@@ -1,7 +1,7 @@
+from hocon.constants import WHITE_CHARS, UNQUOTED_STR_FORBIDDEN_CHARS, SECTION_OPENING
+from hocon.exceptions import HOCONUnquotedStringError, HOCONUnexpectedSeparatorError, HOCONInvalidKeyError
+from hocon.strings import UnquotedString
 from ._data import ParserInput
-from ..constants import WHITE_CHARS, UNQUOTED_STR_FORBIDDEN_CHARS, SECTION_OPENING
-from ..exceptions import HOCONUnquotedStringError, HOCONUnexpectedSeparatorError, HOCONInvalidKeyError
-from ..strings import UnquotedString
 
 
 def _parse_unquoted_string_value(data: ParserInput, idx: int) -> tuple[UnquotedString, int]:
