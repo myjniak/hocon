@@ -19,7 +19,9 @@ jobs:
   deploy:
 
     runs-on: ubuntu-latest
-    environment: release
+    environment:
+      name: release
+      url: https://pypi.org/p/hocon2
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
