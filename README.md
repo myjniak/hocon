@@ -2,12 +2,6 @@
 
 [![codecov](https://codecov.io/github/myjniak/hocon/graph/badge.svg?token=ZY5KK0BSJY)](https://codecov.io/github/myjniak/hocon)
 
-## Installation
-
-```shell
-pip install hocon
-```
-
 ## Usage
 
 Just like in python json module, you can load from a file or from a string to python dictionary/list:
