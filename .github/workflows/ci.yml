@@ -8,7 +8,7 @@ jobs:
     environment: ci
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13" ]
+        python-version: ["3.11", "3.12", "3.13" ]
 
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +24,8 @@ jobs:
           pip install hatch coverage
       - name: Black
         run: hatch run test:black
+      - name: MyPy
+        run: hatch run test:mypy
       - name: Pytest
         run: export PYTHON_VERSION=${{ matrix.python-version }} && hatch run test:coverage
       - name: Upload pytest test results

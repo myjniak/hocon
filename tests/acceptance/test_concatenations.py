@@ -1,7 +1,7 @@
 from hocon import loads
 
 
-def test_concatenation_of_test_with_subs():
+def test_with_subs():
     data = """
     x: 10
     y: 7
@@ -16,7 +16,7 @@ def test_concatenation_of_test_with_subs():
     }
 
 
-def test_concatenation_of_lists_with_subs():
+def test_lists_with_subs():
     data = """
     a: good
     b: bad
@@ -33,7 +33,7 @@ def test_concatenation_of_lists_with_subs():
     }
 
 
-def test_concatenation_of_non_strings_to_text():
+def test_non_strings_to_text():
     data = """
     x: 9.1
     y: 10
@@ -46,7 +46,7 @@ def test_concatenation_of_non_strings_to_text():
     }
 
 
-def test_concatenation_of_dicts_with_subs():
+def test_dicts_with_subs():
     data = """
     x: {a:1}
     y: {e:5}

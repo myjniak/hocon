@@ -1,11 +1,11 @@
-from json import JSONDecoder
+from _json import scanstring
 
 from hocon.strings import QuotedString
 from ._data import ParserInput
 
 
 def parse_quoted_string(data: ParserInput, idx: int) -> tuple[QuotedString, int]:
-    string, idx = JSONDecoder().parse_string(data.data, idx)
+    string, idx = scanstring(data.data, idx)
     return QuotedString(string), idx
 
 

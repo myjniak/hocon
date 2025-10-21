@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+- Refactored LazyResolver to a separate module, dismantled class into functions
+- Introduced basic mypy checks
+- Added py.typed marker
+- Dropped python 3.10 support
+
 ## 0.2.0
 - Various bugfixes in resolving self-referential substitutions
 - Changes in Exception raises in certain scenarios
