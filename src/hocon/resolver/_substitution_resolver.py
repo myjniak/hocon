@@ -1,12 +1,17 @@
 import os
-from typing import Callable, Any, Optional
+from collections.abc import Callable
+from typing import Any
 
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, UNDEFINED
-from hocon.exceptions import HOCONSubstitutionUndefinedError, HOCONSubstitutionCycleError
+from hocon.exceptions import (
+    HOCONSubstitutionCycleError,
+    HOCONSubstitutionUndefinedError,
+)
 from hocon.strings import QuotedString
-from hocon.unresolved import UnresolvedSubstitution, ANY_UNRESOLVED
+from hocon.unresolved import ANY_UNRESOLVED, UnresolvedSubstitution
+
 from ._self_reference import cut_self_reference_and_fields_that_override_it
-from ._substitution import SubstitutionStatus, Substitution
+from ._substitution import Substitution, SubstitutionStatus
 
 
 class SubstitutionResolver:
@@ -14,7 +19,7 @@ class SubstitutionResolver:
         self,
         parsed: ROOT_TYPE,
         resolve_value_func: Callable[[Any], ANY_VALUE_TYPE],
-        substitutions: Optional[dict[int, Substitution]] = None,
+        substitutions: dict[int, Substitution] | None = None,
     ):
         self._parsed = parsed
         self.resolve_value = resolve_value_func
@@ -74,8 +79,7 @@ class SubstitutionResolver:
                 and substitution.keys != substitution.relative_location
             ):
                 raise HOCONSubstitutionCycleError(f"Cycle occurred when resolving {substitution}")
-            else:
-                raise HOCONSubstitutionUndefinedError(f"Could not resolve substitution {substitution}.")
+            raise HOCONSubstitutionUndefinedError(f"Could not resolve substitution {substitution}.")
         self.subs[substitution.id_] = resolved_sub
         return resolved_sub.value
 
@@ -107,7 +111,7 @@ class SubstitutionResolver:
 
 
 def get_from_env(substitution: UnresolvedSubstitution) -> Substitution:
-    env_value: Optional[str] = os.getenv(".".join(substitution.keys))
+    env_value: str | None = os.getenv(".".join(substitution.keys))
     if env_value is None:
         return Substitution(value=UNDEFINED, status=SubstitutionStatus.UNDEFINED)
     return Substitution(value=QuotedString(env_value), status=SubstitutionStatus.RESOLVED)

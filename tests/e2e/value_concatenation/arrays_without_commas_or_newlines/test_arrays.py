@@ -49,8 +49,8 @@ def test_commas_with_unquoted():
         "world": "mom",
         "test": [
             "This is an unquoted string my name is John",
-            "Hello mom"
-        ]
+            "Hello mom",
+        ],
     }
 
 
@@ -70,6 +70,6 @@ def test_commas_with_unquoted_2():
         "y": "help you?",
         "test": [
             "hi mom",
-            "can I help you?"
-        ]
+            "can I help you?",
+        ],
     }

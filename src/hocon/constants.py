@@ -1,5 +1,5 @@
 import re
-from typing import Union, Any
+from typing import Any, Union
 
 WHITE_HEXES = [
     0x00A0,

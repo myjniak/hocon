@@ -1,10 +1,14 @@
 import pytest
 
-from hocon.parser._data import ParserInput
-from hocon.strings import UnquotedString, QuotedString
-from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication, UnresolvedSubstitution
-from hocon.parser._parser import parse_dict_value
 from hocon._main import parse
+from hocon.parser._data import ParserInput
+from hocon.parser._parser import parse_dict_value
+from hocon.strings import QuotedString, UnquotedString
+from hocon.unresolved import (
+    UnresolvedConcatenation,
+    UnresolvedDuplication,
+    UnresolvedSubstitution,
+)
 
 
 def test_1():
@@ -13,7 +17,7 @@ def test_1():
     assert value == UnresolvedConcatenation([
         {"c": UnresolvedConcatenation(["3"])},
         UnquotedString(" "),
-        {"d": UnresolvedConcatenation(["4"])}
+        {"d": UnresolvedConcatenation(["4"])},
     ])
 
 
@@ -27,7 +31,7 @@ def test_2():
         QuotedString("like"),
         UnquotedString("  "),
         UnquotedString("pancakes"),
-        UnquotedString(" ")
+        UnquotedString(" "),
     ))
 
 
@@ -39,14 +43,14 @@ def test_parse_all_unresolved_types():
             UnresolvedConcatenation([
                 [
                     UnresolvedConcatenation(["1"]),
-                    UnresolvedConcatenation(["2"])
-                ]
+                    UnresolvedConcatenation(["2"]),
+                ],
             ]),
             UnresolvedConcatenation([
                 UnresolvedSubstitution(["a"], optional=True, relative_location=["a"]),
-                [UnresolvedConcatenation(["3"])]
-            ])
-        ])
+                [UnresolvedConcatenation(["3"])],
+            ]),
+        ]),
     }
     assert result == expected
 

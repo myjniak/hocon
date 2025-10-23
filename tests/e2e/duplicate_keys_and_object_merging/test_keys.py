@@ -1,6 +1,7 @@
 """duplicate keys that appear later override those that appear earlier, unless both values are objects."""
-import hocon
 import pytest
+
+import hocon
 
 pytestmark = pytest.mark.f7
 
@@ -17,8 +18,8 @@ def test_str():
     assert result == {
         "a": {
             "a": "hi dad",
-            "b": "hi mom"
-        }
+            "b": "hi mom",
+        },
     }
 
 
@@ -34,8 +35,8 @@ def test_int():
     assert result == {
         "a": {
             "a": 1,
-            "b": 2
-        }
+            "b": 2,
+        },
     }
 
 def test_other_simple():
@@ -50,8 +51,8 @@ def test_other_simple():
     assert result == {
         "a": {
             "a": True,
-            "b": False
-        }
+            "b": False,
+        },
     }
 
 
@@ -67,6 +68,6 @@ def test_list():
     assert result == {
         "a": {
             "a": ["hi", "mom"],
-            "b": ["hi dad"]
-        }
+            "b": ["hi dad"],
+        },
     }

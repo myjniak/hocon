@@ -21,7 +21,7 @@ def test_resolvable_nested_substitutions_should_ignore_env():
         "b": 1,
         "c": 1,
         "d": 1,
-        "e": "Don't ignore me!"
+        "e": "Don't ignore me!",
     }
 
 
@@ -36,22 +36,22 @@ def test_resolvable_nested_substitutions_should_ignore_env_2():
         "ny": "Ignore me!",
         "joe": "Ignore me!",
         "joe.lives_in.country": "Ignore me!",
-        "ny_country": "USA"
+        "ny_country": "USA",
     }
     with set_env(**my_env):
         result = hocon.loads(data)
     assert result == {
         "ny": {
             "name": "New York",
-            "country": "USA"
+            "country": "USA",
         },
         "joe": {
             "name": "joe",
             "height": 192,
             "lives_in": {
                 "name": "New York",
-                "country": "USA"
-            }
+                "country": "USA",
+            },
         },
         "joe_company": {
             "employees": [
@@ -60,10 +60,10 @@ def test_resolvable_nested_substitutions_should_ignore_env_2():
                     "height": 192,
                     "lives_in": {
                         "name": "New York",
-                        "country": "USA"
-                    }
-                }
-            ]
+                        "country": "USA",
+                    },
+                },
+            ],
         },
-        "joe_country": "USA"
+        "joe_country": "USA",
     }

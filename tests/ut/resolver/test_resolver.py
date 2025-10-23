@@ -1,7 +1,7 @@
 import pytest
 
 from hocon.constants import UNDEFINED
-from hocon.exceptions import HOCONDeduplicationError, HOCONConcatenationError
+from hocon.exceptions import HOCONConcatenationError, HOCONDeduplicationError
 from hocon.resolver._resolver import Resolver
 from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication
 

@@ -1,5 +1,6 @@
-from hocon.constants import WHITE_CHARS, ELEMENT_SEPARATORS
+from hocon.constants import ELEMENT_SEPARATORS, WHITE_CHARS
 from hocon.exceptions import HOCONUnexpectedBracesError, HOCONUnexpectedSeparatorError
+
 from ._data import ParserInput
 
 

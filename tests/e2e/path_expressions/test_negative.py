@@ -31,7 +31,7 @@ def test_substitution_in_key():
 @pytest.mark.parametrize("key", [
     "a..b",
     ".a",
-    "a."
+    "a.",
 ])
 def test_bad_dot_placement(key: str):
     data = f"{key}: x"

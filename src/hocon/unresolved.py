@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from itertools import count
-from typing import Type, Union, Any
-
-from typing_extensions import Self
+from typing import Any, Self, Union
 
 from hocon.constants import SIMPLE_VALUE_TYPE, UNDEFINED
 from hocon.exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError
@@ -15,7 +13,7 @@ class UnresolvedConcatenation(list):
         list_str = super().__repr__()
         return "\n〈" + list_str[1:-1].replace("\n", "\n    ") + "〉\n"
 
-    def get_type(self) -> Type[list[Any] | dict[Any, Any] | str]:
+    def get_type(self) -> type[list[Any] | dict[Any, Any] | str]:
         concat_types = set(type(value) for value in self)
         concat_types.discard(UnresolvedSubstitution)
         if all(issubclass(concat_type, SIMPLE_VALUE_TYPE) for concat_type in concat_types):
@@ -24,7 +22,7 @@ class UnresolvedConcatenation(list):
             type_names = [concat_type.__name__ for concat_type in concat_types]
             raise HOCONConcatenationError(f"Concatenation of multiple types not allowed: {type_names}")
         concat_type = concat_types.pop()
-        if not concat_type in [list, dict]:
+        if concat_type not in [list, dict]:
             raise HOCONConcatenationError(f"Concatenation of type {concat_type.__name__} not supported!")
         return concat_type
 

@@ -1,22 +1,30 @@
 import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-from hocon.constants import UNDEFINED, ROOT_TYPE
-from hocon.exceptions import HOCONIncludeError, HOCONExcessiveDataError, HOCONNoDataError
+from hocon.constants import ROOT_TYPE, UNDEFINED
+from hocon.exceptions import (
+    HOCONExcessiveDataError,
+    HOCONIncludeError,
+    HOCONNoDataError,
+)
 from hocon.unresolved import UnresolvedConcatenation
+
 from ._data import ParserInput
 from ._eat import (
     eat_comments,
     eat_dict_item_separators,
-    eat_whitespace,
     eat_list_item_separators,
+    eat_whitespace,
     eat_whitespace_and_comments,
 )
 from ._key import parse_keypath
 from ._quoted_string import parse_quoted_string
 from ._simple_value import parse_simple_value
-from ._value_utils import merge_unconcatenated, convert_iadd_to_self_referential_substitution
+from ._value_utils import (
+    convert_iadd_to_self_referential_substitution,
+    merge_unconcatenated,
+)
 
 
 def parse(data: str, root_filepath: str | os.PathLike = os.getcwd(), encoding: str = "UTF-8") -> ROOT_TYPE:
@@ -36,7 +44,7 @@ def parse(data: str, root_filepath: str | os.PathLike = os.getcwd(), encoding: s
     return result
 
 
-def parse_dict(data: ParserInput, idx: int = 0, current_keypath: Optional[list[str]] = None) -> tuple[dict, int]:
+def parse_dict(data: ParserInput, idx: int = 0, current_keypath: list[str] | None = None) -> tuple[dict, int]:
     if current_keypath is None:
         current_keypath = []
     unconcatenated_dictionary: dict = {}
@@ -64,7 +72,7 @@ def parse_dict(data: ParserInput, idx: int = 0, current_keypath: Optional[list[s
     return unconcatenated_dictionary, idx
 
 
-def parse_list(data: ParserInput, idx: int = 0, current_keypath: Optional[list[str]] = None) -> tuple[list, int]:
+def parse_list(data: ParserInput, idx: int = 0, current_keypath: list[str] | None = None) -> tuple[list, int]:
     if current_keypath is None:
         current_keypath = []
     unconcatenated_list: list[UnresolvedConcatenation] = []
@@ -83,7 +91,7 @@ def parse_value_chunk(data: ParserInput, idx: int, current_keypath: list[str]) -
     if char == "{":
         dictionary, idx = parse_dict(data, idx=idx + 1, current_keypath=current_keypath)
         return dictionary, idx
-    elif char == "[":
+    if char == "[":
         list_, idx = parse_list(data, idx=idx + 1, current_keypath=current_keypath)
         return list_, idx
     return parse_simple_value(data, idx, current_keypath=current_keypath)
@@ -130,12 +138,14 @@ def parse_include(data: ParserInput, idx: int, current_keypath: list[str]) -> tu
     except FileNotFoundError:
         return UNDEFINED
     external_input = ParserInput(
-        data=external_file_content, absolute_filepath=external_filepath, root_path=data.root_path + current_keypath
+        data=external_file_content,
+        absolute_filepath=external_filepath,
+        root_path=data.root_path + current_keypath,
     )
     ext_idx = eat_whitespace_and_comments(external_input, 0)
     if external_input[ext_idx] == "[":
         raise HOCONIncludeError("An included file must contain an object, not an array.")
-    elif external_input[ext_idx] == "{":
+    if external_input[ext_idx] == "{":
         external_dict, ext_idx = parse_dict(external_input, idx=ext_idx + 1, current_keypath=current_keypath)
     else:
         external_input.data += "\n}"

@@ -8,7 +8,7 @@ pytestmark = pytest.mark.f10_2
 
 @pytest.mark.parametrize("data", [
     """{"a": {b:1}[2,3]}""",
-    """{"a": [2,3]{b:1}}"""
+    """{"a": [2,3]{b:1}}""",
 ])
 def test_mixed_concatenation(data: str):
     """Arrays can be concatenated with arrays, and objects with objects, but it is an error if they are mixed."""
