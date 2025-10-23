@@ -5,7 +5,7 @@ class QuotedString(str): ...
 
 
 class UnquotedString(str):
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
     def is_empty(self) -> bool:

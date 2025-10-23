@@ -1,6 +1,5 @@
 import re
-from typing import Union
-
+from typing import Union, Any
 
 WHITE_HEXES = [
     0x00A0,
@@ -41,6 +40,6 @@ SECTION_OPENING = "{["
 SECTION_CLOSING = "}]"
 
 SIMPLE_VALUE_TYPE = Union[int, float, str, bool, None]
-ANY_VALUE_TYPE = Union[dict, list, int, float, str, bool, None]
-ROOT_TYPE = Union[list, dict]
+ANY_VALUE_TYPE = Union[dict[Any, Any], list[Any], int, float, str, bool, None]
+ROOT_TYPE = list[Any] | dict[Any, Any]
 UNDEFINED = object()

@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from itertools import count
-from typing import Optional, Type, Union, Any
+from typing import Type, Union, Any
 
 from typing_extensions import Self
 
@@ -11,11 +11,11 @@ from hocon.strings import UnquotedString
 
 class UnresolvedConcatenation(list):
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         list_str = super().__repr__()
         return "\n〈" + list_str[1:-1].replace("\n", "\n    ") + "〉\n"
 
-    def get_type(self) -> Type[list | dict | str]:
+    def get_type(self) -> Type[list[Any] | dict[Any, Any] | str]:
         concat_types = set(type(value) for value in self)
         concat_types.discard(UnresolvedSubstitution)
         if all(issubclass(concat_type, SIMPLE_VALUE_TYPE) for concat_type in concat_types):
@@ -65,7 +65,7 @@ class UnresolvedConcatenation(list):
 
 
 class UnresolvedDuplication(list):
-    def __repr__(self):
+    def __repr__(self) -> str:
         list_str = super().__repr__()
         return "\n【\n" + list_str[1:-1].replace("\n", "\n    ") + "\n】\n"
 
@@ -82,32 +82,26 @@ class UnresolvedDuplication(list):
 class UnresolvedSubstitution:
     keys: list[str]
     optional: bool
-    relative_location: Optional[list[str]] = None
-    including_root: Optional[list[str]] = None
+    relative_location: list[str] = field(default_factory=list)
+    including_root: list[str] = field(default_factory=list)
     id_: int = field(default_factory=count().__next__)
 
-    def __post_init__(self):
-        if self.including_root is None:
-            self.including_root = []
-        if self.relative_location is None:
-            self.relative_location = []
-
     @property
-    def location(self):
+    def location(self) -> list[str]:
         return self.including_root + self.relative_location
 
-    def __str__(self):
+    def __str__(self) -> str:
         return r"${" + ("?" if self.optional else "") + ".".join(self.keys) + r"}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, UnresolvedSubstitution):
             return NotImplemented
         return self.keys == other.keys and self.optional == other.optional and self.location == other.location
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((".".join(self.keys), self.optional, self.location, self.id_))
 
 

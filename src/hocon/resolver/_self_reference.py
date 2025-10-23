@@ -10,7 +10,7 @@ class Cutter:
         self.is_sub_found: bool = False
         self.sub = sub
 
-    def cut(self, subtree: ROOT_TYPE, keypath_index: int = 0):
+    def cut(self, subtree: ROOT_TYPE, keypath_index: int = 0) -> None:
         is_past_last_key = keypath_index == len(self.sub.location)
         if is_past_last_key:
             if isinstance(subtree, UnresolvedDuplication):

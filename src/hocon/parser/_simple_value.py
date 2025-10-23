@@ -50,7 +50,7 @@ def _parse_substitution(
         optional = False
     keypath = parse_keypath(data, idx, keyend_indicator="}")
     substitution = UnresolvedSubstitution(
-        keypath.keys, optional, relative_location=current_keypath, including_root=data.root_path
+        keypath.keys, optional, relative_location=current_keypath or [], including_root=data.root_path
     )
     if (
         current_keypath is not None
