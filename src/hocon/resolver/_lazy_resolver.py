@@ -1,7 +1,7 @@
 from copy import deepcopy
 from dataclasses import dataclass
 from functools import reduce, singledispatch
-from typing import Callable, Type, get_args
+from typing import Callable, Type, get_args, Any
 
 from hocon.constants import ANY_VALUE_TYPE, UNDEFINED, SIMPLE_VALUE_TYPE
 from hocon.exceptions import HOCONConcatenationError
@@ -10,7 +10,7 @@ from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication, Unr
 
 
 @singledispatch
-def resolve(values):
+def resolve(values: Any) -> Any:
     raise NotImplementedError(f"Bad input value type: {type(values)}")
 
 
@@ -20,7 +20,7 @@ def _(values: SIMPLE_VALUE_TYPE | UnresolvedSubstitution) -> SIMPLE_VALUE_TYPE |
 
 
 @resolve.register
-def _(values: list) -> list:
+def _(values: list) -> list[Any]:
     resolved_list = []
     for element in values:
         resolved_elem = resolve(element)
@@ -30,7 +30,7 @@ def _(values: list) -> list:
 
 
 @resolve.register
-def _(values: dict) -> dict:
+def _(values: dict) -> dict[Any, Any]:
     resolved_dict = {}
     for key, value in values.items():
         resolved_value = resolve(value)
@@ -137,7 +137,6 @@ def _concatenate_simple_values(
     if not all(isinstance(value, str) for value in values):
         types = set([type(value).__name__ for value in values])
         raise HOCONConcatenationError(f"Lazy concatenation of types {types} not allowed.")
-    values = list(filter(lambda item: item is not UNDEFINED, values))
     return resolve_simple_value(values, strip_left=strip_left, strip_right=strip_right)
 
 

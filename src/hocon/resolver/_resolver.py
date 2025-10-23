@@ -120,7 +120,7 @@ class Resolver:
                 break
         return deduplicated
 
-    def merge(self, superior: dict, inferior: dict | UnresolvedSubstitution) -> dict:
+    def merge(self, superior: dict, inferior: ANY_VALUE_TYPE | UnresolvedSubstitution) -> dict:
         """If both values are objects, then the objects are merged.
         If keys overlap, the latter wins."""
         if isinstance(inferior, UnresolvedSubstitution):

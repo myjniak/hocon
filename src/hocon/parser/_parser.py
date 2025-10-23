@@ -44,7 +44,7 @@ def parse_dict(data: ParserInput, idx: int = 0, current_keypath: Optional[list[s
         idx = eat_whitespace_and_comments(data, idx)
         if data[idx] == "}":
             idx += 1
-            return unconcatenated_dictionary, idx
+            break
         keypath = parse_keypath(data, idx=idx)
         if keypath.include:
             ext_dict, idx = parse_include(data, idx=keypath.end_idx, current_keypath=current_keypath)
@@ -61,6 +61,7 @@ def parse_dict(data: ParserInput, idx: int = 0, current_keypath: Optional[list[s
                 root_location=data.root_path,
             )
         unconcatenated_dictionary = merge_unconcatenated(unconcatenated_dictionary, keypath.keys, unconcatenated_value)
+    return unconcatenated_dictionary, idx
 
 
 def parse_list(data: ParserInput, idx: int = 0, current_keypath: Optional[list[str]] = None) -> tuple[list, int]:

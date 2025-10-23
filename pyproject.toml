@@ -49,7 +49,6 @@ packages = [
 content-type = 'text/markdown'
 fragments = [
     {path = "README.md"},
-    {path = "FEATURES.md"},
 ]
 
 [tool.hatch.envs.test]
