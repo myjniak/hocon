@@ -3,8 +3,10 @@ import pytest
 from hocon.exceptions import HOCONUnexpectedSeparatorError
 from hocon.parser._data import ParserInput
 from hocon.parser._simple_value import parse_simple_value
-from hocon.strings import UnquotedString, QuotedString
-from hocon.unresolved import UnresolvedSubstitution, UnresolvedDuplication, UnresolvedConcatenation
+from hocon.strings import QuotedString, UnquotedString
+from hocon.unresolved import (
+    UnresolvedSubstitution,
+)
 
 
 def test_parse_simple_value():
@@ -30,7 +32,7 @@ def test_parse_simple_value():
 @pytest.mark.f13
 @pytest.mark.parametrize("data, expected", [
     ("${path.expression}", UnresolvedSubstitution(["path", "expression"], optional=False)),
-    ("${?path.expression}", UnresolvedSubstitution(["path", "expression"], optional=True))
+    ("${?path.expression}", UnresolvedSubstitution(["path", "expression"], optional=True)),
 ])
 def test_parse_substitution(data: str, expected: UnresolvedSubstitution):
     parser_input = ParserInput(data, "")

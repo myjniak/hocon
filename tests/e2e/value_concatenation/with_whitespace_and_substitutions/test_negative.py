@@ -1,5 +1,4 @@
-"""
-Quoted whitespace between substitutions that resolve to list/dict should be an error.
+"""Quoted whitespace between substitutions that resolve to list/dict should be an error.
 """
 
 import pytest

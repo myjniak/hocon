@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Optional
-
-from typing_extensions import Self
+from typing import Self
 
 from hocon.constants import ANY_VALUE_TYPE
 
@@ -15,12 +13,12 @@ class SubstitutionStatus(Enum):
     RESOLVED = auto()
     UNDEFINED = auto()
 
-    def to_resolving(self) -> Optional[Self]:
+    def to_resolving(self) -> Self | None:
         state_change_map = {
             SubstitutionStatus.UNRESOLVED: SubstitutionStatus.RESOLVING,
             SubstitutionStatus.FALLBACK_UNRESOLVED: SubstitutionStatus.FALLBACK_RESOLVING,
         }
-        return state_change_map.get(self, None)
+        return state_change_map.get(self)
 
     @property
     def is_resolved(self) -> bool:

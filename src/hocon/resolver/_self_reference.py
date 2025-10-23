@@ -2,7 +2,11 @@ from copy import deepcopy
 
 from ..constants import ROOT_TYPE
 from ..exceptions import HOCONSubstitutionUndefinedError
-from ..unresolved import UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplication
+from ..unresolved import (
+    UnresolvedConcatenation,
+    UnresolvedDuplication,
+    UnresolvedSubstitution,
+)
 
 
 class Cutter:
@@ -27,7 +31,7 @@ class Cutter:
                         subtree.pop(index)
                     index -= 1
                 return
-            elif isinstance(subtree, UnresolvedConcatenation):
+            if isinstance(subtree, UnresolvedConcatenation):
                 for index, item in enumerate(subtree):
                     if item == self.sub or self.is_sub_found:
                         self.is_sub_found = True
@@ -47,30 +51,28 @@ class Cutter:
             elif type(subtree) is list and key.isdigit():
                 self.cut(subtree[int(key)], keypath_index + 1)
             else:
-                raise HOCONSubstitutionUndefinedError(f"Something went horribly wrong. This is a bug.")
-        else:
-            if type(subtree) is dict and key in subtree:
-                if subtree[key] == self.sub or self.is_sub_found:
-                    subtree.pop(key)
-                    self.is_sub_found = True
-                    return
-                else:
-                    self.cut(subtree[key], keypath_index + 1)
-                    if not subtree[key]:
-                        subtree.pop(key)
-            elif type(subtree) is list and key.isdigit():
-                if subtree[int(key)] == self.sub or self.is_sub_found:
-                    self.is_sub_found = True
-                    del subtree[int(key)]
-                    return
-                else:
-                    self.cut(subtree[int(key)], keypath_index + 1)
-                    if not subtree[int(key)]:
-                        del subtree[int(key)]
+                raise HOCONSubstitutionUndefinedError("Something went horribly wrong. This is a bug.")
+        elif type(subtree) is dict and key in subtree:
+            if subtree[key] == self.sub or self.is_sub_found:
+                subtree.pop(key)
+                self.is_sub_found = True
+                return
+            self.cut(subtree[key], keypath_index + 1)
+            if not subtree[key]:
+                subtree.pop(key)
+        elif type(subtree) is list and key.isdigit():
+            if subtree[int(key)] == self.sub or self.is_sub_found:
+                self.is_sub_found = True
+                del subtree[int(key)]
+                return
+            self.cut(subtree[int(key)], keypath_index + 1)
+            if not subtree[int(key)]:
+                del subtree[int(key)]
 
 
 def cut_self_reference_and_fields_that_override_it(
-    substitution: UnresolvedSubstitution, parsed: ROOT_TYPE
+    substitution: UnresolvedSubstitution,
+    parsed: ROOT_TYPE,
 ) -> ROOT_TYPE:
     carved_parsed = deepcopy(parsed)
     cutter = Cutter(substitution)

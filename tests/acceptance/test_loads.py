@@ -1,5 +1,4 @@
 from hocon import loads
-from hocon._main import parse
 
 
 def test_1():
@@ -53,13 +52,13 @@ def test_6():
                     "f": 7,
                     "g": "hey dude!",
                     "h": "hey man",
-                    "i": "first line"
-                }
+                    "i": "first line",
+                },
             },
             "j": [1, 2, 3],
             "u": "192.168.1.3/32",
-            "g": None
-        }
+            "g": None,
+        },
     }
 
 
@@ -81,9 +80,9 @@ def test_7():
         "a": {
             "b": {
                 "c": 7,
-                "d": 8
-            }
-        }
+                "d": 8,
+            },
+        },
     }
 
 
@@ -103,8 +102,8 @@ def test_8():
         },
         "b": {
             "c": 5,
-            "d": 4
-        }
+            "d": 4,
+        },
     }
 
 
@@ -118,7 +117,7 @@ def test_9():
     assert result == {
         "a": "a b c",
         "b": "5 b",
-        "c": "b 7"
+        "c": "b 7",
     }
 
 
@@ -131,7 +130,7 @@ def test_10():
             """
     result = loads(hocon)
     assert result == {
-        "a": [1, 2, 3, 4, 5, 6]
+        "a": [1, 2, 3, 4, 5, 6],
     }
 
 
@@ -144,7 +143,7 @@ def test_11():
         """
     result = loads(data)
     assert result == {
-        "a": {"b": 2, "c": 3}
+        "a": {"b": 2, "c": 3},
     }
 
 
@@ -156,7 +155,7 @@ def test_12():
         """
     result = loads(data)
     assert result == {
-        "a": {"a": 1, "b": 2, "c": 3}
+        "a": {"a": 1, "b": 2, "c": 3},
     }
 
 
@@ -180,7 +179,7 @@ def test_14():
             """
     result = loads(data)
     assert result == {
-        "a": [1, 2, 3, 4, 5, 6]
+        "a": [1, 2, 3, 4, 5, 6],
     }
 
 
@@ -190,7 +189,7 @@ def test_15():
             """
     result = loads(data)
     assert result == {
-        "a": {"a": 1, "b": 2, "c": 3}
+        "a": {"a": 1, "b": 2, "c": 3},
     }
 
 
@@ -206,8 +205,8 @@ def test_16():
             "a": 5,
             "b": {
                 "c": 7,
-                "d": 4
-            }
-        }
+                "d": 4,
+            },
+        },
 
     }

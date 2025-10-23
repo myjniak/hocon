@@ -65,7 +65,7 @@ def test_inheritance():
     """
     assert hocon.loads(data) == {
         "data-center-generic": {"cluster-size": 6},
-        "data-center-east": {"cluster-size": 6, "name": "east"}
+        "data-center-east": {"cluster-size": 6, "name": "east"},
     }
 
 

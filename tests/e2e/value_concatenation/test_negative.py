@@ -1,7 +1,7 @@
 """Objects and arrays do not make sense as field keys."""
-import hocon
 import pytest
 
+import hocon
 from hocon.exceptions import HOCONInvalidKeyError
 
 pytestmark = pytest.mark.f10

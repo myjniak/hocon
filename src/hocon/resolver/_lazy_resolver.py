@@ -1,12 +1,18 @@
+from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import dataclass
 from functools import reduce, singledispatch
-from typing import Callable, Type, get_args, Any
+from typing import Any, get_args
 
-from hocon.constants import ANY_VALUE_TYPE, UNDEFINED, SIMPLE_VALUE_TYPE
+from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED
 from hocon.exceptions import HOCONConcatenationError
 from hocon.resolver._simple_value import resolve_simple_value
-from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication, UnresolvedSubstitution, ANY_UNRESOLVED
+from hocon.unresolved import (
+    ANY_UNRESOLVED,
+    UnresolvedConcatenation,
+    UnresolvedDuplication,
+    UnresolvedSubstitution,
+)
 
 
 @singledispatch
@@ -81,7 +87,7 @@ def _(values: UnresolvedDuplication) -> ANY_VALUE_TYPE | UnresolvedDuplication:
 def _get_concatenator(values: UnresolvedConcatenation) -> Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]:
     @dataclass(frozen=True)
     class ConcatenationType:
-        type: Type[list | dict | str]
+        type: type[list | dict | str]
         has_substitutions: bool
 
     concat_type = ConcatenationType(type=values.get_type(), has_substitutions=values.has_substitutions())
@@ -116,8 +122,10 @@ def _concatenate_simple_values_with_subs(values: UnresolvedConcatenation) -> Unr
                 else:
                     result.append(
                         _concatenate_simple_values(
-                            UnresolvedConcatenation(chunks_to_concatenate), strip_left=False, strip_right=False
-                        )
+                            UnresolvedConcatenation(chunks_to_concatenate),
+                            strip_left=False,
+                            strip_right=False,
+                        ),
                     )
                 chunks_to_concatenate = []
             result.append(value)
@@ -132,7 +140,9 @@ def _concatenate_simple_values_with_subs(values: UnresolvedConcatenation) -> Unr
 
 
 def _concatenate_simple_values(
-    values: UnresolvedConcatenation, strip_left: bool = True, strip_right: bool = True
+    values: UnresolvedConcatenation,
+    strip_left: bool = True,
+    strip_right: bool = True,
 ) -> str:
     if not all(isinstance(value, str) for value in values):
         types = set([type(value).__name__ for value in values])
@@ -193,7 +203,8 @@ def _(superior: UnresolvedConcatenation, inferior: dict | UnresolvedSubstitution
 
 def merge(superior: dict, inferior: dict) -> dict | UnresolvedConcatenation:
     """If both values are objects, then the objects are merged.
-    If keys overlap, the latter wins."""
+    If keys overlap, the latter wins.
+    """
     result = deepcopy(inferior)
     for key, value in superior.items():
         inferior_value = result.get(key)

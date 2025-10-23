@@ -1,4 +1,5 @@
 import pytest
+
 import hocon
 from hocon.exceptions import HOCONInvalidKeyError
 

@@ -1,7 +1,7 @@
-"""
-substitutions normally "look forward" and use the final value for their path expression
+"""substitutions normally "look forward" and use the final value for their path expression
 when this would create a cycle, when possible the cycle must be broken by looking backward only
-(thus removing one of the substitutions that's a link in the cycle)"""
+(thus removing one of the substitutions that's a link in the cycle)
+"""
 
 import pytest
 
@@ -17,14 +17,14 @@ def test_basic():
     """
     result = hocon.loads(data)
     assert result == {
-        "path": "a:b:c:d"
+        "path": "a:b:c:d",
     }
 
 
 @pytest.mark.parametrize("data, expected", [
     ("a : a, a : ${a}", {"a": "a"}),
     ("a : a, a : ${a}bc", {"a": "abc"}),
-    ("path : [/etc], path : ${path} [ /usr/bin ]", {"path": ["/etc", "/usr/bin"]})
+    ("path : [/etc], path : ${path} [ /usr/bin ]", {"path": ["/etc", "/usr/bin"]}),
 ])
 def test_examples(data: str, expected: dict):
     assert hocon.loads(data) == expected
@@ -36,6 +36,6 @@ def test_breakable_cycle():
     assert result == {
         "a": {
             "x": 42,
-            "y": 42
-        }
+            "y": 42,
+        },
     }

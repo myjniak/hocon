@@ -8,7 +8,8 @@ pytestmark = pytest.mark.f12
 
 def test_key_starting_with_include():
     """As a special rule, the unquoted string include may not begin a path expression in a key,
-    because it has a special interpretation"""
+    because it has a special interpretation
+    """
     data = """
     include.me = 1
     """

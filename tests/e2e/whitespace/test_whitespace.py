@@ -5,7 +5,8 @@ including nonbreaking spaces (such as 0x00A0, 0x2007, and 0x202F).
 The BOM (0xFEFF) must also be treated as whitespace.
 - tab (\t 0x0009), newline ('\n' 0x000A), vertical tab ('\v' 0x000B),
 form feed (\f' 0x000C), carriage return ('\r' 0x000D), file separator (0x001C),
-group separator (0x001D), record separator (0x001E), unit separator (0x001F)."""
+group separator (0x001D), record separator (0x001E), unit separator (0x001F).
+"""
 
 import pytest
 

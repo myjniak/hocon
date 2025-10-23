@@ -10,11 +10,11 @@ def test_1():
                 "e": 2,
                 "f": {
                     "g": 3,
-                    "h": 4
-                }
-            }
+                    "h": 4,
+                },
+            },
         },
-        "b": {}
+        "b": {},
     }
     key = "a"
     value = {
@@ -23,9 +23,9 @@ def test_1():
         "d": {
             "f": {
                 "h": 5,
-                "i": 6
-            }
-        }
+                "i": 6,
+            },
+        },
     }
     output = Resolver({}).merge({key: value}, dictionary)
     assert output == {
@@ -37,38 +37,38 @@ def test_1():
                 "f": {
                     "g": 3,
                     "h": 5,
-                    "i": 6
-                }
+                    "i": 6,
+                },
             },
-            "a": 3
+            "a": 3,
         },
-        "b": {}
+        "b": {},
     }
 
 
 def test_2():
     dictionary = {
         "a": 0,
-        "b": 1
+        "b": 1,
     }
     key = "a"
     value = 2
     output = Resolver({}).merge({key: value}, dictionary)
     assert output == {
         "a": 2,
-        "b": 1
+        "b": 1,
     }
 
 
 def test_3():
     dictionary = {
         "a": 0,
-        "b": 1
+        "b": 1,
     }
     key = "a"
     value = {}
     output = Resolver({}).merge({key: value}, dictionary)
     assert output == {
         "a": {},
-        "b": 1
+        "b": 1,
     }

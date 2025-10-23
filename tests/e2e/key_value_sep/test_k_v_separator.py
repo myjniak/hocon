@@ -1,6 +1,6 @@
 import pytest
-import hocon
 
+import hocon
 
 pytestmark = pytest.mark.f4
 
@@ -12,7 +12,7 @@ def test_regular_separator():
         "k": "v",
         "k2": "v2",
         "k 3": "v 3",
-        "k 4": "v 4"
+        "k 4": "v 4",
     }
 
 
@@ -23,8 +23,8 @@ def test_no_separator():
         "a": {
             "b": {
                 "c": {
-                    "d": []
-                }
-            }
-        }
+                    "d": [],
+                },
+            },
+        },
     }

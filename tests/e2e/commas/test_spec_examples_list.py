@@ -1,6 +1,7 @@
 import pytest
-from hocon.exceptions import HOCONUnexpectedSeparatorError
+
 import hocon
+from hocon.exceptions import HOCONUnexpectedSeparatorError
 
 pytestmark = pytest.mark.f5
 

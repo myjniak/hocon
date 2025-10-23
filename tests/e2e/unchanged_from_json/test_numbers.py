@@ -1,8 +1,11 @@
 """allowed number formats matches JSON; as in JSON, some possible floating-point
-values are not represented, such as NaN"""
+values are not represented, such as NaN
+"""
 import json
 import math
+
 import pytest
+
 import hocon
 
 pytestmark = pytest.mark.f1

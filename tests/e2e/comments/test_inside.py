@@ -4,7 +4,6 @@ import pytest
 
 from hocon import loads
 
-
 pytestmark = pytest.mark.f2
 
 
@@ -13,7 +12,7 @@ def test_comment_inside_dict_values():
     result = loads(data)
     assert result == [
         {"k1": None, "k 2": 15, "k3": "val", "k4": "valu"},
-        {"k1": "v1", "k2": "v2"}
+        {"k1": "v1", "k2": "v2"},
     ]
 
 
@@ -41,5 +40,5 @@ def test_comment_after_values():
         "d": True,
         "e": None,
         "f": [],
-        "g": {}
+        "g": {},
     }

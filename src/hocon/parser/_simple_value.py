@@ -1,18 +1,23 @@
-from typing import Union, Optional
-
-from hocon.constants import ELEMENT_SEPARATORS, SECTION_CLOSING, INLINE_WHITE_CHARS
-from hocon.exceptions import HOCONUnexpectedSeparatorError, HOCONUnexpectedBracesError, HOCONSubstitutionCycleError
-from hocon.strings import UnquotedString, QuotedString
+from hocon.constants import ELEMENT_SEPARATORS, INLINE_WHITE_CHARS, SECTION_CLOSING
+from hocon.exceptions import (
+    HOCONSubstitutionCycleError,
+    HOCONUnexpectedBracesError,
+    HOCONUnexpectedSeparatorError,
+)
+from hocon.strings import QuotedString, UnquotedString
 from hocon.unresolved import UnresolvedSubstitution
+
 from ._data import ParserInput
 from ._key import parse_keypath
-from ._quoted_string import parse_triple_quoted_string, parse_quoted_string
+from ._quoted_string import parse_quoted_string, parse_triple_quoted_string
 from ._unquoted_string import _parse_unquoted_string_value
 
 
 def parse_simple_value(
-    data: ParserInput, idx: int = 0, current_keypath: Optional[list[str]] = None
-) -> tuple[Union[UnquotedString, QuotedString, UnresolvedSubstitution], int]:
+    data: ParserInput,
+    idx: int = 0,
+    current_keypath: list[str] | None = None,
+) -> tuple[UnquotedString | QuotedString | UnresolvedSubstitution, int]:
     char = data[idx]
     if char == ",":
         raise HOCONUnexpectedSeparatorError("Unexpected ',' found.")
@@ -20,14 +25,13 @@ def parse_simple_value(
         raise HOCONUnexpectedBracesError("Unexpected closure")
     if data[idx : idx + 3] == '"""':
         return parse_triple_quoted_string(data, idx + 3)
-    elif char == '"':
+    if char == '"':
         return parse_quoted_string(data, idx + 1)
-    elif char in INLINE_WHITE_CHARS:
+    if char in INLINE_WHITE_CHARS:
         return _parse_whitespace_chunk(data, idx)
-    elif data[idx : idx + 2] == "${":
+    if data[idx : idx + 2] == "${":
         return _parse_substitution(data, idx + 2, current_keypath=current_keypath)
-    else:
-        return _parse_unquoted_string_value(data, idx)
+    return _parse_unquoted_string_value(data, idx)
 
 
 def _parse_whitespace_chunk(data: ParserInput, idx: int) -> tuple[UnquotedString, int]:
@@ -41,7 +45,9 @@ def _parse_whitespace_chunk(data: ParserInput, idx: int) -> tuple[UnquotedString
 
 
 def _parse_substitution(
-    data: ParserInput, idx: int, current_keypath: Optional[list[str]] = None
+    data: ParserInput,
+    idx: int,
+    current_keypath: list[str] | None = None,
 ) -> tuple[UnresolvedSubstitution, int]:
     if data[idx] == "?":
         optional = True
@@ -50,7 +56,10 @@ def _parse_substitution(
         optional = False
     keypath = parse_keypath(data, idx, keyend_indicator="}")
     substitution = UnresolvedSubstitution(
-        keypath.keys, optional, relative_location=current_keypath or [], including_root=data.root_path
+        keypath.keys,
+        optional,
+        relative_location=current_keypath or [],
+        including_root=data.root_path,
     )
     if (
         current_keypath is not None
@@ -58,6 +67,6 @@ def _parse_substitution(
         and current_keypath[: len(keypath.keys)] == keypath.keys
     ):
         raise HOCONSubstitutionCycleError(
-            f"Substitution {substitution} located at [{'.'.join(current_keypath)}] points to its ancestor node."
+            f"Substitution {substitution} located at [{'.'.join(current_keypath)}] points to its ancestor node.",
         )
     return substitution, keypath.end_idx

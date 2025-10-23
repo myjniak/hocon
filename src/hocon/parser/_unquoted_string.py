@@ -1,6 +1,11 @@
-from hocon.constants import WHITE_CHARS, UNQUOTED_STR_FORBIDDEN_CHARS, SECTION_OPENING
-from hocon.exceptions import HOCONUnquotedStringError, HOCONUnexpectedSeparatorError, HOCONInvalidKeyError
+from hocon.constants import SECTION_OPENING, UNQUOTED_STR_FORBIDDEN_CHARS, WHITE_CHARS
+from hocon.exceptions import (
+    HOCONInvalidKeyError,
+    HOCONUnexpectedSeparatorError,
+    HOCONUnquotedStringError,
+)
 from hocon.strings import UnquotedString
+
 from ._data import ParserInput
 
 
@@ -27,7 +32,7 @@ def _parse_unquoted_string_key(data: ParserInput, idx: int) -> tuple[UnquotedStr
         if char == "\n":
             if string == "include":
                 return UnquotedString(string), idx
-            raise HOCONInvalidKeyError(f"Encountered newline before key-value separator.")
+            raise HOCONInvalidKeyError("Encountered newline before key-value separator.")
         if char in string_end or data[idx : idx + 2] == "//":
             if not string:
                 _raise_parse_key_exception(data, idx)

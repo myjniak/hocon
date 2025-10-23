@@ -1,7 +1,6 @@
 import re
-from typing import Union
 
-from ..constants import SIMPLE_VALUE_TYPE, _FLOAT_CONSTANTS, NUMBER_RE, WHITE_CHARS
+from ..constants import _FLOAT_CONSTANTS, NUMBER_RE, SIMPLE_VALUE_TYPE, WHITE_CHARS
 from ..strings import QuotedString, UnquotedString
 
 
@@ -48,7 +47,7 @@ def _cast_string_value(string: str) -> SIMPLE_VALUE_TYPE:
     return string
 
 
-def _cast_to_number(string: str) -> Union[float, int]:
+def _cast_to_number(string: str) -> float | int:
     if string.lstrip("-").isdigit():
         return int(string)
     return float(string)

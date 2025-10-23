@@ -1,11 +1,13 @@
-"""
-An object or array with a substitution inside it is not considered self-referential for this purpose.
+"""An object or array with a substitution inside it is not considered self-referential for this purpose.
 """
 
 import pytest
 
 import hocon
-from hocon.exceptions import HOCONSubstitutionCycleError, HOCONSubstitutionUndefinedError
+from hocon.exceptions import (
+    HOCONSubstitutionCycleError,
+    HOCONSubstitutionUndefinedError,
+)
 
 pytestmark = pytest.mark.f13_1
 

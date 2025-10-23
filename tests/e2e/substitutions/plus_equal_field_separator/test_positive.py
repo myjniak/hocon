@@ -1,5 +1,6 @@
 """Fields may have += as a separator rather than : or =.
-A field with += transforms into a self-referential array concatenation."""
+A field with += transforms into a self-referential array concatenation.
+"""
 
 import pytest
 
@@ -15,7 +16,7 @@ def test_iadd():
     """
     result = hocon.loads(data)
     assert result == {
-        "a": [1, 2, 3]
+        "a": [1, 2, 3],
     }
 
 
@@ -25,5 +26,5 @@ def test_iadd_no_previous_value():
     """
     result = hocon.loads(data)
     assert result == {
-        "a": [3]
+        "a": [3],
     }

@@ -4,8 +4,7 @@ import os
 
 @contextlib.contextmanager
 def set_env(**environ):
-    """
-    Temporarily set the process environment variables.
+    """Temporarily set the process environment variables.
 
     with set_env(PLUGINS_DIR='test/plugins'):
     ...   "PLUGINS_DIR" in os.environ
