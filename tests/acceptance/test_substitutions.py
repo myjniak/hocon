@@ -1,7 +1,6 @@
-import json
 
-from hocon._main import parse, resolve
 from hocon import loads
+from hocon._main import parse, resolve
 
 
 def test_1():
@@ -13,14 +12,14 @@ def test_1():
     """
     result = loads(data)
     assert result == {
-        'd': {
-            'e': 2,
-            'f': {
-                'g': [3, {'4': 4, '99': 2}, 6]
-            }
+        "d": {
+            "e": 2,
+            "f": {
+                "g": [3, {"4": 4, "99": 2}, 6],
+            },
         },
-        'a': [3, {'4': 4, '99': 2}, 6],
-        'x': 2}
+        "a": [3, {"4": 4, "99": 2}, 6],
+        "x": 2}
 
 
 def test_2():
@@ -31,7 +30,7 @@ def test_2():
     result = loads(data)
     assert result == {
         "a": 3,
-        "b": 3
+        "b": 3,
     }
 
 
@@ -42,7 +41,7 @@ def test_3():
     parsed = parse(data)
     resolved = resolve(parsed)
     assert resolved == {
-        "a": {"a": 1, "b": 1, "c": 3}
+        "a": {"a": 1, "b": 1, "c": 3},
     }
 
 
@@ -56,8 +55,8 @@ def test_4():
         "a": {
             "a": 4,
             "b": 5,
-            "c": 6
-        }
+            "c": 6,
+        },
     }
     assert result == expected
 
@@ -72,8 +71,8 @@ def test_5():
         "a": {
             "a": 1,
             "b": 2,
-            "c": 3
-        }
+            "c": 3,
+        },
     }
     assert result == expected
 
@@ -85,7 +84,7 @@ def test_6():
             """
     result = loads(data)
     assert result == {
-        "a": [1, 2, 3, 4]
+        "a": [1, 2, 3, 4],
     }
 
 
@@ -97,7 +96,7 @@ def test_7():
     result = loads(data)
     assert result == {
         "a": 1,
-        "b": "c1"
+        "b": "c1",
     }
 
 
@@ -112,8 +111,8 @@ def test_8():
     assert result == {
         "a": {
             "a": 1,
-            "b": "c1"
-        }
+            "b": "c1",
+        },
     }
 
 
@@ -125,14 +124,14 @@ def test_9():
     assert loads(data) == {
         "a": {
             "b": 1,
-            "c": "1 42"
-        }
+            "c": "1 42",
+        },
     }
 
 
 def test_concatenation_with_undefined_subs():
     data = """url: "https://"${?predomain}google"."com"""
     assert loads(data) == {
-        "url": "https://google.com"
+        "url": "https://google.com",
     }
 

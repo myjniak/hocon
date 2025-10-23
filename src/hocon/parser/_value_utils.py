@@ -3,7 +3,11 @@
 from copy import deepcopy
 from functools import reduce
 
-from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication, UnresolvedSubstitution
+from hocon.unresolved import (
+    UnresolvedConcatenation,
+    UnresolvedDuplication,
+    UnresolvedSubstitution,
+)
 
 
 def merge_unconcatenated(unconcatenated_dictionary: dict, keys: list, unconcatenated_value: UnresolvedConcatenation):
@@ -29,7 +33,10 @@ def merge_unconcatenated(unconcatenated_dictionary: dict, keys: list, unconcaten
 
 
 def convert_iadd_to_self_referential_substitution(
-    keys: list[str], concatenation: UnresolvedConcatenation, current_keypath: list[str], root_location: list[str]
+    keys: list[str],
+    concatenation: UnresolvedConcatenation,
+    current_keypath: list[str],
+    root_location: list[str],
 ):
     """Basically it turns this expression:
     a += 1
@@ -39,8 +46,11 @@ def convert_iadd_to_self_referential_substitution(
     return UnresolvedConcatenation(
         [
             UnresolvedSubstitution(
-                keys, optional=True, relative_location=current_keypath, including_root=root_location
+                keys,
+                optional=True,
+                relative_location=current_keypath,
+                including_root=root_location,
             ),
             [concatenation],
-        ]
+        ],
     )

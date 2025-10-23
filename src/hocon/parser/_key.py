@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from hocon.constants import WHITE_CHARS
 from hocon.exceptions import HOCONDecodeError
 from hocon.strings import UnquotedString
+
 from ._data import ParserInput
 from ._eat import eat_comments
 from ._quoted_string import parse_quoted_string, parse_triple_quoted_string
@@ -28,7 +29,7 @@ def parse_keypath(data: ParserInput, idx: int = 0, keyend_indicator: str = ":={"
         keychunks_list[-1].append(string)
         char = data[idx]
         if idx == old_idx:
-            raise HOCONDecodeError(f"This is an exception preventing infinite loop and it's a bug. Please report it.")
+            raise HOCONDecodeError("This is an exception preventing infinite loop and it's a bug. Please report it.")
         if data[idx] in keyend_indicator or data[idx : idx + 2] == "+=":
             if isinstance(string, UnquotedString):
                 keychunks_list[-1][-1] = keychunks_list[-1][-1].rstrip(WHITE_CHARS)

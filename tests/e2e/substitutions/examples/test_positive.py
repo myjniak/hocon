@@ -12,7 +12,7 @@ def test_regular_fallback():
     """
     result = hocon.loads(data)
     assert result == {
-        "foo": {"a": 1}
+        "foo": {"a": 1},
     }
 
 
@@ -57,8 +57,8 @@ def test_allow_to_refer_to_paths_within_themselves():
     assert result == {
         "bar": {
             "foo": 42,
-            "baz": 42
-        }
+            "baz": 42,
+        },
     }
 
 
@@ -72,8 +72,8 @@ def test_no_cycle_when_looking_at_path_within_itself():
     assert result == {
         "bar": {
             "foo": 43,
-            "baz": 43
-        }
+            "baz": 43,
+        },
     }
 
 
@@ -89,12 +89,12 @@ def test_mutually_referring_objects():
     assert result == {
         "bar": {
             "a": 4,
-            "b": 3
+            "b": 3,
         },
         "foo": {
             "c": 3,
-            "d": 4
-        }
+            "d": 4,
+        },
     }
 
 

@@ -10,7 +10,8 @@ pytestmark = pytest.mark.f14_1
 
 def test_triple_quote():
     """If an unquoted include at the start of a key is followed by anything other than a single quoted string or
-    the url("")/file("")/classpath("") syntax, it is invalid and an error should be generated."""
+    the url("")/file("")/classpath("") syntax, it is invalid and an error should be generated.
+    """
     conf_filepath = Path(__file__).parent / "data" / "bad_value" / "application.conf"
     with pytest.raises(HOCONIncludeError):
         hocon.load(open(conf_filepath))
@@ -18,7 +19,8 @@ def test_triple_quote():
 
 def test_unquoted():
     """Value concatenation is NOT performed on the "argument" to include or url() etc.
-     The argument must be a single quoted string."""
+    The argument must be a single quoted string.
+    """
     conf_filepath = Path(__file__).parent / "data" / "bad_value" / "unquoted.conf"
     with pytest.raises(HOCONIncludeError):
         hocon.load(open(conf_filepath))
@@ -43,7 +45,7 @@ def test_include_as_object_value():
     """
     result = hocon.loads(data)
     assert result == {
-        "foo": "include"
+        "foo": "include",
     }
 
 

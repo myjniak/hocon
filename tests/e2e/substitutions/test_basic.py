@@ -1,6 +1,7 @@
 """If a key is a path expression with multiple elements,
 it is expanded to create an object for each path element other than the last.
-The last path element, combined with the value, becomes a field in the most-nested object."""
+The last path element, combined with the value, becomes a field in the most-nested object.
+"""
 from pathlib import Path
 
 import pytest
@@ -19,13 +20,14 @@ def test_not_parsed_inside_quoted_string():
     result = hocon.loads(data)
     assert result == {
         "animal": {"favorite": "badger"},
-        "key": "${animal.favorite} is my favorite animal"
+        "key": "${animal.favorite} is my favorite animal",
     }
 
 
 def test_substituion_in_unquoted_concatenation():
     """To get a string containing a substitution,
-    you must use value concatenation with the substitution in the unquoted portion"""
+    you must use value concatenation with the substitution in the unquoted portion
+    """
     data = """
     animal.favorite: badger
     key : ${animal.favorite} is my favorite animal
@@ -33,12 +35,12 @@ def test_substituion_in_unquoted_concatenation():
     result = hocon.loads(data)
     assert result == {
         "animal": {"favorite": "badger"},
-        "key": "badger is my favorite animal"
+        "key": "badger is my favorite animal",
     }
 
 
 def test_substituion_in_concatenation():
-    """you could also quote the non-substitution portion"""
+    """You could also quote the non-substitution portion"""
     data = """
     animal.favorite: badger
     key : ${animal.favorite}" is my favorite animal"
@@ -46,7 +48,7 @@ def test_substituion_in_concatenation():
     result = hocon.loads(data)
     assert result == {
         "animal": {"favorite": "badger"},
-        "key": "badger is my favorite animal"
+        "key": "badger is my favorite animal",
     }
 
 
@@ -73,24 +75,25 @@ def test_substitution_path_is_absolute():
             "b": {
                 "c": "nested",
                 "d": "absolute",
-                "e": "nested"
-            }
+                "e": "nested",
+            },
         },
-        "c": "absolute"
+        "c": "absolute",
     }
 
 
 def test_substitution_from_env_var():
     """For substitutions which are not found in the configuration tree,
     implementations may try to resolve them by looking at system environment variables
-    or other external sources of configuration."""
+    or other external sources of configuration.
+    """
     data = """
     key: ${MY_HOCON_ENV_VAR}
     """
     with set_env(MY_HOCON_ENV_VAR="HELLO"):
         result = hocon.loads(data)
     assert result == {
-        "key": "HELLO"
+        "key": "HELLO",
     }
 
 
@@ -100,15 +103,16 @@ def test_retrieve_value_from_another_file():
     assert result == {
         "key": "badger is my favorite animal",
         "animal": {
-            "favorite": "badger"
-        }
+            "favorite": "badger",
+        },
     }
 
 
 def test_evaluate_to_latest_value():
     """If a key has been specified more than once, the substitution will always evaluate to its latest-assigned value
     (that is, it will evaluate to the merged object, or the last non-object value that was set,
-    in the entire document being parsed including all included files)."""
+    in the entire document being parsed including all included files).
+    """
     data = """
     a: {a: 1}
     b: ${a}
@@ -118,7 +122,7 @@ def test_evaluate_to_latest_value():
     result = hocon.loads(data)
     assert result == {
         "a": {"a": 1, "b": 2, "c": 3},
-        "b": {"a": 1, "b": 2, "c": 3}
+        "b": {"a": 1, "b": 2, "c": 3},
     }
 
 
@@ -132,7 +136,7 @@ def test_value_null_also_prevents_from_looking_to_env():
         result = hocon.loads(data)
     assert result == {
         "HOME": None,
-        "a": None
+        "a": None,
     }
 
 
@@ -157,5 +161,5 @@ def test_substitution_can_be_anything():
         "e": True,
         "f": False,
         "g": None,
-        "subs": [3.14, {"a": "a"}, "string", [1, 2, 3], True, False, None]
+        "subs": [3.14, {"a": "a"}, "string", [1, 2, 3], True, False, None],
     }

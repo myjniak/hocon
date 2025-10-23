@@ -22,7 +22,7 @@ def test_subs_as_strings():
     assert result == {
         "foo": "a",
         "bar": "b",
-        "c": "a  b"
+        "c": "a  b",
     }
 
 
@@ -37,7 +37,7 @@ def test_subs_as_dicts():
     assert result == {
         "foo": {"a": "a"},
         "bar": {"b": "b"},
-        "c": {"a": "a", "b": "b"}
+        "c": {"a": "a", "b": "b"},
     }
 
 
@@ -52,5 +52,5 @@ def test_subs_as_lists():
     assert result == {
         "foo": ["a"],
         "bar": ["b"],
-        "c": ["a", "b"]
+        "c": ["a", "b"],
     }

@@ -1,8 +1,8 @@
 """Values in arrays, and fields in objects, need not have a comma between them
- as long as they have at least one ASCII newline (\n, decimal value 10) between them.
+as long as they have at least one ASCII newline (\n, decimal value 10) between them.
 
- The last element in an array or last field in an object may be followed by a single comma. This extra comma is ignored.
- """
+The last element in an array or last field in an object may be followed by a single comma. This extra comma is ignored.
+"""
 import pytest
 
 import hocon
@@ -43,5 +43,5 @@ def test_fields_in_dicts():
         "k4": "v4",
         "k5": "v5",
         "k6": "v6",
-        "k7": "v7"
+        "k7": "v7",
     }

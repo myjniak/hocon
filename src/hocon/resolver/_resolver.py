@@ -1,12 +1,17 @@
 import json
+from collections.abc import Callable
 from copy import deepcopy
 from functools import reduce, singledispatchmethod
-from typing import Callable, Any, Type, get_args
+from typing import get_args
 
-from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, UNDEFINED, SIMPLE_VALUE_TYPE
+from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED
 from hocon.exceptions import HOCONConcatenationError, HOCONDeduplicationError
 from hocon.resolver._simple_value import resolve_simple_value
-from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication, UnresolvedSubstitution
+from hocon.unresolved import (
+    UnresolvedConcatenation,
+    UnresolvedDuplication,
+    UnresolvedSubstitution,
+)
 
 from . import _lazy_resolver
 from ._substitution_resolver import SubstitutionResolver
@@ -63,7 +68,7 @@ class Resolver:
         if len(values) == 1 and type(values[0]) in get_args(SIMPLE_VALUE_TYPE) + (UnresolvedSubstitution,):
             return values[0]
         concat_type = values.get_type()
-        concatenate_functions: dict[Type[list | dict | str], Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]] = {
+        concatenate_functions: dict[type[list | dict | str], Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]] = {
             list: self._concatenate_lists,
             dict: self._concatenate_dicts,
             str: self._concatenate_simple_values,
@@ -122,7 +127,8 @@ class Resolver:
 
     def merge(self, superior: dict, inferior: ANY_VALUE_TYPE | UnresolvedSubstitution) -> dict:
         """If both values are objects, then the objects are merged.
-        If keys overlap, the latter wins."""
+        If keys overlap, the latter wins.
+        """
         if isinstance(inferior, UnresolvedSubstitution):
             inferior = self.resolve_substitution(inferior)
         if not isinstance(inferior, dict):

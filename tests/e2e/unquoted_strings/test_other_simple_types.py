@@ -1,7 +1,7 @@
 """Unquoted string_, as its initial characters do not parse as true, false, null, or a number."""
-import hocon
 import pytest
 
+import hocon
 
 pytestmark = pytest.mark.f8
 
@@ -11,7 +11,7 @@ pytestmark = pytest.mark.f8
     ("[falsefalse]", [False]),
     ("[nullisanull]", [None]),
     ("[1]", [1]),
-    ("[-0.24]", [-0.24])
+    ("[-0.24]", [-0.24]),
 ])
 def test_other_types(data: str, expected: list):
     assert hocon.loads(data) == expected

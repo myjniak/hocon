@@ -12,7 +12,7 @@ def test_with_subs():
         "x": 10,
         "y": 7,
         "z": [3, 4],
-        "data": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        "data": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     }
 
 
@@ -29,7 +29,7 @@ def test_lists_with_subs():
         "b": "bad",
         "c": "If",
         "d": "people",
-        "data": "To my mind, there is no good or bad. If I had to say what I value most in life, I'd say people"
+        "data": "To my mind, there is no good or bad. If I had to say what I value most in life, I'd say people",
     }
 
 
@@ -42,7 +42,7 @@ def test_non_strings_to_text():
     assert loads(data) == {
         "x": 9.1,
         "y": 10,
-        "data": "About 9.1/10 dentists recommends this library."
+        "data": "About 9.1/10 dentists recommends this library.",
     }
 
 
@@ -62,6 +62,6 @@ def test_dicts_with_subs():
             "b": 2,
             "c": 3,
             "d": 4,
-            "e": 5
-        }
+            "e": 5,
+        },
     }
