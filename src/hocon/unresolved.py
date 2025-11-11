@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass, field
 from itertools import count
 from typing import Any, Self
@@ -10,8 +11,8 @@ from hocon.strings import UnquotedString
 class UnresolvedConcatenation(list):
 
     def __repr__(self) -> str:
-        list_str = super().__repr__()
-        return "\n〈" + list_str[1:-1].replace("\n", "\n    ") + "〉\n"
+        reprs = [repr(elem) for elem in self]
+        return "〈" + json.dumps(reprs, indent=2)[1:-1] + "〉"
 
     def get_type(self) -> type[list[Any] | dict[Any, Any] | str]:
         concat_types = {type(value) for value in self}
