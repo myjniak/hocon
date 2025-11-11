@@ -15,10 +15,12 @@ def _parse_unquoted_string_value(data: ParserInput, idx: int) -> tuple[UnquotedS
     while True:
         char = data[idx]
         if char in SECTION_OPENING:
-            raise HOCONUnquotedStringError(f"Forbidden opening '{char}' found when parsing unquoted string.")
+            msg = f"Forbidden opening '{char}' found when parsing unquoted string."
+            raise HOCONUnquotedStringError(msg)
         if char in unquoted_string_end or data[idx : idx + 2] == "//":
             if not string:
-                raise HOCONUnquotedStringError("Error when parsing unquoted string")
+                msg = "Error when parsing unquoted string"
+                raise HOCONUnquotedStringError(msg)
             return UnquotedString(string), idx
         string += char
         idx += 1
@@ -32,7 +34,8 @@ def _parse_unquoted_string_key(data: ParserInput, idx: int) -> tuple[UnquotedStr
         if char == "\n":
             if string == "include":
                 return UnquotedString(string), idx
-            raise HOCONInvalidKeyError("Encountered newline before key-value separator.")
+            msg = "Encountered newline before key-value separator."
+            raise HOCONInvalidKeyError(msg)
         if char in string_end or data[idx : idx + 2] == "//":
             if not string:
                 _raise_parse_key_exception(data, idx)
@@ -43,9 +46,13 @@ def _parse_unquoted_string_key(data: ParserInput, idx: int) -> tuple[UnquotedStr
 
 def _raise_parse_key_exception(data: ParserInput, idx: int) -> None:
     if data[idx] == ",":
-        raise HOCONUnexpectedSeparatorError("Excessive leading comma found in a dictionary.")
+        msg = "Excessive leading comma found in a dictionary."
+        raise HOCONUnexpectedSeparatorError(msg)
     if data[idx] in "{[":
-        raise HOCONInvalidKeyError("Objects and arrays do not make sense as field keys.")
+        msg = "Objects and arrays do not make sense as field keys."
+        raise HOCONInvalidKeyError(msg)
     if data[idx] == ".":
-        raise HOCONInvalidKeyError("Keypath separator '.' used in an invalid way.")
-    raise HOCONInvalidKeyError(f"Unexpected ({idx}th) character found when parsing keypath: '{data[idx]}'")
+        msg = "Keypath separator '.' used in an invalid way."
+        raise HOCONInvalidKeyError(msg)
+    msg = f"Unexpected ({idx}th) character found when parsing keypath: '{data[idx]}'"
+    raise HOCONInvalidKeyError(msg)

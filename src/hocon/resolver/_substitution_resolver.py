@@ -20,7 +20,7 @@ class SubstitutionResolver:
         parsed: ROOT_TYPE,
         resolve_value_func: Callable[[Any], ANY_VALUE_TYPE],
         substitutions: dict[int, Substitution] | None = None,
-    ):
+    ) -> None:
         self._parsed = parsed
         self.resolve_value = resolve_value_func
         self.subs: dict[int, Substitution] = substitutions or {}
@@ -68,20 +68,22 @@ class SubstitutionResolver:
     def _turn_to_resolving_state(self, substitution: UnresolvedSubstitution, status: SubstitutionStatus) -> None:
         new_status = status.to_resolving()
         if new_status is None:
-            raise HOCONSubstitutionCycleError(f"Could not resolve {substitution}.")
+            msg = f"Could not resolve {substitution}."
+            raise HOCONSubstitutionCycleError(msg)
         self.subs[substitution.id_] = Substitution(status=new_status)
 
     def _resolve_sub_from_env(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
         resolved_sub = get_from_env(substitution)
         if resolved_sub.status == SubstitutionStatus.UNDEFINED and substitution.optional is False:
             resolving_status = self.subs[substitution.id_].status
-            if (
-                resolving_status == SubstitutionStatus.FALLBACK_RESOLVING
-                and substitution.keys != substitution.location
-                and substitution.keys != substitution.relative_location
+            if resolving_status == SubstitutionStatus.FALLBACK_RESOLVING and substitution.keys not in (
+                substitution.location,
+                substitution.relative_location,
             ):
-                raise HOCONSubstitutionCycleError(f"Cycle occurred when resolving {substitution}")
-            raise HOCONSubstitutionUndefinedError(f"Could not resolve substitution {substitution}.")
+                msg = f"Cycle occurred when resolving {substitution}"
+                raise HOCONSubstitutionCycleError(msg)
+            msg = f"Could not resolve substitution {substitution}."
+            raise HOCONSubstitutionUndefinedError(msg)
         self.subs[substitution.id_] = resolved_sub
         return resolved_sub.value
 
@@ -108,8 +110,7 @@ class SubstitutionResolver:
             resolve_value_func=self.resolve_value,
             substitutions=self.subs,
         )
-        result = sub_resolver(substitution)
-        return result
+        return sub_resolver(substitution)
 
 
 def get_from_env(substitution: UnresolvedSubstitution) -> Substitution:

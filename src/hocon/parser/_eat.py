@@ -51,12 +51,14 @@ def __eat_item_separators(data: ParserInput, idx: int, struct_end: str, unexpect
     while True:
         char = data[idx]
         if char == unexpected_brace:
-            raise HOCONUnexpectedBracesError("Unexpected closure found")
+            msg = "Unexpected closure found"
+            raise HOCONUnexpectedBracesError(msg)
         if char == struct_end:
             return True, idx
         if char not in ELEMENT_SEPARATORS:
             return bool(separators_found), idx
         separators_found += char
         if separators_found.count(",") > 1:
-            raise HOCONUnexpectedSeparatorError("Multiple commas found")
+            msg = "Multiple commas found"
+            raise HOCONUnexpectedSeparatorError(msg)
         idx += 1

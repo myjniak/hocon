@@ -1,8 +1,8 @@
 from copy import deepcopy
 
-from ..constants import ROOT_TYPE
-from ..exceptions import HOCONSubstitutionUndefinedError
-from ..unresolved import (
+from hocon.constants import ROOT_TYPE
+from hocon.exceptions import HOCONSubstitutionUndefinedError
+from hocon.unresolved import (
     UnresolvedConcatenation,
     UnresolvedDuplication,
     UnresolvedSubstitution,
@@ -10,7 +10,7 @@ from ..unresolved import (
 
 
 class Cutter:
-    def __init__(self, sub: UnresolvedSubstitution):
+    def __init__(self, sub: UnresolvedSubstitution) -> None:
         self.is_sub_found: bool = False
         self.sub = sub
 
@@ -51,7 +51,8 @@ class Cutter:
             elif type(subtree) is list and key.isdigit():
                 self.cut(subtree[int(key)], keypath_index + 1)
             else:
-                raise HOCONSubstitutionUndefinedError("Something went horribly wrong. This is a bug.")
+                msg = "Something went horribly wrong. This is a bug."
+                raise HOCONSubstitutionUndefinedError(msg)
         elif type(subtree) is dict and key in subtree:
             if subtree[key] == self.sub or self.is_sub_found:
                 subtree.pop(key)

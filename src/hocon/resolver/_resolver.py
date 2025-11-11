@@ -1,8 +1,8 @@
 import json
-from collections.abc import Callable
+import operator
 from copy import deepcopy
 from functools import reduce, singledispatchmethod
-from typing import get_args
+from typing import TYPE_CHECKING, Never, get_args
 
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED
 from hocon.exceptions import HOCONConcatenationError, HOCONDeduplicationError
@@ -16,6 +16,9 @@ from hocon.unresolved import (
 from . import _lazy_resolver
 from ._substitution_resolver import SubstitutionResolver
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
 
 def resolve(parsed: ROOT_TYPE) -> ROOT_TYPE:
     lazy_resolved = _lazy_resolver.resolve(parsed)
@@ -24,12 +27,13 @@ def resolve(parsed: ROOT_TYPE) -> ROOT_TYPE:
 
 
 class Resolver:
-    def __init__(self, parsed: ROOT_TYPE):
+    def __init__(self, parsed: ROOT_TYPE) -> None:
         self.resolve_substitution = SubstitutionResolver(parsed, self.resolve)
 
     @singledispatchmethod
-    def resolve(self, values):
-        raise NotImplementedError(f"Bad input value type: {type(values)}")
+    def resolve(self, values) -> Never:
+        msg = f"Bad input value type: {type(values)}"
+        raise NotImplementedError(msg)
 
     @resolve.register
     def _(self, values: SIMPLE_VALUE_TYPE) -> ANY_VALUE_TYPE:
@@ -37,18 +41,18 @@ class Resolver:
 
     @resolve.register
     def _(self, values: list) -> list:
-        resolved_list = []
+        resolved_list: list[ANY_VALUE_TYPE] = []
         for element in values:
-            resolved_elem = self.resolve(element)
+            resolved_elem: ANY_VALUE_TYPE = self.resolve(element)
             if resolved_elem is not UNDEFINED:
                 resolved_list.append(resolved_elem)
         return resolved_list
 
     @resolve.register
     def _(self, values: dict) -> dict:
-        resolved_dict = {}
+        resolved_dict: dict[SIMPLE_VALUE_TYPE, ANY_VALUE_TYPE] = {}
         for key, value in values.items():
-            resolved_value = self.resolve(value)
+            resolved_value: ANY_VALUE_TYPE = self.resolve(value)
             if resolved_value is not UNDEFINED:
                 resolved_dict[key] = resolved_value
         return resolved_dict
@@ -62,10 +66,11 @@ class Resolver:
         values = self.resolve_substitutions(values)
         values = values.sanitize()
         if any(isinstance(value, (UnresolvedConcatenation, UnresolvedDuplication)) for value in values):
-            raise HOCONConcatenationError("Something went horribly wrong. This is a bug.")
+            msg = "Something went horribly wrong. This is a bug."
+            raise HOCONConcatenationError(msg)
         if not values:
             return UNDEFINED
-        if len(values) == 1 and type(values[0]) in get_args(SIMPLE_VALUE_TYPE) + (UnresolvedSubstitution,):
+        if len(values) == 1 and type(values[0]) in (*get_args(SIMPLE_VALUE_TYPE), UnresolvedSubstitution):
             return values[0]
         concat_type = values.get_type()
         concatenate_functions: dict[type[list | dict | str], Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]] = {
@@ -83,7 +88,8 @@ class Resolver:
         If at any point of object merging, duplicate value is not a dict, merging will stop.
         """
         if not values:
-            raise HOCONDeduplicationError("Unresolved duplicate key must contain at least 1 element.")
+            msg = "Unresolved duplicate key must contain at least 1 element."
+            raise HOCONDeduplicationError(msg)
         deduplicated = self._resolve_latest_unresolved_duplication_element(values)
         if not isinstance(deduplicated, dict):
             return deduplicated
@@ -101,24 +107,26 @@ class Resolver:
 
     def _concatenate_simple_values(self, values: UnresolvedConcatenation) -> str:
         if not all(isinstance(value, SIMPLE_VALUE_TYPE) for value in values):
-            types = set([type(value) for value in values])
-            raise HOCONConcatenationError(f"Concatenation of types {types} not allowed.")
+            types = {type(value) for value in values}
+            msg = f"Concatenation of types {types} not allowed."
+            raise HOCONConcatenationError(msg)
         for i in range(len(values)):
             if not isinstance(values[i], str):
                 values[i] = json.dumps(values[i])
         return resolve_simple_value(values)
 
     def _concatenate_lists(self, values: UnresolvedConcatenation) -> list:
-        if not all([isinstance(value, list) for value in values]):
-            raise HOCONConcatenationError("Something went horribly wrong. This is a bug.")
-        resolved_lists = []
+        if not all(isinstance(value, list) for value in values):
+            msg = "Something went horribly wrong. This is a bug."
+            raise HOCONConcatenationError(msg)
+        resolved_lists: list[ANY_VALUE_TYPE] = []
         for value in values:
             resolved_lists.append(self.resolve(value))
-        return sum(resolved_lists, [])
+        return reduce(operator.iadd, resolved_lists, [])
 
     def _resolve_latest_unresolved_duplication_element(self, values: UnresolvedDuplication) -> ANY_VALUE_TYPE:
         while True:
-            deduplicated = self.resolve(values[-1])
+            deduplicated: ANY_VALUE_TYPE = self.resolve(values[-1])
             if deduplicated is UNDEFINED:
                 values.pop()
             else:
@@ -139,7 +147,7 @@ class Resolver:
             if isinstance(value, dict) and isinstance(inferior_value, dict):
                 result[key] = self.merge(value, inferior_value)
             else:
-                resolved_value = self.resolve(value)
+                resolved_value: ANY_VALUE_TYPE = self.resolve(value)
                 if resolved_value is not UNDEFINED:
                     result[key] = resolved_value
         return result

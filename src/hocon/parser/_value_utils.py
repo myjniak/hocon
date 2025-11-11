@@ -41,7 +41,7 @@ def convert_iadd_to_self_referential_substitution(
     """Basically it turns this expression:
     a += 1
     To this:
-    a = ${?a} [1]
+    a = ${?a} [1].
     """
     return UnresolvedConcatenation(
         [

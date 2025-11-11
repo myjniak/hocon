@@ -1,7 +1,7 @@
 import re
 
-from ..constants import _FLOAT_CONSTANTS, NUMBER_RE, SIMPLE_VALUE_TYPE, WHITE_CHARS
-from ..strings import QuotedString, UnquotedString
+from hocon.constants import _FLOAT_CONSTANTS, NUMBER_RE, SIMPLE_VALUE_TYPE, WHITE_CHARS
+from hocon.strings import QuotedString, UnquotedString
 
 
 def resolve_simple_value(chunks: list[str], strip_left: bool = True, strip_right: bool = True) -> SIMPLE_VALUE_TYPE:
@@ -39,7 +39,7 @@ def _cast_string_value(string: str) -> SIMPLE_VALUE_TYPE:
         return False
     if string.startswith("null"):
         return None
-    if string in _FLOAT_CONSTANTS.keys():
+    if string in _FLOAT_CONSTANTS:
         return _FLOAT_CONSTANTS[string]
     match = re.match(NUMBER_RE, string)
     if match is not None and match.group() == string:
