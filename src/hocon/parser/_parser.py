@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from typing import Any
 
@@ -27,7 +26,8 @@ from ._value_utils import (
 )
 
 
-def parse(data: str, root_filepath: str | os.PathLike = os.getcwd(), encoding: str = "UTF-8") -> ROOT_TYPE:
+def parse(data: str, root_filepath: str | Path | None = None, encoding: str = "UTF-8") -> ROOT_TYPE:
+    root_filepath = root_filepath or Path.cwd()
     if not data:
         msg = "Empty string provided"
         raise HOCONNoDataError(msg)
@@ -136,7 +136,7 @@ def parse_include(data: ParserInput, idx: int, current_keypath: list[str]) -> tu
     string, idx = parse_quoted_string(data, idx + 1)
     external_filepath = Path(data.absolute_filepath).parent / string
     try:
-        with open(external_filepath, encoding=data.encoding) as conf:
+        with Path(external_filepath).open("r", encoding=data.encoding) as conf:
             external_file_content = conf.read()
     except FileNotFoundError:
         return UNDEFINED

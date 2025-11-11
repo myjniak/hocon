@@ -17,58 +17,70 @@ class Cutter:
     def cut(self, subtree: ROOT_TYPE, keypath_index: int = 0) -> None:
         is_past_last_key = keypath_index == len(self.sub.location)
         if is_past_last_key:
-            if isinstance(subtree, UnresolvedDuplication):
-                for index, item in enumerate(subtree):
-                    if isinstance(item, UnresolvedConcatenation):
-                        self.cut(item, keypath_index)
-                    elif item == self.sub or self.is_sub_found:
-                        self.is_sub_found = True
-                        for _ in range(len(subtree) - index):
-                            subtree.pop()
-                index = len(subtree) - 1
-                while index > 0:
-                    if not subtree[index]:
-                        subtree.pop(index)
-                    index -= 1
-                return
-            if isinstance(subtree, UnresolvedConcatenation):
-                for index, item in enumerate(subtree):
-                    if item == self.sub or self.is_sub_found:
-                        self.is_sub_found = True
-                        for _ in range(len(subtree) - index):
-                            subtree.pop()
-                        return
-                return
-            raise HOCONSubstitutionUndefinedError(subtree)
+            return self.final_cut(subtree, keypath_index=keypath_index)
         key = self.sub.location[keypath_index]
         is_last_key = keypath_index + 1 == len(self.sub.location)
         if isinstance(subtree, (UnresolvedDuplication, UnresolvedConcatenation)):
             for item in subtree:
                 self.cut(item, keypath_index)
-        elif not is_last_key:
-            if type(subtree) is dict and key in subtree:
-                self.cut(subtree[key], keypath_index + 1)
-            elif type(subtree) is list and key.isdigit():
-                self.cut(subtree[int(key)], keypath_index + 1)
-            else:
-                msg = "Something went horribly wrong. This is a bug."
-                raise HOCONSubstitutionUndefinedError(msg)
         elif type(subtree) is dict and key in subtree:
-            if subtree[key] == self.sub or self.is_sub_found:
-                subtree.pop(key)
-                self.is_sub_found = True
-                return
-            self.cut(subtree[key], keypath_index + 1)
-            if not subtree[key]:
-                subtree.pop(key)
+            return self.cut_dict(subtree, key, keypath_index, is_last_key)
         elif type(subtree) is list and key.isdigit():
-            if subtree[int(key)] == self.sub or self.is_sub_found:
+            return self.cut_list(subtree, key, keypath_index, is_last_key)
+        return None
+
+    def cut_list(self, subtree, key, keypath_index: int, is_last_key: bool):
+        if not is_last_key:
+            return self.cut(subtree[int(key)], keypath_index + 1)
+        if subtree[int(key)] == self.sub or self.is_sub_found:
+            self.is_sub_found = True
+            del subtree[int(key)]
+            return None
+        self.cut(subtree[int(key)], keypath_index + 1)
+        if not subtree[int(key)]:
+            del subtree[int(key)]
+        return None
+
+    def cut_dict(self, subtree, key, keypath_index: int, is_last_key: bool):
+        if not is_last_key:
+            return self.cut(subtree[key], keypath_index + 1)
+        if subtree[key] == self.sub or self.is_sub_found:
+            subtree.pop(key)
+            self.is_sub_found = True
+            return None
+        self.cut(subtree[key], keypath_index + 1)
+        if not subtree[key]:
+            subtree.pop(key)
+        return None
+
+    def final_cut(self, subtree, keypath_index: int = 0):
+        if isinstance(subtree, UnresolvedDuplication):
+            return self.cut_duplication(subtree, keypath_index=keypath_index)
+        if isinstance(subtree, UnresolvedConcatenation):
+            return self.cut_concatenation(subtree)
+        raise HOCONSubstitutionUndefinedError(subtree)
+
+    def cut_duplication(self, subtree, keypath_index: int = 0) -> None:
+        for index, item in enumerate(subtree):
+            if isinstance(item, UnresolvedConcatenation):
+                self.cut(item, keypath_index)
+            elif item == self.sub or self.is_sub_found:
                 self.is_sub_found = True
-                del subtree[int(key)]
+                for _ in range(len(subtree) - index):
+                    subtree.pop()
+        index = len(subtree) - 1
+        while index > 0:
+            if not subtree[index]:
+                subtree.pop(index)
+            index -= 1
+
+    def cut_concatenation(self, subtree) -> None:
+        for index, item in enumerate(subtree):
+            if item == self.sub or self.is_sub_found:
+                self.is_sub_found = True
+                for _ in range(len(subtree) - index):
+                    subtree.pop()
                 return
-            self.cut(subtree[int(key)], keypath_index + 1)
-            if not subtree[int(key)]:
-                del subtree[int(key)]
 
 
 def cut_self_reference_and_fields_that_override_it(

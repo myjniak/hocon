@@ -12,9 +12,15 @@ def test_sanitize_empty_concatenation():
 
 
 def test_sanitize_empty_duplication():
-    concatenation = UnresolvedDuplication([])
+    duplication = UnresolvedDuplication([])
     with pytest.raises(HOCONDuplicateKeyMergeError):
-        concatenation.sanitize()
+        duplication.sanitize()
+
+
+def test_sanitize_duplication():
+    duplication = UnresolvedDuplication([1, 2, {"a": 1}, 4, {"b": 2}, {"c": 3}])
+    sanitized = duplication.sanitize()
+    assert sanitized == UnresolvedDuplication([{"b": 2}, {"c": 3}])
 
 
 def test_filter_unquoted_spaces():
