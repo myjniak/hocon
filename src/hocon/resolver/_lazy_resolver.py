@@ -71,14 +71,14 @@ def _(values: UnresolvedDuplication) -> ANY_VALUE_TYPE | UnresolvedDuplication:
     if not isinstance(last_value, (dict, ANY_UNRESOLVED)):
         return last_value
     for value in reversed(values[:-1]):
-        value = resolve(value)
-        if isinstance(value, ANY_UNRESOLVED) or isinstance(deduplicated[0], ANY_UNRESOLVED):
-            deduplicated.insert(0, value)
-        elif isinstance(value, dict):
+        maybe_resolved_value = resolve(value)
+        if isinstance(maybe_resolved_value, ANY_UNRESOLVED) or isinstance(deduplicated[0], ANY_UNRESOLVED):
+            deduplicated.insert(0, maybe_resolved_value)
+        elif isinstance(maybe_resolved_value, dict):
             if isinstance(deduplicated[0], dict):
-                deduplicated[0] = merge(deduplicated[0], value)
+                deduplicated[0] = merge(deduplicated[0], maybe_resolved_value)
             else:
-                deduplicated.insert(0, value)
+                deduplicated.insert(0, maybe_resolved_value)
         else:
             break
     if len(deduplicated) == 1:
@@ -173,9 +173,7 @@ def _concatenate_lists(values: UnresolvedConcatenation) -> list:
     if not all(isinstance(value, list) for value in values):
         msg = "Something went horribly wrong. This is a bug."
         raise HOCONConcatenationError(msg)
-    resolved_lists = []
-    for value in values:
-        resolved_lists.append(resolve(value))
+    resolved_lists = [resolve(value) for value in values]
     return reduce(operator.iadd, resolved_lists, [])
 
 

@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from itertools import count
-from typing import Any, Self, Union
+from typing import Any, Self
 
 from hocon.constants import SIMPLE_VALUE_TYPE, UNDEFINED
 from hocon.exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError
@@ -37,7 +37,7 @@ class UnresolvedConcatenation(list):
         if any(isinstance(value, (list, dict)) for value in concatenation):
             concatenation = concatenation.filter_out_unquoted_space()
         elif any(isinstance(value, str) for value in concatenation):
-            concatenation = concatenation._strip_unquoted_space()
+            concatenation = concatenation.strip_unquoted_space()
         concatenation.get_type()
         return concatenation
 
@@ -47,7 +47,7 @@ class UnresolvedConcatenation(list):
     def _filter_out_undefined_substitutions(self) -> Self:
         return UnresolvedConcatenation(filter(lambda v: v is not UNDEFINED, self))
 
-    def _strip_unquoted_space(self) -> Self:
+    def strip_unquoted_space(self) -> Self:
         try:
             first = next(index for index, value in enumerate(self) if not self._is_empty_unquoted_string(value))
         except StopIteration:
@@ -75,7 +75,7 @@ class UnresolvedDuplication(list):
             raise HOCONDuplicateKeyMergeError(msg)
         for index in reversed(range(len(self))):
             if not isinstance(self[index], (dict, ANY_UNRESOLVED)):
-                return UnresolvedDuplication([self[index + 1 :]])
+                return UnresolvedDuplication([*self[index + 1 :]])
         return self
 
 
@@ -106,4 +106,4 @@ class UnresolvedSubstitution:
         return hash((".".join(self.keys), self.optional, self.location, self.id_))
 
 
-ANY_UNRESOLVED = Union[UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplication]
+ANY_UNRESOLVED = UnresolvedConcatenation | UnresolvedSubstitution | UnresolvedDuplication

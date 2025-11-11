@@ -94,10 +94,11 @@ class Resolver:
         if not isinstance(deduplicated, dict):
             return deduplicated
         for value in reversed(values[:-1]):
+            resolved_value = value
             if isinstance(value, UnresolvedConcatenation):
-                value = self.resolve(value)
-            if isinstance(value, (dict, UnresolvedSubstitution)):
-                deduplicated = self.merge(deduplicated, value)
+                resolved_value = self.resolve(value)
+            if isinstance(resolved_value, (dict, UnresolvedSubstitution)):
+                deduplicated = self.merge(deduplicated, resolved_value)
             else:
                 break
         return self.resolve(deduplicated)
@@ -119,9 +120,7 @@ class Resolver:
         if not all(isinstance(value, list) for value in values):
             msg = "Something went horribly wrong. This is a bug."
             raise HOCONConcatenationError(msg)
-        resolved_lists: list[ANY_VALUE_TYPE] = []
-        for value in values:
-            resolved_lists.append(self.resolve(value))
+        resolved_lists: list[ANY_VALUE_TYPE] = [self.resolve(value) for value in values]
         return reduce(operator.iadd, resolved_lists, [])
 
     def _resolve_latest_unresolved_duplication_element(self, values: UnresolvedDuplication) -> ANY_VALUE_TYPE:
@@ -155,7 +154,8 @@ class Resolver:
     def resolve_substitutions(self, values: UnresolvedConcatenation) -> UnresolvedConcatenation:
         values_with_resolved_substitutions = UnresolvedConcatenation()
         for value in values:
+            resolved_value = value
             if isinstance(value, UnresolvedSubstitution):
-                value = self.resolve_substitution(value)
-            values_with_resolved_substitutions.append(value)
+                resolved_value = self.resolve_substitution(value)
+            values_with_resolved_substitutions.append(resolved_value)
         return values_with_resolved_substitutions

@@ -1,10 +1,15 @@
 from hocon.constants import WHITE_CHARS
 
 
-class QuotedString(str): ...
+class QuotedString(str):
+
+    __slots__ = ()
 
 
 class UnquotedString(str):
+
+    __slots__ = ()
+
     def __repr__(self) -> str:
         return self.__str__()
 

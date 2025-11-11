@@ -57,13 +57,15 @@ dependencies = [
     "pytest-timeout",
     "pytest-cov",
     "black",
-    "mypy"
+    "mypy",
+    "ruff"
 ]
 
 [tool.hatch.envs.test.scripts]
 coverage = "python -m pytest -vs --cov hocon --cov-fail-under=97 --junitxml=junit/test-results.xml-{env:PYTHON_VERSION}.xml"
 black = "python -m black --check src/"
 mypy = "python -m mypy -p hocon"
+ruff = "python -m ruff check src"
 
 [tool.black]
 line-length = 120
