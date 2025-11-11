@@ -12,8 +12,8 @@ For example tests for Array and object concatenation are marked with "f10_2" tag
 
 :no_entry_sign: Not applicable for python / not planned for implementation
 
-| Feature ID | Item                                                                                                                                                                   |    Implemented     |  Covered in tests  |
-|------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------:|:------------------:|
+| Feature ID | Item                                                                                                                                                                   |    Implemented     |  Covered in tests  |                                     Notes                                     |
+|------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------:|:------------------:|:-----------------------------------------------------------------------------:|
 | f1         | [Unchanged from JSON](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#unchanged-from-json)                                                                    | :heavy_check_mark: | :heavy_check_mark: |
 | f2         | [Comments](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#comments)                                                                                          | :heavy_check_mark: | :heavy_check_mark: |
 | f3         | [Omit root braces](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#omit-root-braces)                                                                          | :heavy_check_mark: | :heavy_check_mark: |
@@ -35,42 +35,29 @@ For example tests for Array and object concatenation are marked with "f10_2" tag
 | f13_2      | [The `+=` field separator](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#the--field-separator)                                                              | :heavy_check_mark: | :heavy_check_mark: |
 | f13_3      | [Examples of Self-Referential Substitutions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#examples-of-self-referential-substitutions)                      | :heavy_check_mark: | :heavy_check_mark: |
 | f14        | [Includes](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#includes)                                                                                          | :heavy_check_mark: | :heavy_check_mark: |
-| f14_1      | [Include syntax](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-syntax)                                                                              |  :yellow_circle:   | :heavy_check_mark: |
+| f14_1      | [Include syntax](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-syntax)                                                                              |  :yellow_circle:   | :heavy_check_mark: |    url(), file(), classpath() and required() keywords are not implemented.    |
 | f14_2      | [Include semantics: merging](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-semantics-merging)                                                       | :heavy_check_mark: | :heavy_check_mark: |
 | f14_3      | [Include semantics: substitution](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-semantics-substitution)                                             | :heavy_check_mark: | :heavy_check_mark: |
 | f14_4      | [Include semantics: missing files and required files](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-semantics-missing-files-and-required-files)     |        :x:         |        :x:         |
 | f14_5      | [Include semantics: file formats and extensions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-semantics-file-formats-and-extensions)               |        :x:         |        :x:         |
 | f14_6      | [Include semantics: locating resources](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-semantics-locating-resources)                                 |        :x:         |        :x:         |
 | f15        | [Conversion of numerically-index objects to arrays](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conversion-of-numerically-indexed-objects-to-arrays)      |        :x:         |        :x:         |
-| f16        | [Automatic type conversions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#automatic-type-conversions)                                                      |  :no_entry_sign:   |  :no_entry_sign:   |
-| f17        | [Units format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#units-format)                                                                                  |  :no_entry_sign:   |  :no_entry_sign:   |
-| f18        | [Duration format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#duration-format)                                                                            |  :no_entry_sign:   |  :no_entry_sign:   |
-| f19        | [Period format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#period-format)                                                                                |  :no_entry_sign:   |  :no_entry_sign:   |
-| f20        | [Size in bytes format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#size-in-bytes-format)                                                                  |  :no_entry_sign:   |  :no_entry_sign:   |
+| f16        | [Automatic type conversions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#automatic-type-conversions)                                                      |  :no_entry_sign:   |  :no_entry_sign:   |                 This library does not implement API features.                 |
+| f17        | [Units format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#units-format)                                                                                  |  :no_entry_sign:   |  :no_entry_sign:   |        This library does not support "asking for data types". See f16.        |
+| f18        | [Duration format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#duration-format)                                                                            |  :no_entry_sign:   |  :no_entry_sign:   |        This library does not support "asking for data types". See f16.        |
+| f19        | [Period format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#period-format)                                                                                |  :no_entry_sign:   |  :no_entry_sign:   |        This library does not support "asking for data types". See f16.        |
+| f20        | [Size in bytes format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#size-in-bytes-format)                                                                  |  :no_entry_sign:   |  :no_entry_sign:   |        This library does not support "asking for data types". See f16.        |
 | f21        | [Config object merging and file merging](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#config-object-merging-and-file-merging)                              |        :x:         |        :x:         |
 | f22        | [Java properties mapping](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#java-properties-mapping)                                                            |        :x:         |        :x:         |
-| f23        | [Conventional configuration files for JVM apps](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-configuration-files-for-jvm-apps)                |  :no_entry_sign:   |  :no_entry_sign:   |
-| f24        | [Conventional override by system properties](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-override-by-system-properties)                      |  :no_entry_sign:   |  :no_entry_sign:   |
+| f23        | [Conventional configuration files for JVM apps](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-configuration-files-for-jvm-apps)                |  :no_entry_sign:   |  :no_entry_sign:   | Feature intertwines too much with Java ecosystem to be implemented in python. |
+| f24        | [Conventional override by system properties](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-override-by-system-properties)                      |  :no_entry_sign:   |  :no_entry_sign:   | Feature intertwines too much with Java ecosystem to be implemented in python. |
 | f25        | [Substitution fallback to environment variables](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#substitution-fallback-to-environment-variables)              | :heavy_check_mark: | :heavy_check_mark: |
-
-## Notes
-
-| Feature ID | Item                                                                                                                                                    |                                     Notes                                     |
-|------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------:|
-| f14_1      | [Includes](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#includes)                                                                           |    url(), file(), classpath() and required() keywords are not implemented.    |
-| f16        | [Automatic type conversions](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#automatic-type-conversions)                                       |                 This library does not implement API features.                 |
-| f17        | [Units format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#units-format)                                                                   |        This library does not support "asking for data types". See f16.        |
-| f18        | [Duration format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#duration-format)                                                             |        This library does not support "asking for data types". See f16.        |
-| f19        | [Period format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#period-format)                                                                 |        This library does not support "asking for data types". See f16.        |
-| f20        | [Size in bytes format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#size-in-bytes-format)                                                   |        This library does not support "asking for data types". See f16.        | 
-| f23        | [Conventional configuration files for JVM apps](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-configuration-files-for-jvm-apps) | Feature intertwines too much with Java ecosystem to be implemented in python. |
-| f24        | [Conventional override by system properties](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-override-by-system-properties)       | Feature intertwines too much with Java ecosystem to be implemented in python. |
 
 ## Additional requirements
 
 There are several assumptions which are not defined by the HOCON spec but are essential to the library health.
 
-| Requirement ID | Requirement                                                       |
-|----------------|-------------------------------------------------------------------|
-| r1             | If data is an invalid hocon, HOCONError exception will be raised. |
+| Requirement ID | Requirement                                                       | Notes                                      |
+|----------------|-------------------------------------------------------------------|--------------------------------------------|
+| r1             | If data is an invalid hocon, HOCONError exception will be raised. | https://github.com/myjniak/hocon/issues/42 |
 
