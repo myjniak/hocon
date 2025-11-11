@@ -1,3 +1,4 @@
+import operator
 from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import dataclass
@@ -17,7 +18,8 @@ from hocon.unresolved import (
 
 @singledispatch
 def resolve(values: Any) -> Any:
-    raise NotImplementedError(f"Bad input value type: {type(values)}")
+    msg = f"Bad input value type: {type(values)}"
+    raise NotImplementedError(msg)
 
 
 @resolve.register
@@ -50,7 +52,7 @@ def _(values: UnresolvedConcatenation) -> ANY_VALUE_TYPE | UnresolvedConcatenati
     values = values.sanitize()
     if not values:
         return UNDEFINED
-    if len(values) == 1 and type(values[0]) in get_args(SIMPLE_VALUE_TYPE) + (UnresolvedSubstitution,):
+    if len(values) == 1 and type(values[0]) in (*get_args(SIMPLE_VALUE_TYPE), UnresolvedSubstitution):
         return values[0]
     concatenate_function = _get_concatenator(values)
     return concatenate_function(values)
@@ -111,7 +113,7 @@ def _concatenate_dicts(values: UnresolvedConcatenation) -> dict:
 
 
 def _concatenate_simple_values_with_subs(values: UnresolvedConcatenation) -> UnresolvedConcatenation:
-    """[${a}, b, c, ${d}, e, f, g] should turn to [${a}, bc, ${d}, efg]"""
+    """[${a}, b, c, ${d}, e, f, g] should turn to [${a}, bc, ${d}, efg]."""
     result = UnresolvedConcatenation()
     chunks_to_concatenate: list[str] = []
     for value in values:
@@ -145,8 +147,9 @@ def _concatenate_simple_values(
     strip_right: bool = True,
 ) -> str:
     if not all(isinstance(value, str) for value in values):
-        types = set([type(value).__name__ for value in values])
-        raise HOCONConcatenationError(f"Lazy concatenation of types {types} not allowed.")
+        types = {type(value).__name__ for value in values}
+        msg = f"Lazy concatenation of types {types} not allowed."
+        raise HOCONConcatenationError(msg)
     return resolve_simple_value(values, strip_left=strip_left, strip_right=strip_right)
 
 
@@ -167,17 +170,19 @@ def _concatenate_lists_with_subs(values: UnresolvedConcatenation) -> UnresolvedC
 
 
 def _concatenate_lists(values: UnresolvedConcatenation) -> list:
-    if not all([isinstance(value, list) for value in values]):
-        raise HOCONConcatenationError("Something went horribly wrong. This is a bug.")
+    if not all(isinstance(value, list) for value in values):
+        msg = "Something went horribly wrong. This is a bug."
+        raise HOCONConcatenationError(msg)
     resolved_lists = []
     for value in values:
         resolved_lists.append(resolve(value))
-    return sum(resolved_lists, [])
+    return reduce(operator.iadd, resolved_lists, [])
 
 
 @singledispatch
 def merge_dict_concatenation(superior, inferior: dict | UnresolvedSubstitution) -> dict | UnresolvedConcatenation:
-    raise NotImplementedError(f"Bad input value type: {type(superior)}")
+    msg = f"Bad input value type: {type(superior)}"
+    raise NotImplementedError(msg)
 
 
 @merge_dict_concatenation.register(UnresolvedSubstitution)

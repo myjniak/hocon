@@ -14,20 +14,22 @@ class UnresolvedConcatenation(list):
         return "\n〈" + list_str[1:-1].replace("\n", "\n    ") + "〉\n"
 
     def get_type(self) -> type[list[Any] | dict[Any, Any] | str]:
-        concat_types = set(type(value) for value in self)
+        concat_types = {type(value) for value in self}
         concat_types.discard(UnresolvedSubstitution)
         if all(issubclass(concat_type, SIMPLE_VALUE_TYPE) for concat_type in concat_types):
             return str
         if len(concat_types) > 1:
             type_names = [concat_type.__name__ for concat_type in concat_types]
-            raise HOCONConcatenationError(f"Concatenation of multiple types not allowed: {type_names}")
+            msg = f"Concatenation of multiple types not allowed: {type_names}"
+            raise HOCONConcatenationError(msg)
         concat_type = concat_types.pop()
         if concat_type not in [list, dict]:
-            raise HOCONConcatenationError(f"Concatenation of type {concat_type.__name__} not supported!")
+            msg = f"Concatenation of type {concat_type.__name__} not supported!"
+            raise HOCONConcatenationError(msg)
         return concat_type
 
     def has_substitutions(self) -> bool:
-        concat_types = set(type(value) for value in self)
+        concat_types = {type(value) for value in self}
         return UnresolvedSubstitution in concat_types
 
     def sanitize(self) -> Self:
@@ -69,10 +71,11 @@ class UnresolvedDuplication(list):
 
     def sanitize(self) -> Self:
         if len(self) == 0:
-            raise HOCONDuplicateKeyMergeError("Unresolved duplicate key must contain at least 2 elements.")
+            msg = "Unresolved duplicate key must contain at least 2 elements."
+            raise HOCONDuplicateKeyMergeError(msg)
         for index in reversed(range(len(self))):
             if not isinstance(self[index], (dict, ANY_UNRESOLVED)):
-                return UnresolvedDuplication([self[index + 1 :]] or [self[-1]])
+                return UnresolvedDuplication([self[index + 1 :]])
         return self
 
 

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 from hocon.constants import WHITE_CHARS
-from hocon.exceptions import HOCONDecodeError
 from hocon.strings import UnquotedString
 
 from ._data import ParserInput
@@ -21,7 +20,6 @@ class Keypath:
 def parse_keypath(data: ParserInput, idx: int = 0, keyend_indicator: str = ":={") -> Keypath:
     keychunks_list: list[list[str]] = [[]]
     while True:
-        old_idx = idx
         idx = eat_comments(data, idx)
         string, idx = _parse_key_chunk(data, idx)
         if not keychunks_list[-1] and string.startswith("include") and type(string) is UnquotedString:

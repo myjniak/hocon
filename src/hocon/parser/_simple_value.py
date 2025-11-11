@@ -20,9 +20,11 @@ def parse_simple_value(
 ) -> tuple[UnquotedString | QuotedString | UnresolvedSubstitution, int]:
     char = data[idx]
     if char == ",":
-        raise HOCONUnexpectedSeparatorError("Unexpected ',' found.")
+        msg = "Unexpected ',' found."
+        raise HOCONUnexpectedSeparatorError(msg)
     if char in ELEMENT_SEPARATORS + SECTION_CLOSING:
-        raise HOCONUnexpectedBracesError("Unexpected closure")
+        msg = "Unexpected closure"
+        raise HOCONUnexpectedBracesError(msg)
     if data[idx : idx + 3] == '"""':
         return parse_triple_quoted_string(data, idx + 3)
     if char == '"':
@@ -66,7 +68,8 @@ def _parse_substitution(
         and len(current_keypath) > len(keypath.keys)
         and current_keypath[: len(keypath.keys)] == keypath.keys
     ):
+        msg = f"Substitution {substitution} located at [{'.'.join(current_keypath)}] points to its ancestor node."
         raise HOCONSubstitutionCycleError(
-            f"Substitution {substitution} located at [{'.'.join(current_keypath)}] points to its ancestor node.",
+            msg,
         )
     return substitution, keypath.end_idx
