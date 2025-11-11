@@ -73,3 +73,4 @@ There are several assumptions which are not defined by the HOCON spec but are es
 | Requirement ID | Requirement                                                       |
 |----------------|-------------------------------------------------------------------|
 | r1             | If data is an invalid hocon, HOCONError exception will be raised. |
+

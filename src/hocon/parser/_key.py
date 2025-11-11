@@ -28,8 +28,6 @@ def parse_keypath(data: ParserInput, idx: int = 0, keyend_indicator: str = ":={"
             return Keypath(keys=[], end_idx=idx, include=True)
         keychunks_list[-1].append(string)
         char = data[idx]
-        if idx == old_idx:
-            raise HOCONDecodeError("This is an exception preventing infinite loop and it's a bug. Please report it.")
         if data[idx] in keyend_indicator or data[idx : idx + 2] == "+=":
             if isinstance(string, UnquotedString):
                 keychunks_list[-1][-1] = keychunks_list[-1][-1].rstrip(WHITE_CHARS)

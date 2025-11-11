@@ -135,3 +135,14 @@ def test_concatenation_with_undefined_subs():
         "url": "https://google.com",
     }
 
+
+def test_substitution_with_array_in_path():
+    data = """
+    a: [1, 2, 3, 4]
+    b: ${a.2}
+    """
+    result = loads(data)
+    assert result == {
+        "a": [1, 2, 3, 4],
+        "b": 3,
+    }
