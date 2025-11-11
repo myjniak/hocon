@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+- Basic support for substitutions with array element in its path (like ${a.b.1.d})
+- Autofixed code with ruff
+
 ## 0.3.0
 - Refactored LazyResolver to a separate module, dismantled class into functions
 - Introduced basic mypy checks

@@ -84,6 +84,7 @@ def parse_list(data: ParserInput, idx: int = 0, current_keypath: list[str] | Non
             return unconcatenated_list, idx
         unconcatenated_value, idx = parse_list_element(data, idx=idx, current_keypath=current_keypath + [str(index)])
         unconcatenated_list.append(unconcatenated_value)
+        index += 1
 
 
 def parse_value_chunk(data: ParserInput, idx: int, current_keypath: list[str]) -> tuple[Any, int]:

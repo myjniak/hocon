@@ -45,7 +45,7 @@ class Cutter:
         if isinstance(subtree, (UnresolvedDuplication, UnresolvedConcatenation)):
             for item in subtree:
                 self.cut(item, keypath_index)
-        if not is_last_key:
+        elif not is_last_key:
             if type(subtree) is dict and key in subtree:
                 self.cut(subtree[key], keypath_index + 1)
             elif type(subtree) is list and key.isdigit():

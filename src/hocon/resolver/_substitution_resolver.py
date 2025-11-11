@@ -49,6 +49,8 @@ class SubstitutionResolver:
                 value = self.resolve_value(value)
             if isinstance(value, dict) and key in value:
                 value = value[key]
+            elif isinstance(value, list) and key.isdigit() and len(value) > int(key):
+                value = value[int(key)]
             elif isinstance(value, (dict, list)):
                 if substitution.including_root:
                     substitution.keys = substitution.including_root + substitution.keys
