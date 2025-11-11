@@ -139,7 +139,7 @@ def parse_include(data: ParserInput, idx: int, current_keypath: list[str]) -> tu
         with Path(external_filepath).open("r", encoding=data.encoding) as conf:
             external_file_content = conf.read()
     except FileNotFoundError:
-        return UNDEFINED
+        return {}, idx
     external_input = ParserInput(
         data=external_file_content,
         absolute_filepath=external_filepath,
