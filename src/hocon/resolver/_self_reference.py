@@ -8,8 +8,10 @@ from hocon.unresolved import (
     UnresolvedSubstitution,
 )
 
+__all__ = ["cut_self_reference_and_fields_that_override_it"]
 
-class Cutter:
+
+class _Cutter:
     def __init__(self, sub: UnresolvedSubstitution) -> None:
         self.is_sub_found: bool = False
         self.sub = sub
@@ -88,6 +90,6 @@ def cut_self_reference_and_fields_that_override_it(
     parsed: ROOT_TYPE,
 ) -> ROOT_TYPE:
     carved_parsed = deepcopy(parsed)
-    cutter = Cutter(substitution)
+    cutter = _Cutter(substitution)
     cutter.cut(carved_parsed)
     return carved_parsed

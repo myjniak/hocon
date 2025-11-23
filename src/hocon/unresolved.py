@@ -1,4 +1,3 @@
-import json
 from dataclasses import dataclass, field
 from itertools import count
 from typing import Any, Self
@@ -11,8 +10,7 @@ from hocon.strings import UnquotedString
 class UnresolvedConcatenation(list):
 
     def __repr__(self) -> str:
-        reprs = [repr(elem) for elem in self]
-        return "〈" + json.dumps(reprs, indent=2)[1:-1] + "〉"
+        return "〈" + super().__repr__()[1:-1] + "〉"
 
     def get_type(self) -> type[list[Any] | dict[Any, Any] | str]:
         concat_types = {type(value) for value in self}
@@ -67,8 +65,7 @@ class UnresolvedConcatenation(list):
 
 class UnresolvedDuplication(list):
     def __repr__(self) -> str:
-        list_str = super().__repr__()
-        return "\n【\n" + list_str[1:-1].replace("\n", "\n    ") + "\n】\n"
+        return "【" + super().__repr__()[1:-1] + "】"
 
     def sanitize(self) -> Self:
         if len(self) == 0:
@@ -104,7 +101,7 @@ class UnresolvedSubstitution:
         return self.keys == other.keys and self.optional == other.optional and self.location == other.location
 
     def __hash__(self) -> int:
-        return hash((".".join(self.keys), self.optional, self.location, self.id_))
+        return hash((".".join(self.keys), self.optional, ".".join(self.location)))
 
 
 ANY_UNRESOLVED = UnresolvedConcatenation | UnresolvedSubstitution | UnresolvedDuplication

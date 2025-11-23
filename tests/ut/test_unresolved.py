@@ -2,7 +2,7 @@ import pytest
 
 from hocon.exceptions import HOCONDuplicateKeyMergeError
 from hocon.strings import UnquotedString
-from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication
+from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication, UnresolvedSubstitution
 
 
 def test_sanitize_empty_concatenation():
@@ -33,3 +33,14 @@ def test_filter_unquoted_spaces_2():
     concatenation = UnresolvedConcatenation([{}, UnquotedString(" Hi"), {}, UnquotedString()])
     result = concatenation.filter_out_unquoted_space()
     assert result == [{}, UnquotedString(" Hi"), {}]
+
+
+def test_sub_hashing():
+    """Substitution is hashable -> should be usable as dict key."""
+    a = UnresolvedSubstitution(["a", "b"], True, ["c", "d"])
+    b = UnresolvedSubstitution(["e", "f"], True, ["g", "h"])
+    sub_dict = {
+        a: ".".join(a.keys),
+        b: ".".join(b.keys)
+    }
+    assert sub_dict[a] == "a.b"

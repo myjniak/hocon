@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.2
+- Fixed UnresolvedSubstitution hashing
+- Changed __repr__ for UnresolvedConcatenation and UnresolvedDuplication
+- Do not fail, when phrase 'include' includes file that doesn't exist. Ignore that include instead.
+
 ## 0.3.1
 - Basic support for substitutions with array element in its path (like ${a.b.1.d})
 - Autofixed code with ruff
