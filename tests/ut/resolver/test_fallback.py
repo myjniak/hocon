@@ -1,5 +1,6 @@
 import pytest
 
+from hocon.exceptions import HOCONSubstitutionUndefinedError
 from hocon.parser import parse
 from hocon.resolver import resolve, _lazy_resolver
 from hocon.resolver._self_reference import cut_self_reference_and_fields_that_override_it
@@ -101,3 +102,18 @@ def test_array_ref2():
     carved = cut_self_reference_and_fields_that_override_it(sub, lazy_resolved)
     result = resolve(carved)
     assert result == {"a": [1, 2, {"b": [1, 2, 4]}, 4]}
+
+
+def test_wrong_location():
+    """When given substitution is deeper than expected.
+    Honestly, I don't know how to naturally trigger this exception.
+    In this test, substituion at location a.c is moved deeper to a.c.0."""
+    data = """
+    a.c: ${?a.b} "42"
+    a {b: 1}
+    """
+    parsed = parse(data)
+    sub: UnresolvedSubstitution = parsed["a"][0]["c"][0]
+    parsed["a"][0]["c"] = [sub, "42"]
+    with pytest.raises(HOCONSubstitutionUndefinedError):
+        cut_self_reference_and_fields_that_override_it(sub, parsed)
