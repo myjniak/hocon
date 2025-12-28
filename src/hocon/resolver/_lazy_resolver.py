@@ -170,9 +170,6 @@ def _concatenate_lists_with_subs(values: UnresolvedConcatenation) -> UnresolvedC
 
 
 def _concatenate_lists(values: UnresolvedConcatenation) -> list:
-    if not all(isinstance(value, list) for value in values):
-        msg = "Something went horribly wrong. This is a bug."
-        raise HOCONConcatenationError(msg)
     resolved_lists = [resolve(value) for value in values]
     return reduce(operator.iadd, resolved_lists, [])
 
