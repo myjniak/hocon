@@ -3,7 +3,6 @@ from typing import Any
 
 from hocon.constants import ROOT_TYPE
 from hocon.exceptions import (
-    HOCONIncludeError,
     HOCONNoDataError,
 )
 from hocon.unresolved import UnresolvedConcatenation
@@ -32,16 +31,20 @@ def parse(data: str, root_filepath: str | Path | None = None, encoding: str = "U
         msg = "Empty string provided"
         raise HOCONNoDataError(msg)
     data_object = ParserInput(data, Path(root_filepath), encoding=encoding)
+    return _parse(data_object)
+
+
+def _parse(data: ParserInput, idx: int = 0) -> ROOT_TYPE:
     result: ROOT_TYPE
-    idx = eat_whitespace_and_comments(data_object, 0)
+    idx = eat_whitespace_and_comments(data, idx)
     if data[idx] == "[":
-        result, idx = parse_list(data_object, idx=idx + 1)
+        result, idx = parse_list(data, idx=idx + 1)
     elif data[idx] == "{":
-        result, idx = parse_dict(data_object, idx=idx + 1)
+        result, idx = parse_dict(data, idx=idx + 1)
     else:
-        data_object.data += "\n}"
-        result, idx = parse_dict(data_object, idx=idx)
-    assert_no_content_left(data_object, idx)
+        data.data += "\n}"
+        result, idx = parse_dict(data, idx=idx)
+    assert_no_content_left(data, idx)
     return result
 
 
@@ -130,22 +133,7 @@ def parse_list_element(data: ParserInput, idx: int, current_keypath: list[str]) 
 def parse_include(data: ParserInput, idx: int, current_keypath: list[str]) -> tuple[dict, int]:
     """We start parsing right after 'include' phrase here."""
     idx = eat_whitespace_and_comments(data, idx)
-    external_file, idx = parse_include_value(data, idx)
-    if not external_file.required and not external_file.path.exists():
-        return {}, idx
-    external_input = ParserInput(
-        data=external_file.path.read_text(encoding=data.encoding),
-        absolute_filepath=external_file.path,
-        root_path=data.root_path + current_keypath,
-    )
-    ext_idx = eat_whitespace_and_comments(external_input, 0)
-    if external_input[ext_idx] == "[":
-        msg = "An included file must contain an object, not an array."
-        raise HOCONIncludeError(msg)
-    if external_input[ext_idx] == "{":
-        external_dict, ext_idx = parse_dict(external_input, idx=ext_idx + 1, current_keypath=current_keypath)
-    else:
-        external_input.data += "\n}"
-        external_dict, ext_idx = parse_dict(external_input, idx=ext_idx, current_keypath=current_keypath)
-    assert_no_content_left(external_input, ext_idx)
+    external_parsed, idx = parse_include_value(data, idx)
+    external_parsed.root_path = data.root_path + current_keypath
+    external_dict = _parse(external_parsed)
     return external_dict, idx

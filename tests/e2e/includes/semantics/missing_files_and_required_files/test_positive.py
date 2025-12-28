@@ -23,3 +23,9 @@ def test_required():
     conf_filepath = Path(__file__).parent / "data" / "required.conf"
     result = hocon.load(open(conf_filepath))
     assert result == {"a": 1, "b": 2, "c": 3}
+
+
+def test_file():
+    conf_filepath = Path(__file__).parent / "data" / "file.conf"
+    result = hocon.load(open(conf_filepath))
+    assert result == {"a": 1, "b": 2, "c": 3, "d": 4}
