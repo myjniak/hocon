@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.0
+- Implemented required() in include syntax
+
 ## 0.3.2
 - Fixed UnresolvedSubstitution hashing
 - Changed __repr__ for UnresolvedConcatenation and UnresolvedDuplication
