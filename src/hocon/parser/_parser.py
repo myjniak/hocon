@@ -3,7 +3,6 @@ from typing import Any
 
 from hocon.constants import ROOT_TYPE
 from hocon.exceptions import (
-    HOCONExcessiveDataError,
     HOCONIncludeError,
     HOCONNoDataError,
 )
@@ -17,10 +16,11 @@ from ._eat import (
     eat_whitespace,
     eat_whitespace_and_comments,
 )
+from ._include import parse_include_value
 from ._key import parse_keypath
-from ._quoted_string import parse_quoted_string
 from ._simple_value import parse_simple_value
 from ._value_utils import (
+    assert_no_content_left,
     convert_iadd_to_self_referential_substitution,
     merge_unconcatenated,
 )
@@ -41,7 +41,7 @@ def parse(data: str, root_filepath: str | Path | None = None, encoding: str = "U
     else:
         data_object.data += "\n}"
         result, idx = parse_dict(data_object, idx=idx)
-    _assert_no_content_left(data_object, idx)
+    assert_no_content_left(data_object, idx)
     return result
 
 
@@ -130,19 +130,12 @@ def parse_list_element(data: ParserInput, idx: int, current_keypath: list[str]) 
 def parse_include(data: ParserInput, idx: int, current_keypath: list[str]) -> tuple[dict, int]:
     """We start parsing right after 'include' phrase here."""
     idx = eat_whitespace_and_comments(data, idx)
-    if data[idx : idx + 3] == '"""' or data[idx] != '"':
-        msg = "Only single quoted include filepaths are supported."
-        raise HOCONIncludeError(msg)
-    string, idx = parse_quoted_string(data, idx + 1)
-    external_filepath = Path(data.absolute_filepath).parent / string
-    try:
-        with Path(external_filepath).open("r", encoding=data.encoding) as conf:
-            external_file_content = conf.read()
-    except FileNotFoundError:
+    external_file, idx = parse_include_value(data, idx)
+    if not external_file.required and not external_file.path.exists():
         return {}, idx
     external_input = ParserInput(
-        data=external_file_content,
-        absolute_filepath=external_filepath,
+        data=external_file.path.read_text(encoding=data.encoding),
+        absolute_filepath=external_file.path,
         root_path=data.root_path + current_keypath,
     )
     ext_idx = eat_whitespace_and_comments(external_input, 0)
@@ -154,18 +147,5 @@ def parse_include(data: ParserInput, idx: int, current_keypath: list[str]) -> tu
     else:
         external_input.data += "\n}"
         external_dict, ext_idx = parse_dict(external_input, idx=ext_idx, current_keypath=current_keypath)
-    _assert_no_content_left(external_input, ext_idx)
+    assert_no_content_left(external_input, ext_idx)
     return external_dict, idx
-
-
-def _assert_no_content_left(data: ParserInput, idx: int) -> None:
-    try:
-        while True:
-            old_idx = idx
-            idx = eat_whitespace(data, idx)
-            idx = eat_comments(data, idx)
-            if idx == old_idx:
-                msg = "Excessive meaningful data outside of the HOCON structure."
-                raise HOCONExcessiveDataError(msg)
-    except IndexError:
-        return

@@ -3,6 +3,9 @@
 from copy import deepcopy
 from functools import reduce
 
+from hocon.exceptions import HOCONExcessiveDataError
+from hocon.parser._data import ParserInput
+from hocon.parser._eat import eat_comments, eat_whitespace
 from hocon.unresolved import (
     UnresolvedConcatenation,
     UnresolvedDuplication,
@@ -54,3 +57,16 @@ def convert_iadd_to_self_referential_substitution(
             [concatenation],
         ],
     )
+
+
+def assert_no_content_left(data: ParserInput, idx: int) -> None:
+    try:
+        while True:
+            old_idx = idx
+            idx = eat_whitespace(data, idx)
+            idx = eat_comments(data, idx)
+            if idx == old_idx:
+                msg = "Excessive meaningful data outside of the HOCON structure."
+                raise HOCONExcessiveDataError(msg)
+    except IndexError:
+        return

@@ -31,9 +31,9 @@ def _parse_unquoted_string_key(data: ParserInput, idx: int) -> tuple[UnquotedStr
     string = ""
     while True:
         char = data[idx]
+        if string == "include":
+            return UnquotedString(string), idx
         if char == "\n":
-            if string == "include":
-                return UnquotedString(string), idx
             msg = "Encountered newline before key-value separator."
             raise HOCONInvalidKeyError(msg)
         if char in string_end or data[idx : idx + 2] == "//":
