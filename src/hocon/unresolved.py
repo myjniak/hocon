@@ -33,7 +33,7 @@ class UnresolvedConcatenation(list):
 
     def sanitize(self) -> Self:
         concatenation = self._filter_out_undefined_substitutions()
-        if any(isinstance(value, (list, dict)) for value in concatenation):
+        if any(type(value) in [list, dict] for value in concatenation):
             concatenation = concatenation.filter_out_unquoted_space()
         elif any(isinstance(value, str) for value in concatenation):
             concatenation = concatenation.strip_unquoted_space()
