@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from itertools import count
-from typing import Any, Self
+from typing import Any, Self, get_args
 
 from hocon.constants import SIMPLE_VALUE_TYPE, UNDEFINED
 from hocon.exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError
@@ -15,7 +15,8 @@ class UnresolvedConcatenation(list):
     def get_type(self) -> type[list[Any] | dict[Any, Any] | str]:
         concat_types = {type(value) for value in self}
         concat_types.discard(UnresolvedSubstitution)
-        if all(issubclass(concat_type, SIMPLE_VALUE_TYPE) for concat_type in concat_types):
+        simple_value_classes = get_args(SIMPLE_VALUE_TYPE)
+        if all(issubclass(concat_type, simple_value_classes) for concat_type in concat_types):
             return str
         if len(concat_types) > 1:
             type_names = [concat_type.__name__ for concat_type in concat_types]
@@ -72,7 +73,7 @@ class UnresolvedDuplication(list):
             msg = "Unresolved duplicate key must contain at least 2 elements."
             raise HOCONDuplicateKeyMergeError(msg)
         for index in reversed(range(len(self))):
-            if not isinstance(self[index], (dict, ANY_UNRESOLVED)):
+            if not isinstance(self[index], dict | ANY_UNRESOLVED):
                 return UnresolvedDuplication([*self[index + 1 :]])
         return self
 

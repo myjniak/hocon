@@ -3,6 +3,7 @@
 ## 0.4.0
 - Implemented required() function in include syntax
 - Implemented file() function in include syntax
+- Almost doubled the library performance
 
 ## 0.3.2
 - Fixed UnresolvedSubstitution hashing
