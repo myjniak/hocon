@@ -2,7 +2,7 @@ import operator
 from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import dataclass
-from functools import reduce, singledispatch
+from functools import cache, reduce, singledispatch
 from typing import Any, get_args
 
 from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED
@@ -17,7 +17,7 @@ from hocon.unresolved import (
 
 
 @singledispatch
-def resolve(values: Any) -> Any:
+def resolve(values: Any) -> ANY_VALUE_TYPE | ANY_UNRESOLVED:
     msg = f"Bad input value type: {type(values)}"
     raise NotImplementedError(msg)
 
@@ -68,11 +68,14 @@ def _(values: UnresolvedDuplication) -> ANY_VALUE_TYPE | UnresolvedDuplication:
     values = values.sanitize()
     last_value = resolve(values[-1])
     deduplicated = UnresolvedDuplication([last_value])
-    if not isinstance(last_value, (dict, ANY_UNRESOLVED)):
+    if not isinstance(last_value, dict | ANY_UNRESOLVED):
         return last_value
     for value in reversed(values[:-1]):
         maybe_resolved_value = resolve(value)
-        if isinstance(maybe_resolved_value, ANY_UNRESOLVED) or isinstance(deduplicated[0], ANY_UNRESOLVED):
+        if isinstance(maybe_resolved_value, get_args(ANY_UNRESOLVED)) or isinstance(
+            deduplicated[0],
+            get_args(ANY_UNRESOLVED),
+        ):
             deduplicated.insert(0, maybe_resolved_value)
         elif isinstance(maybe_resolved_value, dict):
             if isinstance(deduplicated[0], dict):
@@ -86,14 +89,21 @@ def _(values: UnresolvedDuplication) -> ANY_VALUE_TYPE | UnresolvedDuplication:
     return deduplicated
 
 
-def _get_concatenator(values: UnresolvedConcatenation) -> Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]:
-    @dataclass(frozen=True)
-    class ConcatenationType:
-        type: type[list | dict | str]
-        has_substitutions: bool
+@dataclass(frozen=True)
+class ConcatenationType:
+    type: type[list | dict | str]
+    has_substitutions: bool
 
+
+def _get_concatenator(values: UnresolvedConcatenation) -> Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]:
+    concatenate_functions = _get_concatenators()
     concat_type = ConcatenationType(type=values.get_type(), has_substitutions=values.has_substitutions())
-    concatenate_functions: dict[ConcatenationType, Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]] = {
+    return concatenate_functions.get(concat_type)
+
+
+@cache
+def _get_concatenators() -> dict[ConcatenationType, Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]]:
+    return {
         ConcatenationType(list, True): _concatenate_lists_with_subs,
         ConcatenationType(dict, True): _concatenate_dicts_with_subs,
         ConcatenationType(str, True): _concatenate_simple_values_with_subs,
@@ -101,7 +111,6 @@ def _get_concatenator(values: UnresolvedConcatenation) -> Callable[[UnresolvedCo
         ConcatenationType(dict, False): _concatenate_dicts,
         ConcatenationType(str, False): _concatenate_simple_values,
     }
-    return concatenate_functions.get(concat_type)
 
 
 def _concatenate_dicts_with_subs(values: UnresolvedConcatenation) -> dict | UnresolvedConcatenation:
@@ -208,7 +217,7 @@ def merge(superior: dict, inferior: dict) -> dict | UnresolvedConcatenation:
     result = deepcopy(inferior)
     for key, value in superior.items():
         inferior_value = result.get(key)
-        if isinstance(inferior_value, ANY_UNRESOLVED):
+        if isinstance(inferior_value, get_args(ANY_UNRESOLVED)):
             inferior_value = resolve(inferior_value)
         if isinstance(value, dict) and isinstance(inferior_value, dict):
             result[key] = merge(value, inferior_value)

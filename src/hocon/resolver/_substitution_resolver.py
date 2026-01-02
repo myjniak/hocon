@@ -1,6 +1,6 @@
 import os
 from collections.abc import Callable
-from typing import Any
+from typing import Any, get_args
 
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, UNDEFINED
 from hocon.exceptions import (
@@ -21,7 +21,7 @@ class SubstitutionResolver:
         resolve_value_func: Callable[[Any], ANY_VALUE_TYPE],
         substitutions: dict[int, Substitution] | None = None,
     ) -> None:
-        self._parsed = parsed
+        self._parsed: ANY_VALUE_TYPE | ANY_UNRESOLVED = parsed
         self.resolve_value = resolve_value_func
         self.subs: dict[int, Substitution] = substitutions or {}
 
@@ -43,9 +43,9 @@ class SubstitutionResolver:
         return subvalue
 
     def _try_resolve(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
-        value: ANY_VALUE_TYPE | ANY_UNRESOLVED = self._parsed
+        value = self._parsed
         for key in substitution.keys:
-            if isinstance(value, ANY_UNRESOLVED):
+            if isinstance(value, get_args(ANY_UNRESOLVED)):
                 value = self.resolve_value(value)
             if isinstance(value, dict) and key in value:
                 value = value[key]
