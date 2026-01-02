@@ -5,7 +5,7 @@ from functools import reduce, singledispatchmethod
 from typing import TYPE_CHECKING, Never, get_args
 
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED
-from hocon.exceptions import HOCONConcatenationError, HOCONDeduplicationError
+from hocon.exceptions import HOCONDeduplicationError
 from hocon.resolver._simple_value import resolve_simple_value
 from hocon.unresolved import (
     UnresolvedConcatenation,
@@ -65,9 +65,6 @@ class Resolver:
     def _(self, values: UnresolvedConcatenation) -> ANY_VALUE_TYPE:
         values = self.resolve_substitutions(values)
         values = values.sanitize()
-        if any(isinstance(value, (UnresolvedConcatenation, UnresolvedDuplication)) for value in values):
-            msg = "Something went horribly wrong. This is a bug."
-            raise HOCONConcatenationError(msg)
         if not values:
             return UNDEFINED
         if len(values) == 1 and type(values[0]) in (*get_args(SIMPLE_VALUE_TYPE), UnresolvedSubstitution):
@@ -106,20 +103,14 @@ class Resolver:
     def _concatenate_dicts(self, values: UnresolvedConcatenation) -> dict:
         return self.resolve(reduce(self.merge, reversed(values)))
 
-    def _concatenate_simple_values(self, values: UnresolvedConcatenation) -> str:
-        if not all(isinstance(value, SIMPLE_VALUE_TYPE) for value in values):
-            types = {type(value) for value in values}
-            msg = f"Concatenation of types {types} not allowed."
-            raise HOCONConcatenationError(msg)
+    @staticmethod
+    def _concatenate_simple_values(values: UnresolvedConcatenation) -> str:
         for i in range(len(values)):
             if not isinstance(values[i], str):
                 values[i] = json.dumps(values[i])
         return resolve_simple_value(values)
 
     def _concatenate_lists(self, values: UnresolvedConcatenation) -> list:
-        if not all(isinstance(value, list) for value in values):
-            msg = "Something went horribly wrong. This is a bug."
-            raise HOCONConcatenationError(msg)
         resolved_lists: list[ANY_VALUE_TYPE] = [self.resolve(value) for value in values]
         return reduce(operator.iadd, resolved_lists, [])
 
