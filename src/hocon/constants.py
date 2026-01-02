@@ -42,4 +42,10 @@ SECTION_CLOSING = "}]"
 SIMPLE_VALUE_TYPE = int | float | str | bool | None
 ANY_VALUE_TYPE = dict[Any, Any] | list[Any] | int | float | str | bool | None
 ROOT_TYPE = list[Any] | dict[Any, Any]
-UNDEFINED = object()
+
+
+class Undefined:
+    pass
+
+
+UNDEFINED = Undefined()

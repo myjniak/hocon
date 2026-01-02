@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.1
+- mypy fixes for bad arg-types
+
 ## 0.4.0
 - Implemented required() function in include syntax
 - Implemented file() function in include syntax

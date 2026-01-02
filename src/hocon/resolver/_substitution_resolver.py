@@ -21,7 +21,7 @@ class SubstitutionResolver:
         resolve_value_func: Callable[[Any], ANY_VALUE_TYPE],
         substitutions: dict[int, Substitution] | None = None,
     ) -> None:
-        self._parsed: ANY_VALUE_TYPE | ANY_UNRESOLVED = parsed
+        self._parsed: ROOT_TYPE = parsed
         self.resolve_value = resolve_value_func
         self.subs: dict[int, Substitution] = substitutions or {}
 
@@ -43,7 +43,7 @@ class SubstitutionResolver:
         return subvalue
 
     def _try_resolve(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
-        value = self._parsed
+        value: ANY_VALUE_TYPE | ANY_UNRESOLVED = self._parsed
         for key in substitution.keys:
             if isinstance(value, get_args(ANY_UNRESOLVED)):
                 value = self.resolve_value(value)

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Self
 
-from hocon.constants import ANY_VALUE_TYPE
+from hocon.constants import ANY_VALUE_TYPE, Undefined
 
 
 class SubstitutionStatus(Enum):
@@ -27,5 +27,5 @@ class SubstitutionStatus(Enum):
 
 @dataclass
 class Substitution:
-    value: ANY_VALUE_TYPE = None
+    value: ANY_VALUE_TYPE | Undefined = None
     status: SubstitutionStatus = SubstitutionStatus.UNRESOLVED
