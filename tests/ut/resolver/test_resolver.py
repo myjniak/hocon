@@ -1,8 +1,8 @@
 import pytest
 
 from hocon.constants import UNDEFINED
-from hocon.exceptions import HOCONConcatenationError, HOCONDeduplicationError
-from hocon.resolver._resolver import Resolver
+from hocon.exceptions import HOCONConcatenationError, HOCONDeduplicationError, HOCONError
+from hocon.resolver._resolver import Resolver, resolve
 from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication
 
 
@@ -33,3 +33,8 @@ def test_concatenation_cant_contain_concatenations():
     concatenation = UnresolvedConcatenation([UnresolvedConcatenation([5])])
     with pytest.raises(HOCONConcatenationError):
         Resolver({}).resolve(concatenation)
+
+
+def test_lazy_resolver_bad_return_type():
+    with pytest.raises(HOCONError, match="lazy resolver returned <class 'int'>"):
+        resolve(5)

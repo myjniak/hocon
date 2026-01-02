@@ -2,10 +2,10 @@ import json
 import operator
 from copy import deepcopy
 from functools import reduce, singledispatchmethod
-from typing import TYPE_CHECKING, Never, get_args
+from typing import TYPE_CHECKING, get_args
 
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED
-from hocon.exceptions import HOCONDeduplicationError
+from hocon.exceptions import HOCONDeduplicationError, HOCONError
 from hocon.resolver._simple_value import resolve_simple_value
 from hocon.unresolved import (
     UnresolvedConcatenation,
@@ -22,6 +22,9 @@ if TYPE_CHECKING:
 
 def resolve(parsed: ROOT_TYPE) -> ROOT_TYPE:
     lazy_resolved = _lazy_resolver.resolve(parsed)
+    if not isinstance(lazy_resolved, (list, dict)):
+        msg = f"Fatal error: lazy resolver returned {type(lazy_resolved)}! Only lists and dicts are valid HOCONs!"
+        raise HOCONError(msg)
     resolver = Resolver(lazy_resolved)
     return resolver.resolve(lazy_resolved)
 
@@ -31,12 +34,12 @@ class Resolver:
         self.resolve_substitution = SubstitutionResolver(parsed, self.resolve)
 
     @singledispatchmethod
-    def resolve(self, values) -> Never:
+    def resolve(self, values):
         msg = f"Bad input value type: {type(values)}"
         raise NotImplementedError(msg)
 
     @resolve.register
-    def _(self, values: SIMPLE_VALUE_TYPE) -> ANY_VALUE_TYPE:
+    def _(self, values: SIMPLE_VALUE_TYPE) -> SIMPLE_VALUE_TYPE:
         return values
 
     @resolve.register
