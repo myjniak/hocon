@@ -104,7 +104,7 @@ def _get_concatenator(values: UnresolvedConcatenation) -> Callable[[UnresolvedCo
     return concatenate_functions.get(concat_type)
 
 
-def _concatenate_dicts_with_subs(values: UnresolvedConcatenation) -> UnresolvedConcatenation:
+def _concatenate_dicts_with_subs(values: UnresolvedConcatenation) -> dict | UnresolvedConcatenation:
     return reduce(merge_dict_concatenation, reversed(values))
 
 

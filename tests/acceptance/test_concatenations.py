@@ -65,3 +65,29 @@ def test_dicts_with_subs():
             "e": 5,
         },
     }
+
+
+def test_lazy_concatenating_with_substitution():
+    """When 2 out of 3 neighboring elements of concatenation are dicts, lazy_resolver should merge them before
+     resolving the substitution."""
+    data = """
+    x = { a: 1, b: 1.5 } { b: 2, c: 2.5 } ${y}
+    y = { c: 3, d: 4 }
+    """
+    assert loads(data) == {
+        "x": {"a": 1, "b": 2, "c": 3, "d": 4},
+        "y": {"c": 3, "d": 4}
+    }
+
+
+def test_lazy_concatenating_with_substitution_2():
+    """When 2 out of 3 neighboring elements of concatenation are dicts, lazy_resolver should merge them before
+    resolving the substitution."""
+    data = """
+    x = ${y} { a: 1, b: 1.5 } { b: 2, c: 2.5 }
+    y = { c: 3, d: 4 }
+    """
+    assert loads(data) == {
+        "x": {"a": 1, "b": 2, "c": 2.5, "d": 4},
+        "y": {"c": 3, "d": 4}
+    }
