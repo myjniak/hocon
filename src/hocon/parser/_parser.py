@@ -39,13 +39,19 @@ def _parse(data: ParserInput, idx: int = 0) -> ROOT_TYPE:
     idx = eat_whitespace_and_comments(data, idx)
     if data[idx] == "[":
         result, idx = parse_list(data, idx=idx + 1)
-    elif data[idx] == "{":
+    else:
+        result, idx = _parse_root_dict(data, idx=idx)
+    assert_no_content_left(data, idx)
+    return result
+
+
+def _parse_root_dict(data: ParserInput, idx: int = 0) -> tuple[dict, int]:
+    if data[idx] == "{":
         result, idx = parse_dict(data, idx=idx + 1)
     else:
         data.data += "\n}"
         result, idx = parse_dict(data, idx=idx)
-    assert_no_content_left(data, idx)
-    return result
+    return result, idx
 
 
 def parse_dict(data: ParserInput, idx: int = 0, current_keypath: list[str] | None = None) -> tuple[dict, int]:
@@ -135,5 +141,7 @@ def parse_include(data: ParserInput, idx: int, current_keypath: list[str]) -> tu
     idx = eat_whitespace_and_comments(data, idx)
     external_parsed, idx = parse_include_value(data, idx)
     external_parsed.root_path = data.root_path + current_keypath
-    external_dict = _parse(external_parsed)
+    ext_idx = eat_whitespace_and_comments(external_parsed, 0)
+    external_dict, ext_idx = _parse_root_dict(external_parsed, idx=ext_idx)
+    assert_no_content_left(external_parsed, ext_idx)
     return external_dict, idx

@@ -1,7 +1,8 @@
 # Changelog
 
-## 0.4.1
-- mypy fixes for bad arg-types
+## 0.5.0
+- Turn UNDEFINED to an instance of class Undefined
+- Fixed all typing problems detected with mypy
 
 ## 0.4.0
 - Implemented required() function in include syntax

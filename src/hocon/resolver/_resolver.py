@@ -4,7 +4,7 @@ from copy import deepcopy
 from functools import reduce, singledispatchmethod
 from typing import TYPE_CHECKING, get_args
 
-from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED
+from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED, Undefined
 from hocon.exceptions import HOCONDeduplicationError, HOCONError
 from hocon.resolver._simple_value import resolve_simple_value
 from hocon.unresolved import (
@@ -61,11 +61,11 @@ class Resolver:
         return resolved_dict
 
     @resolve.register
-    def _(self, values: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
+    def _(self, values: UnresolvedSubstitution) -> ANY_VALUE_TYPE | Undefined:
         return self.resolve_substitution(values)
 
     @resolve.register
-    def _(self, values: UnresolvedConcatenation) -> ANY_VALUE_TYPE:
+    def _(self, values: UnresolvedConcatenation) -> ANY_VALUE_TYPE | Undefined:
         values = self.resolve_substitutions(values)
         values = values.sanitize()
         if not values:
@@ -107,7 +107,7 @@ class Resolver:
         return self.resolve(reduce(self.merge, reversed(values)))
 
     @staticmethod
-    def _concatenate_simple_values(values: UnresolvedConcatenation) -> str:
+    def _concatenate_simple_values(values: UnresolvedConcatenation) -> SIMPLE_VALUE_TYPE:
         for i in range(len(values)):
             if not isinstance(values[i], str):
                 values[i] = json.dumps(values[i])
@@ -130,11 +130,14 @@ class Resolver:
         """If both values are objects, then the objects are merged.
         If keys overlap, the latter wins.
         """
+        resolved_inferior: ANY_VALUE_TYPE | Undefined
         if isinstance(inferior, UnresolvedSubstitution):
-            inferior = self.resolve_substitution(inferior)
-        if not isinstance(inferior, dict):
+            resolved_inferior = self.resolve_substitution(inferior)
+        else:
+            resolved_inferior = inferior
+        if not isinstance(resolved_inferior, dict):
             return superior
-        result = deepcopy(inferior)
+        result = deepcopy(resolved_inferior)
         for key, value in superior.items():
             inferior_value = result.get(key)
             if isinstance(value, dict) and isinstance(inferior_value, dict):

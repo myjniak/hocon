@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from functools import cache, reduce, singledispatch
 from typing import Any, get_args
 
-from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED
+from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED, Undefined
 from hocon.exceptions import HOCONConcatenationError
 from hocon.resolver._simple_value import resolve_simple_value
 from hocon.unresolved import (
@@ -17,7 +17,7 @@ from hocon.unresolved import (
 
 
 @singledispatch
-def resolve(values: Any) -> ANY_VALUE_TYPE | ANY_UNRESOLVED:
+def resolve(values):
     msg = f"Bad input value type: {type(values)}"
     raise NotImplementedError(msg)
 
@@ -48,7 +48,7 @@ def _(values: dict) -> dict[Any, Any]:
 
 
 @resolve.register
-def _(values: UnresolvedConcatenation) -> ANY_VALUE_TYPE | UnresolvedConcatenation:
+def _(values: UnresolvedConcatenation) -> Undefined | ANY_VALUE_TYPE | UnresolvedSubstitution | UnresolvedConcatenation:
     values = values.sanitize()
     if not values:
         return UNDEFINED
@@ -95,14 +95,19 @@ class ConcatenationType:
     has_substitutions: bool
 
 
-def _get_concatenator(values: UnresolvedConcatenation) -> Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]:
+def _get_concatenator(
+    values: UnresolvedConcatenation,
+) -> Callable[[UnresolvedConcatenation], dict | list | SIMPLE_VALUE_TYPE | UnresolvedConcatenation]:
     concatenate_functions = _get_concatenators()
     concat_type = ConcatenationType(type=values.get_type(), has_substitutions=values.has_substitutions())
-    return concatenate_functions.get(concat_type)
+    return concatenate_functions[concat_type]
 
 
 @cache
-def _get_concatenators() -> dict[ConcatenationType, Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]]:
+def _get_concatenators() -> dict[
+    ConcatenationType,
+    Callable[[UnresolvedConcatenation], dict | list | SIMPLE_VALUE_TYPE | UnresolvedConcatenation],
+]:
     return {
         ConcatenationType(list, True): _concatenate_lists_with_subs,
         ConcatenationType(dict, True): _concatenate_dicts_with_subs,
@@ -154,7 +159,7 @@ def _concatenate_simple_values(
     values: UnresolvedConcatenation,
     strip_left: bool = True,
     strip_right: bool = True,
-) -> str:
+) -> SIMPLE_VALUE_TYPE:
     if not all(isinstance(value, str) for value in values):
         types = {type(value).__name__ for value in values}
         msg = f"Lazy concatenation of types {types} not allowed."
@@ -184,7 +189,7 @@ def _concatenate_lists(values: UnresolvedConcatenation) -> list:
 
 
 @singledispatch
-def merge_dict_concatenation(superior, inferior: dict | UnresolvedSubstitution) -> dict | UnresolvedConcatenation:
+def merge_dict_concatenation(superior, inferior: dict | UnresolvedSubstitution):
     msg = f"Bad input value type: {type(superior)}"
     raise NotImplementedError(msg)
 

@@ -2,7 +2,7 @@ import os
 from collections.abc import Callable
 from typing import Any, get_args
 
-from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, UNDEFINED
+from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, UNDEFINED, Undefined
 from hocon.exceptions import (
     HOCONSubstitutionCycleError,
     HOCONSubstitutionUndefinedError,
@@ -25,7 +25,7 @@ class SubstitutionResolver:
         self.resolve_value = resolve_value_func
         self.subs: dict[int, Substitution] = substitutions or {}
 
-    def __call__(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
+    def __call__(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE | Undefined:
         cached_sub = self.subs.get(substitution.id_, Substitution())
         if cached_sub.status.is_resolved:
             return cached_sub.value
@@ -42,8 +42,8 @@ class SubstitutionResolver:
         self.subs[substitution.id_] = Substitution(value=subvalue, status=SubstitutionStatus.RESOLVED)
         return subvalue
 
-    def _try_resolve(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
-        value: ANY_VALUE_TYPE | ANY_UNRESOLVED = self._parsed
+    def _try_resolve(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE | Undefined:
+        value: ANY_VALUE_TYPE | ANY_UNRESOLVED | Undefined = self._parsed
         for key in substitution.keys:
             if isinstance(value, get_args(ANY_UNRESOLVED)):
                 value = self.resolve_value(value)
@@ -72,7 +72,7 @@ class SubstitutionResolver:
             raise HOCONSubstitutionCycleError(msg)
         self.subs[substitution.id_] = Substitution(status=new_status)
 
-    def _resolve_sub_from_env(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
+    def _resolve_sub_from_env(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE | Undefined:
         resolved_sub = get_from_env(substitution)
         if resolved_sub.status == SubstitutionStatus.UNDEFINED and substitution.optional is False:
             resolving_status = self.subs[substitution.id_].status
@@ -87,7 +87,7 @@ class SubstitutionResolver:
         self.subs[substitution.id_] = resolved_sub
         return resolved_sub.value
 
-    def resolve_substitution_fallback(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE:
+    def resolve_substitution_fallback(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE | Undefined:
         """In case of self-referencial substitutions, try to resolve them by removing the self-reference, and
         nodes after that.
         For example for:
