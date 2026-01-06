@@ -17,7 +17,7 @@ from hocon.unresolved import (
 
 
 @singledispatch
-def resolve(values):
+def resolve(values: ANY_VALUE_TYPE | ANY_UNRESOLVED) -> Undefined | ANY_VALUE_TYPE | ANY_UNRESOLVED:
     msg = f"Bad input value type: {type(values)}"
     raise NotImplementedError(msg)
 
@@ -39,12 +39,7 @@ def _(values: list) -> list[Any]:
 
 @resolve.register
 def _(values: dict) -> dict[Any, Any]:
-    resolved_dict = {}
-    for key, value in values.items():
-        resolved_value = resolve(value)
-        if resolved_value is not UNDEFINED:
-            resolved_dict[key] = resolved_value
-    return resolved_dict
+    return _resolve_dict(values)
 
 
 @resolve.register
@@ -52,8 +47,15 @@ def _(values: UnresolvedConcatenation) -> Undefined | ANY_VALUE_TYPE | Unresolve
     values = values.sanitize()
     if not values:
         return UNDEFINED
-    if len(values) == 1 and type(values[0]) in (*get_args(SIMPLE_VALUE_TYPE), UnresolvedSubstitution):
-        return values[0]
+    first_value = values[0]
+    if len(values) == 1 and (
+        type(first_value) is str
+        or type(first_value) is int
+        or type(first_value) is bool
+        or type(first_value) is None
+        or type(first_value) is UnresolvedSubstitution
+    ):
+        return first_value
     concatenate_function = _get_concatenator(values)
     return concatenate_function(values)
 
@@ -68,7 +70,7 @@ def _(values: UnresolvedDuplication) -> ANY_VALUE_TYPE | UnresolvedDuplication:
     values = values.sanitize()
     last_value = resolve(values[-1])
     deduplicated = UnresolvedDuplication([last_value])
-    if not isinstance(last_value, dict | ANY_UNRESOLVED):
+    if isinstance(last_value, SIMPLE_VALUE_TYPE) or type(last_value) is list:
         return last_value
     for value in reversed(values[:-1]):
         maybe_resolved_value = resolve(value)
@@ -84,9 +86,18 @@ def _(values: UnresolvedDuplication) -> ANY_VALUE_TYPE | UnresolvedDuplication:
                 deduplicated.insert(0, maybe_resolved_value)
         else:
             break
-    if len(deduplicated) == 1:
+    if len(deduplicated) == 1 and isinstance(deduplicated[0], ANY_VALUE_TYPE):
         return deduplicated[0]
     return deduplicated
+
+
+def _resolve_dict(values: dict) -> dict[Any, Any]:
+    resolved_dict = {}
+    for key, value in values.items():
+        resolved_value = resolve(value)
+        if resolved_value is not UNDEFINED:
+            resolved_dict[key] = resolved_value
+    return resolved_dict
 
 
 @dataclass(frozen=True)
@@ -122,8 +133,8 @@ def _concatenate_dicts_with_subs(values: UnresolvedConcatenation) -> dict | Unre
     return reduce(merge_dict_concatenation, reversed(values))
 
 
-def _concatenate_dicts(values: UnresolvedConcatenation) -> dict:
-    return resolve(reduce(merge, reversed(values)))
+def _concatenate_dicts(values: list[dict]) -> dict:
+    return _resolve_dict(reduce(merge, reversed(values)))
 
 
 def _concatenate_simple_values_with_subs(values: UnresolvedConcatenation) -> UnresolvedConcatenation:
@@ -215,7 +226,7 @@ def _(superior: UnresolvedConcatenation, inferior: dict | UnresolvedSubstitution
     return superior
 
 
-def merge(superior: dict, inferior: dict) -> dict | UnresolvedConcatenation:
+def merge(superior: dict, inferior: dict) -> dict:
     """If both values are objects, then the objects are merged.
     If keys overlap, the latter wins.
     """

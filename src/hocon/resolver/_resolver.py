@@ -46,8 +46,8 @@ class Resolver:
     def _(self, values: list) -> list:
         resolved_list: list[ANY_VALUE_TYPE] = []
         for element in values:
-            resolved_elem: ANY_VALUE_TYPE = self.resolve(element)
-            if resolved_elem is not UNDEFINED:
+            resolved_elem: ANY_VALUE_TYPE | Undefined = self.resolve(element)
+            if not isinstance(resolved_elem, Undefined):
                 resolved_list.append(resolved_elem)
         return resolved_list
 
@@ -55,8 +55,8 @@ class Resolver:
     def _(self, values: dict) -> dict:
         resolved_dict: dict[SIMPLE_VALUE_TYPE, ANY_VALUE_TYPE] = {}
         for key, value in values.items():
-            resolved_value: ANY_VALUE_TYPE = self.resolve(value)
-            if resolved_value is not UNDEFINED:
+            resolved_value: ANY_VALUE_TYPE | Undefined = self.resolve(value)
+            if not isinstance(resolved_value, Undefined):
                 resolved_dict[key] = resolved_value
         return resolved_dict
 
@@ -81,7 +81,7 @@ class Resolver:
         return concatenate_functions[concat_type](values)
 
     @resolve.register
-    def _(self, values: UnresolvedDuplication) -> ANY_VALUE_TYPE:
+    def _(self, values: UnresolvedDuplication) -> ANY_VALUE_TYPE | Undefined:
         """Resolve duplication values starting from the last (latest overrides/merges with the rest).
         If it's a SIMPLE_VALUE_TYPE or a list, it overrides the rest.
         If it's a dict type, objects will merge.
@@ -117,9 +117,12 @@ class Resolver:
         resolved_lists: list[ANY_VALUE_TYPE] = [self.resolve(value) for value in values]
         return reduce(operator.iadd, resolved_lists, [])
 
-    def _resolve_latest_unresolved_duplication_element(self, values: UnresolvedDuplication) -> ANY_VALUE_TYPE:
+    def _resolve_latest_unresolved_duplication_element(
+        self,
+        values: UnresolvedDuplication,
+    ) -> ANY_VALUE_TYPE | Undefined:
         while True:
-            deduplicated: ANY_VALUE_TYPE = self.resolve(values[-1])
+            deduplicated: ANY_VALUE_TYPE | Undefined = self.resolve(values[-1])
             if deduplicated is UNDEFINED:
                 values.pop()
             else:
@@ -143,7 +146,7 @@ class Resolver:
             if isinstance(value, dict) and isinstance(inferior_value, dict):
                 result[key] = self.merge(value, inferior_value)
             else:
-                resolved_value: ANY_VALUE_TYPE = self.resolve(value)
+                resolved_value: ANY_VALUE_TYPE | Undefined = self.resolve(value)
                 if resolved_value is not UNDEFINED:
                     result[key] = resolved_value
         return result

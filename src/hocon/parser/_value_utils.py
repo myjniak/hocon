@@ -13,7 +13,11 @@ from hocon.unresolved import (
 )
 
 
-def merge_unconcatenated(unconcatenated_dictionary: dict, keys: list, unconcatenated_value: UnresolvedConcatenation):
+def merge_unconcatenated(
+    unconcatenated_dictionary: dict,
+    keys: list,
+    unconcatenated_value: UnresolvedConcatenation,
+) -> dict:
     def set_default(dictionary: dict, key: str) -> dict:
         value = dictionary.get(key)
         new_element: dict = {}
@@ -40,7 +44,7 @@ def convert_iadd_to_self_referential_substitution(
     concatenation: UnresolvedConcatenation,
     current_keypath: list[str],
     root_location: list[str],
-):
+) -> UnresolvedConcatenation:
     """Basically it turns this expression:
     a += 1
     To this:
