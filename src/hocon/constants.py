@@ -40,7 +40,7 @@ SECTION_OPENING = "{["
 SECTION_CLOSING = "}]"
 
 SIMPLE_VALUE_TYPE = int | float | str | bool | None
-ANY_VALUE_TYPE = dict[Any, Any] | list[Any] | SIMPLE_VALUE_TYPE
+ANY_VALUE_TYPE = dict | list | SIMPLE_VALUE_TYPE
 ROOT_TYPE = list[Any] | dict[Any, Any]
 
 
