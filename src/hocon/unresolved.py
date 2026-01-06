@@ -32,7 +32,7 @@ class UnresolvedConcatenation(list):
         concat_types = {type(value) for value in self}
         return UnresolvedSubstitution in concat_types
 
-    def sanitize(self) -> Self:
+    def sanitize(self) -> "UnresolvedConcatenation":
         concatenation = self._filter_out_undefined_substitutions()
         if any(type(value) in [list, dict] for value in concatenation):
             concatenation = concatenation.filter_out_unquoted_space()
@@ -41,13 +41,13 @@ class UnresolvedConcatenation(list):
         concatenation.get_type()
         return concatenation
 
-    def filter_out_unquoted_space(self) -> Self:
+    def filter_out_unquoted_space(self) -> "UnresolvedConcatenation":
         return UnresolvedConcatenation(filter(lambda v: not self._is_empty_unquoted_string(v), self))
 
-    def _filter_out_undefined_substitutions(self) -> Self:
+    def _filter_out_undefined_substitutions(self) -> "UnresolvedConcatenation":
         return UnresolvedConcatenation(filter(lambda v: v is not UNDEFINED, self))
 
-    def strip_unquoted_space(self) -> Self:
+    def strip_unquoted_space(self) -> "UnresolvedConcatenation":
         try:
             first = next(index for index, value in enumerate(self) if not self._is_empty_unquoted_string(value))
         except StopIteration:
@@ -74,7 +74,9 @@ class UnresolvedDuplication(list):
             raise HOCONDuplicateKeyMergeError(msg)
         for index in reversed(range(len(self))):
             if not isinstance(self[index], dict | ANY_UNRESOLVED):
-                return UnresolvedDuplication([*self[index + 1 :]])
+                for _ in range(index + 1):
+                    del self[0]
+                break
         return self
 
 
