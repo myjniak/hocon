@@ -1,8 +1,9 @@
 from copy import deepcopy
 
-from hocon.constants import ROOT_TYPE
+from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE
 from hocon.exceptions import HOCONSubstitutionUndefinedError
 from hocon.unresolved import (
+    ANY_UNRESOLVED,
     UnresolvedConcatenation,
     UnresolvedDuplication,
     UnresolvedSubstitution,
@@ -16,7 +17,7 @@ class _Cutter:
         self.is_sub_found: bool = False
         self.sub = sub
 
-    def cut(self, subtree: ROOT_TYPE, keypath_index: int = 0) -> None:
+    def cut(self, subtree: ANY_VALUE_TYPE | ANY_UNRESOLVED, keypath_index: int = 0) -> None:
         is_past_last_key = keypath_index == len(self.sub.location)
         if is_past_last_key:
             return self.final_cut(subtree, keypath_index=keypath_index)
@@ -31,7 +32,7 @@ class _Cutter:
             return self.cut_list(subtree, key, keypath_index, is_last_key)
         return None
 
-    def cut_list(self, subtree, key, keypath_index: int, is_last_key: bool):
+    def cut_list(self, subtree: list, key: str, keypath_index: int, is_last_key: bool) -> None:
         if not is_last_key:
             return self.cut(subtree[int(key)], keypath_index + 1)
         if subtree[int(key)] == self.sub or self.is_sub_found:
@@ -43,7 +44,7 @@ class _Cutter:
             del subtree[int(key)]
         return None
 
-    def cut_dict(self, subtree, key, keypath_index: int, is_last_key: bool):
+    def cut_dict(self, subtree: dict, key: str, keypath_index: int, is_last_key: bool) -> None:
         if not is_last_key:
             return self.cut(subtree[key], keypath_index + 1)
         if subtree[key] == self.sub or self.is_sub_found:
@@ -55,14 +56,14 @@ class _Cutter:
             subtree.pop(key)
         return None
 
-    def final_cut(self, subtree, keypath_index: int = 0):
+    def final_cut(self, subtree: ANY_VALUE_TYPE | ANY_UNRESOLVED, keypath_index: int = 0) -> None:
         if isinstance(subtree, UnresolvedDuplication):
             return self.cut_duplication(subtree, keypath_index=keypath_index)
         if isinstance(subtree, UnresolvedConcatenation):
             return self.cut_concatenation(subtree)
         raise HOCONSubstitutionUndefinedError(subtree)
 
-    def cut_duplication(self, subtree, keypath_index: int = 0) -> None:
+    def cut_duplication(self, subtree: UnresolvedDuplication, keypath_index: int = 0) -> None:
         for index, item in enumerate(subtree):
             if isinstance(item, UnresolvedConcatenation):
                 self.cut(item, keypath_index)
@@ -76,7 +77,7 @@ class _Cutter:
                 subtree.pop(index)
             index -= 1
 
-    def cut_concatenation(self, subtree) -> None:
+    def cut_concatenation(self, subtree: UnresolvedConcatenation) -> None:
         for index, item in enumerate(subtree):
             if item == self.sub or self.is_sub_found:
                 self.is_sub_found = True
