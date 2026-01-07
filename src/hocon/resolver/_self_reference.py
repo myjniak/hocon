@@ -27,12 +27,12 @@ class _Cutter:
             for item in subtree:
                 self.cut(item, keypath_index)
         elif type(subtree) is dict and key in subtree:
-            return self.cut_dict(subtree, key, keypath_index, is_last_key)
+            return self.cut_dict(subtree, key, keypath_index, is_last_key=is_last_key)
         elif type(subtree) is list and key.isdigit():
-            return self.cut_list(subtree, key, keypath_index, is_last_key)
+            return self.cut_list(subtree, key, keypath_index, is_last_key=is_last_key)
         return None
 
-    def cut_list(self, subtree: list, key: str, keypath_index: int, is_last_key: bool) -> None:
+    def cut_list(self, subtree: list, key: str, keypath_index: int, *, is_last_key: bool) -> None:
         if not is_last_key:
             return self.cut(subtree[int(key)], keypath_index + 1)
         if subtree[int(key)] == self.sub or self.is_sub_found:
@@ -44,7 +44,7 @@ class _Cutter:
             del subtree[int(key)]
         return None
 
-    def cut_dict(self, subtree: dict, key: str, keypath_index: int, is_last_key: bool) -> None:
+    def cut_dict(self, subtree: dict, key: str, keypath_index: int, *, is_last_key: bool) -> None:
         if not is_last_key:
             return self.cut(subtree[key], keypath_index + 1)
         if subtree[key] == self.sub or self.is_sub_found:

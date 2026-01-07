@@ -4,15 +4,15 @@ from hocon.constants import _FLOAT_CONSTANTS, NUMBER_RE, SIMPLE_VALUE_TYPE, WHIT
 from hocon.strings import QuotedString, UnquotedString
 
 
-def resolve_simple_value(chunks: list[str], strip_left: bool = True, strip_right: bool = True) -> SIMPLE_VALUE_TYPE:
-    chunks = _strip_string_list(chunks, strip_left, strip_right)
+def resolve_simple_value(chunks: list[str], *, strip_left: bool = True, strip_right: bool = True) -> SIMPLE_VALUE_TYPE:
+    chunks = _strip_string_list(chunks, left=strip_left, right=strip_right)
     joined = "".join(chunks)
     if len(chunks) == 1 and isinstance(chunks[0], UnquotedString):
         return _cast_string_value(joined)
     return joined
 
 
-def _strip_string_list(values: list[str], left: bool = True, right: bool = True) -> list[str]:
+def _strip_string_list(values: list[str], *, left: bool = True, right: bool = True) -> list[str]:
     if left:
         first = next(
             index for index, value in enumerate(values) if value.strip(WHITE_CHARS) or isinstance(value, QuotedString)
