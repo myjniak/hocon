@@ -2,12 +2,13 @@ import json
 import operator
 from copy import deepcopy
 from functools import reduce, singledispatchmethod
-from typing import TYPE_CHECKING, get_args
+from typing import TYPE_CHECKING, Never, get_args
 
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED, Undefined
 from hocon.exceptions import HOCONDeduplicationError, HOCONError
 from hocon.resolver._simple_value import resolve_simple_value
 from hocon.unresolved import (
+    ANY_UNRESOLVED,
     UnresolvedConcatenation,
     UnresolvedDuplication,
     UnresolvedSubstitution,
@@ -34,7 +35,7 @@ class Resolver:
         self.resolve_substitution = SubstitutionResolver(parsed, self.resolve)
 
     @singledispatchmethod
-    def resolve(self, values):
+    def resolve(self, values: ANY_VALUE_TYPE | ANY_UNRESOLVED) -> Never:
         msg = f"Bad input value type: {type(values)}"
         raise NotImplementedError(msg)
 

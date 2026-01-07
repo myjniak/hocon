@@ -129,7 +129,7 @@ def _get_concatenators() -> dict[
     }
 
 
-def _concatenate_dicts_with_subs(values: UnresolvedConcatenation) -> dict | UnresolvedConcatenation:
+def _concatenate_dicts_with_subs(values: list[dict | UnresolvedSubstitution]) -> dict | UnresolvedConcatenation:
     return reduce(merge_dict_concatenation, reversed(values))
 
 
@@ -200,7 +200,10 @@ def _concatenate_lists(values: UnresolvedConcatenation) -> list:
 
 
 @singledispatch
-def merge_dict_concatenation(superior, inferior: dict | UnresolvedSubstitution):
+def merge_dict_concatenation(
+    superior: dict | UnresolvedSubstitution | UnresolvedConcatenation,
+    inferior: dict | UnresolvedSubstitution,
+) -> dict | UnresolvedConcatenation:
     msg = f"Bad input value type: {type(superior)}"
     raise NotImplementedError(msg)
 
