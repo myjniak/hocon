@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from itertools import count
 from typing import Any, Self, get_args
 
-from hocon.constants import SIMPLE_VALUE_TYPE, UNDEFINED
+from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED
 from hocon.exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError
 from hocon.strings import UnquotedString
 
@@ -60,7 +60,7 @@ class UnresolvedConcatenation(list):
         return UnresolvedConcatenation(self[first:last])
 
     @staticmethod
-    def _is_empty_unquoted_string(value: Any) -> bool:
+    def _is_empty_unquoted_string(value: ANY_VALUE_TYPE) -> bool:
         return isinstance(value, UnquotedString) and value.is_empty()
 
 

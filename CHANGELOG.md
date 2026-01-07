@@ -3,6 +3,7 @@
 ## 0.5.0
 - Turn UNDEFINED to an instance of class Undefined
 - Fixed all typing problems detected with mypy
+- Satisfied some ruff checks
 
 ## 0.4.0
 - Implemented required() function in include syntax
