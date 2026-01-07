@@ -168,6 +168,7 @@ def _concatenate_simple_values_with_subs(values: UnresolvedConcatenation) -> Unr
 
 def _concatenate_simple_values(
     values: UnresolvedConcatenation,
+    *,
     strip_left: bool = True,
     strip_right: bool = True,
 ) -> SIMPLE_VALUE_TYPE:

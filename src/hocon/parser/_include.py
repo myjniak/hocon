@@ -35,12 +35,12 @@ def parse_include_value(data: ParserInput, idx: int) -> tuple[ParserInput, int]:
         msg = "Only single quoted include filepaths are supported."
         raise HOCONIncludeError(msg)
     string, idx = parse_quoted_string(data, idx + 1)
-    idx = _eat_closing_brackets(data, idx, include_mode, required)
-    content = load_include_content(data, string, include_mode, required)
+    idx = _eat_closing_brackets(data, idx, include_mode, required=required)
+    content = load_include_content(data, string, include_mode, required=required)
     return content, idx
 
 
-def load_include_content(data: ParserInput, string: str, mode: IncludeMode, required: bool) -> ParserInput:
+def load_include_content(data: ParserInput, string: str, mode: IncludeMode, *, required: bool) -> ParserInput:
     if mode in [IncludeMode.FILE, IncludeMode.DEFAULT]:
         external_filepath = Path(data.absolute_filepath).parent / string
         if not required and not external_filepath.exists():
@@ -57,7 +57,7 @@ def load_include_content(data: ParserInput, string: str, mode: IncludeMode, requ
     raise NotImplementedError(msg)
 
 
-def _eat_closing_brackets(data: ParserInput, idx: int, include_mode: IncludeMode, required: bool) -> int:
+def _eat_closing_brackets(data: ParserInput, idx: int, include_mode: IncludeMode, *, required: bool) -> int:
     if include_mode != IncludeMode.DEFAULT:
         idx = _eat_closing_bracket(data, idx)
     if required:

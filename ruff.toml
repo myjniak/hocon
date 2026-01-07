@@ -2,4 +2,4 @@ line-length = 120
 
 [lint]
 select = ["ALL"]
-ignore = ["D", "FBT"]
+ignore = ["D", "FBT003"]
