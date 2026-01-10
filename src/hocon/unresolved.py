@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from itertools import count
-from typing import Any, Self, get_args
+from typing import Self, get_args
 
 from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED
 from hocon.exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError
@@ -12,7 +12,7 @@ class UnresolvedConcatenation(list):
     def __repr__(self) -> str:
         return "〈" + super().__repr__()[1:-1] + "〉"
 
-    def get_type(self) -> type[list[Any] | dict[Any, Any] | str]:
+    def get_type(self) -> type[list | dict | str]:
         concat_types = {type(value) for value in self}
         concat_types.discard(UnresolvedSubstitution)
         simple_value_classes = get_args(SIMPLE_VALUE_TYPE)
@@ -60,7 +60,7 @@ class UnresolvedConcatenation(list):
         return UnresolvedConcatenation(self[first:last])
 
     @staticmethod
-    def _is_empty_unquoted_string(value: ANY_VALUE_TYPE) -> bool:
+    def _is_empty_unquoted_string(value: "ANY_VALUE_TYPE | ANY_UNRESOLVED") -> bool:
         return isinstance(value, UnquotedString) and value.is_empty()
 
 

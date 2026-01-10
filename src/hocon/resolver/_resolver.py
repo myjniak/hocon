@@ -32,7 +32,7 @@ def resolve(parsed: ROOT_TYPE) -> ROOT_TYPE:
 
 class Resolver:
     def __init__(self, parsed: ROOT_TYPE) -> None:
-        self.resolve_substitution = SubstitutionResolver(parsed, self.resolve)
+        self.resolve_substitution = SubstitutionResolver(parsed, self)
 
     @singledispatchmethod
     def resolve(self, values: ANY_VALUE_TYPE | ANY_UNRESOLVED) -> Never:

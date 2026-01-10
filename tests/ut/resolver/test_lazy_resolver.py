@@ -6,6 +6,7 @@ from hocon.resolver import _lazy_resolver
 from hocon.unresolved import UnresolvedConcatenation
 
 
+@pytest.mark.passing_unsupported_type
 def test_lazy_resolve_unsupported_type():
     with pytest.raises(NotImplementedError):
         _lazy_resolver.resolve({1, 2, 3})
@@ -29,9 +30,10 @@ def test_concatenation_cant_contain_concatenations():
         _lazy_resolver.resolve(concatenation)
 
 
+@pytest.mark.passing_unsupported_type
 def test_cant_merge_unsupported_types():
     with pytest.raises(NotImplementedError):
-        _lazy_resolver.merge_dict_concatenation({1,2,3}, {4:5})
+        _lazy_resolver.merge_dict_concatenation({1, 2, 3}, {4: 5})
 
 
 def test_resolve_multiple_simple_type_concatentation():
