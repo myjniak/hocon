@@ -58,11 +58,21 @@ dependencies = [
     "pytest-cov",
     "black",
     "mypy",
-    "ruff"
+    "ruff",
+    "typeguard"
 ]
 
 [tool.hatch.envs.test.scripts]
-coverage = "python -m pytest -vs --cov hocon --cov-fail-under=100 --junitxml=junit/test-results.xml-{env:PYTHON_VERSION}.xml"
+run_tests_with_dynamic_typechecks = 'coverage run -m pytest --typeguard-packages=hocon -m "not passing_unsupported_type"'
+run_tests_violating_typehints = 'coverage run -a -m pytest -m "passing_unsupported_type"'
+
+test = [
+    'run_tests_with_dynamic_typechecks',
+    'run_tests_violating_typehints',
+    'coverage report -m --fail-under 100',
+    'coverage xml -o junit/test-results.xml-{env:PYTHON_VERSION:3.13}.xml',
+]
+
 black = "python -m black --check src/"
 mypy = "python -m mypy --strict -p hocon"
 ruff = "python -m ruff check src"

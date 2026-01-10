@@ -16,7 +16,7 @@ from hocon.unresolved import (
 def merge_unconcatenated(
     unconcatenated_dictionary: dict,
     keys: list,
-    unconcatenated_value: UnresolvedConcatenation,
+    unconcatenated_value: UnresolvedConcatenation | dict,
 ) -> dict:
     def set_default(dictionary: dict, key: str) -> dict:
         value = dictionary.get(key)

@@ -6,6 +6,7 @@ from hocon.resolver._resolver import Resolver, resolve
 from hocon.unresolved import UnresolvedConcatenation, UnresolvedDuplication
 
 
+@pytest.mark.passing_unsupported_type
 def test_resolve_unsupported_type():
     with pytest.raises(NotImplementedError):
         Resolver({}).resolve({1, 2, 3})
@@ -35,6 +36,7 @@ def test_concatenation_cant_contain_concatenations():
         Resolver({}).resolve(concatenation)
 
 
+@pytest.mark.passing_unsupported_type
 def test_lazy_resolver_bad_return_type():
     with pytest.raises(HOCONError, match="lazy resolver returned <class 'int'>"):
         resolve(5)

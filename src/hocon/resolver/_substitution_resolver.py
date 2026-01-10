@@ -1,6 +1,5 @@
 import os
-from collections.abc import Callable
-from typing import Any, get_args
+from typing import Protocol, get_args
 
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, UNDEFINED, Undefined
 from hocon.exceptions import (
@@ -14,15 +13,19 @@ from ._self_reference import cut_self_reference_and_fields_that_override_it
 from ._substitution import Substitution, SubstitutionStatus
 
 
+class Resolver(Protocol):
+    def resolve(self, values: ANY_VALUE_TYPE) -> ANY_VALUE_TYPE: ...
+
+
 class SubstitutionResolver:
     def __init__(
         self,
         parsed: ROOT_TYPE,
-        resolve_value_func: Callable[[Any], ANY_VALUE_TYPE],
+        resolver: Resolver,
         substitutions: dict[int, Substitution] | None = None,
     ) -> None:
         self._parsed: ROOT_TYPE = parsed
-        self.resolve_value = resolve_value_func
+        self.resolver = resolver
         self.subs: dict[int, Substitution] = substitutions or {}
 
     def __call__(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE | Undefined:
@@ -46,7 +49,7 @@ class SubstitutionResolver:
         value: ANY_VALUE_TYPE | ANY_UNRESOLVED | Undefined = self._parsed
         for key in substitution.keys:
             if isinstance(value, get_args(ANY_UNRESOLVED)):
-                value = self.resolve_value(value)
+                value = self.resolver.resolve(value)
             if isinstance(value, dict) and key in value:
                 value = value[key]
             elif isinstance(value, list) and key.isdigit() and len(value) > int(key):
@@ -60,7 +63,7 @@ class SubstitutionResolver:
                 else:
                     value = self._resolve_sub_from_env(substitution)
         if isinstance(value, (dict, list)):
-            value = self.resolve_value(value)
+            value = self.resolver.resolve(value)
         if isinstance(value, UnresolvedSubstitution):
             value = self(value)
         return value
@@ -107,7 +110,7 @@ class SubstitutionResolver:
         carved_parsed = cut_self_reference_and_fields_that_override_it(substitution, self._parsed)
         sub_resolver = SubstitutionResolver(
             carved_parsed,
-            resolve_value_func=self.resolve_value,
+            resolver=self.resolver,
             substitutions=self.subs,
         )
         return sub_resolver(substitution)
