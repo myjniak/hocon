@@ -120,12 +120,12 @@ def _get_concatenators() -> dict[
     Callable[[UnresolvedConcatenation], dict | list | SIMPLE_VALUE_TYPE | UnresolvedConcatenation],
 ]:
     return {
-        ConcatenationType(list, True): _concatenate_lists_with_subs,
-        ConcatenationType(dict, True): _concatenate_dicts_with_subs,
-        ConcatenationType(str, True): _concatenate_simple_values_with_subs,
-        ConcatenationType(list, False): _concatenate_lists,
-        ConcatenationType(dict, False): _concatenate_dicts,
-        ConcatenationType(str, False): _concatenate_simple_values,
+        ConcatenationType(list, has_substitutions=True): _concatenate_lists_with_subs,
+        ConcatenationType(dict, has_substitutions=True): _concatenate_dicts_with_subs,
+        ConcatenationType(str, has_substitutions=True): _concatenate_simple_values_with_subs,
+        ConcatenationType(list, has_substitutions=False): _concatenate_lists,
+        ConcatenationType(dict, has_substitutions=False): _concatenate_dicts,
+        ConcatenationType(str, has_substitutions=False): _concatenate_simple_values,
     }
 
 
