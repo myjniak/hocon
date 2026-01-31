@@ -108,7 +108,10 @@ class ConcatenationType:
 
 def _get_concatenator(
     values: UnresolvedConcatenation,
-) -> Callable[[UnresolvedConcatenation], dict | list | SIMPLE_VALUE_TYPE | UnresolvedConcatenation]:
+) -> Callable[
+    [UnresolvedConcatenation],
+    dict | list | SIMPLE_VALUE_TYPE | UnresolvedSubstitution | UnresolvedConcatenation,
+]:
     concatenate_functions = _get_concatenators()
     concat_type = ConcatenationType(type=values.get_type(), has_substitutions=values.has_substitutions())
     return concatenate_functions[concat_type]
@@ -117,7 +120,10 @@ def _get_concatenator(
 @cache
 def _get_concatenators() -> dict[
     ConcatenationType,
-    Callable[[UnresolvedConcatenation], dict | list | SIMPLE_VALUE_TYPE | UnresolvedConcatenation],
+    Callable[
+        [UnresolvedConcatenation],
+        dict | list | SIMPLE_VALUE_TYPE | UnresolvedSubstitution | UnresolvedConcatenation,
+    ],
 ]:
     return {
         ConcatenationType(list, has_substitutions=True): _concatenate_lists_with_subs,
@@ -129,7 +135,9 @@ def _get_concatenators() -> dict[
     }
 
 
-def _concatenate_dicts_with_subs(values: list[dict | UnresolvedSubstitution]) -> dict | UnresolvedConcatenation:
+def _concatenate_dicts_with_subs(
+    values: list[dict | UnresolvedSubstitution | UnresolvedConcatenation],
+) -> dict | UnresolvedConcatenation | UnresolvedSubstitution:
     return reduce(merge_dict_concatenation, reversed(values))
 
 
