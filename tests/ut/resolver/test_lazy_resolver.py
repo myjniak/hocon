@@ -3,7 +3,7 @@ import pytest
 from hocon.constants import UNDEFINED
 from hocon.exceptions import HOCONConcatenationError
 from hocon.resolver import _lazy_resolver
-from hocon.unresolved import UnresolvedConcatenation
+from hocon.unresolved import UnresolvedConcatenation, UnresolvedSubstitution
 
 
 @pytest.mark.passing_unsupported_type
@@ -28,6 +28,13 @@ def test_concatenation_cant_contain_concatenations():
     concatenation = UnresolvedConcatenation([UnresolvedConcatenation([5])])
     with pytest.raises(HOCONConcatenationError, match="Concatenation of type UnresolvedConcatenation not supported!"):
         _lazy_resolver.resolve(concatenation)
+
+
+def test_concatenation_substitution_only():
+    sub = UnresolvedSubstitution(["a"], True)
+    concatenation = UnresolvedConcatenation([sub])
+    result = _lazy_resolver.resolve(concatenation)
+    assert result == sub
 
 
 @pytest.mark.passing_unsupported_type
