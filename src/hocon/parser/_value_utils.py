@@ -45,11 +45,7 @@ def convert_iadd_to_self_referential_substitution(
     current_keypath: list[str],
     root_location: list[str],
 ) -> UnresolvedConcatenation:
-    """Basically it turns this expression:
-    a += 1
-    To this:
-    a = ${?a} [1].
-    """
+    """Turn this expression: a += 1 into this: a = ${?a} [1]."""
     return UnresolvedConcatenation(
         [
             UnresolvedSubstitution(

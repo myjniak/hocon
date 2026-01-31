@@ -91,8 +91,9 @@ class SubstitutionResolver:
         return resolved_sub.value
 
     def resolve_substitution_fallback(self, substitution: UnresolvedSubstitution) -> ANY_VALUE_TYPE | Undefined:
-        """In case of self-referencial substitutions, try to resolve them by removing the self-reference, and
-        nodes after that.
+        """In case of self-referencial substitutions, try to resolve them by removing the self-reference.
+
+        Then, resolve the nodes after the removed self-reference.
         For example for:
 
         a : { a : { c : 1 } }
@@ -101,11 +102,11 @@ class SubstitutionResolver:
         a : { a : 2 }
         b : 5
 
-        Substitution ${a.a} will be attempted to resolve with the following object:
+        the substitution ${a.a} will be attempted to resolve with the following object:
         a : { a : { c : 1 } }
         b : 1
         b : 5
-        And ultimately return {c:1}
+        and ultimately will return {c:1}
         """
         carved_parsed = cut_self_reference_and_fields_that_override_it(substitution, self._parsed)
         sub_resolver = SubstitutionResolver(
