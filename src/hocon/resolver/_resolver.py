@@ -2,7 +2,7 @@ import json
 import operator
 from copy import deepcopy
 from functools import reduce, singledispatchmethod
-from typing import TYPE_CHECKING, Never, get_args
+from typing import TYPE_CHECKING
 
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED, Undefined
 from hocon.exceptions import HOCONDeduplicationError, HOCONError
@@ -23,19 +23,22 @@ if TYPE_CHECKING:
 
 def resolve(parsed: ROOT_TYPE) -> ROOT_TYPE:
     lazy_resolved = _lazy_resolver.resolve(parsed)
-    if not isinstance(lazy_resolved, (list, dict)):
-        msg = f"Fatal error: lazy resolver returned {type(lazy_resolved)}! Only lists and dicts are valid HOCONs!"
-        raise HOCONError(msg)
-    resolver = Resolver(lazy_resolved)
-    return resolver.resolve(lazy_resolved)
+    if type(lazy_resolved) is list:
+        resolver = Resolver(lazy_resolved)
+        return resolver.resolve_list(lazy_resolved)
+    if type(lazy_resolved) is dict:
+        resolver = Resolver(lazy_resolved)
+        return resolver.resolve_dict(lazy_resolved)
+    msg = f"Fatal error: lazy resolver returned {type(lazy_resolved)}! Only lists and dicts are valid HOCONs!"
+    raise HOCONError(msg)
 
 
 class Resolver:
     def __init__(self, parsed: ROOT_TYPE) -> None:
-        self.resolve_substitution = SubstitutionResolver(parsed, self)
+        self._resolve_substitution = SubstitutionResolver(parsed, self)
 
     @singledispatchmethod
-    def resolve(self, values: ANY_VALUE_TYPE | ANY_UNRESOLVED) -> Never:
+    def resolve(self, values: ANY_VALUE_TYPE | ANY_UNRESOLVED) -> ANY_VALUE_TYPE | Undefined:
         msg = f"Bad input value type: {type(values)}"
         raise NotImplementedError(msg)
 
@@ -43,8 +46,7 @@ class Resolver:
     def _(self, values: SIMPLE_VALUE_TYPE) -> SIMPLE_VALUE_TYPE:
         return values
 
-    @resolve.register
-    def _(self, values: list) -> list:
+    def resolve_list(self, values: list) -> list:
         resolved_list: list[ANY_VALUE_TYPE] = []
         for element in values:
             resolved_elem: ANY_VALUE_TYPE | Undefined = self.resolve(element)
@@ -52,8 +54,7 @@ class Resolver:
                 resolved_list.append(resolved_elem)
         return resolved_list
 
-    @resolve.register
-    def _(self, values: dict) -> dict:
+    def resolve_dict(self, values: dict) -> dict:
         resolved_dict: dict[SIMPLE_VALUE_TYPE, ANY_VALUE_TYPE] = {}
         for key, value in values.items():
             resolved_value: ANY_VALUE_TYPE | Undefined = self.resolve(value)
@@ -61,18 +62,22 @@ class Resolver:
                 resolved_dict[key] = resolved_value
         return resolved_dict
 
-    @resolve.register
-    def _(self, values: UnresolvedSubstitution) -> ANY_VALUE_TYPE | Undefined:
-        return self.resolve_substitution(values)
+    def resolve_substitution(self, values: UnresolvedSubstitution) -> ANY_VALUE_TYPE | Undefined:
+        return self._resolve_substitution(values)
 
-    @resolve.register
-    def _(self, values: UnresolvedConcatenation) -> ANY_VALUE_TYPE | Undefined:
+    def resolve_concatenation(self, values: UnresolvedConcatenation) -> ANY_VALUE_TYPE | Undefined:
         values = self.resolve_substitutions(values)
         values = values.sanitize()
         if not values:
             return UNDEFINED
-        if len(values) == 1 and type(values[0]) in (*get_args(SIMPLE_VALUE_TYPE), UnresolvedSubstitution):
-            return values[0]
+        first_value = values[0]
+        if len(values) == 1 and (
+            type(first_value) is str
+            or type(first_value) is int
+            or type(first_value) is bool
+            or type(first_value) is None
+        ):
+            return first_value
         concat_type = values.get_type()
         concatenate_functions: dict[type[list | dict | str], Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]] = {
             list: self._concatenate_lists,
@@ -81,8 +86,7 @@ class Resolver:
         }
         return concatenate_functions[concat_type](values)
 
-    @resolve.register
-    def _(self, values: UnresolvedDuplication) -> ANY_VALUE_TYPE | Undefined:
+    def resolve_duplication(self, values: UnresolvedDuplication) -> ANY_VALUE_TYPE | Undefined:
         """Resolve duplication values starting from the last (latest overrides/merges with the rest).
         If it's a SIMPLE_VALUE_TYPE or a list, it overrides the rest.
         If it's a dict type, objects will merge.
@@ -98,14 +102,22 @@ class Resolver:
             resolved_value = value
             if isinstance(value, UnresolvedConcatenation):
                 resolved_value = self.resolve(value)
-            if isinstance(resolved_value, (dict, UnresolvedSubstitution)):
-                deduplicated = self.merge(deduplicated, resolved_value)
-            else:
+            if not isinstance(resolved_value, (dict, UnresolvedSubstitution)):
                 break
+            if isinstance(resolved_value, UnresolvedSubstitution):
+                resolved_value = self.resolve(value)
+            if isinstance(resolved_value, dict):
+                deduplicated = self.merge(deduplicated, resolved_value)
         return self.resolve(deduplicated)
 
-    def _concatenate_dicts(self, values: UnresolvedConcatenation) -> dict:
-        return self.resolve(reduce(self.merge, reversed(values)))
+    resolve.register(resolve_list)
+    resolve.register(resolve_dict)
+    resolve.register(resolve_concatenation)
+    resolve.register(resolve_substitution)
+    resolve.register(resolve_duplication)
+
+    def _concatenate_dicts(self, values: list[dict]) -> dict:
+        return self.resolve_dict(reduce(self.merge, reversed(values)))
 
     @staticmethod
     def _concatenate_simple_values(values: UnresolvedConcatenation) -> SIMPLE_VALUE_TYPE:
@@ -115,7 +127,7 @@ class Resolver:
         return resolve_simple_value(values)
 
     def _concatenate_lists(self, values: UnresolvedConcatenation) -> list:
-        resolved_lists: list[ANY_VALUE_TYPE] = [self.resolve(value) for value in values]
+        resolved_lists: list[ANY_VALUE_TYPE | Undefined] = [self.resolve(value) for value in values]
         return reduce(operator.iadd, resolved_lists, [])
 
     def _resolve_latest_unresolved_duplication_element(
@@ -130,18 +142,11 @@ class Resolver:
                 break
         return deduplicated
 
-    def merge(self, superior: dict, inferior: ANY_VALUE_TYPE | UnresolvedSubstitution) -> dict:
+    def merge(self, superior: dict, inferior: dict) -> dict:
         """If both values are objects, then the objects are merged.
         If keys overlap, the latter wins.
         """
-        resolved_inferior: ANY_VALUE_TYPE | Undefined
-        if isinstance(inferior, UnresolvedSubstitution):
-            resolved_inferior = self.resolve_substitution(inferior)
-        else:
-            resolved_inferior = inferior
-        if not isinstance(resolved_inferior, dict):
-            return superior
-        result = deepcopy(resolved_inferior)
+        result = deepcopy(inferior)
         for key, value in superior.items():
             inferior_value = result.get(key)
             if isinstance(value, dict) and isinstance(inferior_value, dict):
@@ -157,6 +162,6 @@ class Resolver:
         for value in values:
             resolved_value = value
             if isinstance(value, UnresolvedSubstitution):
-                resolved_value = self.resolve_substitution(value)
+                resolved_value = self._resolve_substitution(value)
             values_with_resolved_substitutions.append(resolved_value)
         return values_with_resolved_substitutions

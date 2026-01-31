@@ -14,7 +14,7 @@ from ._substitution import Substitution, SubstitutionStatus
 
 
 class Resolver(Protocol):
-    def resolve(self, values: ANY_VALUE_TYPE) -> ANY_VALUE_TYPE: ...
+    def resolve(self, values: ANY_VALUE_TYPE | ANY_UNRESOLVED) -> ANY_VALUE_TYPE | Undefined: ...
 
 
 class SubstitutionResolver:
