@@ -1,3 +1,5 @@
+"""Hocon needs to distinguish "quoted" from unquoted strings."""
+
 from hocon.constants import WHITE_CHARS
 
 

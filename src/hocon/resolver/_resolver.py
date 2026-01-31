@@ -88,6 +88,7 @@ class Resolver:
 
     def resolve_duplication(self, values: UnresolvedDuplication) -> ANY_VALUE_TYPE | Undefined:
         """Resolve duplication values starting from the last (latest overrides/merges with the rest).
+
         If it's a SIMPLE_VALUE_TYPE or a list, it overrides the rest.
         If it's a dict type, objects will merge.
         If at any point of object merging, duplicate value is not a dict, merging will stop.
@@ -143,9 +144,7 @@ class Resolver:
         return deduplicated
 
     def merge(self, superior: dict, inferior: dict) -> dict:
-        """If both values are objects, then the objects are merged.
-        If keys overlap, the latter wins.
-        """
+        """Merge two objects recursively. If keys overlap, the latter wins."""
         result = deepcopy(inferior)
         for key, value in superior.items():
             inferior_value = result.get(key)

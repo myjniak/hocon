@@ -63,6 +63,7 @@ def _(values: UnresolvedConcatenation) -> Undefined | ANY_VALUE_TYPE | Unresolve
 @resolve.register
 def _(values: UnresolvedDuplication) -> ANY_VALUE_TYPE | UnresolvedDuplication:
     """Resolve duplication values starting from the last (latest overrides/merges with the rest).
+
     If it's a SIMPLE_VALUE_TYPE or a list, it overrides the rest.
     If it's a dict type, objects will merge.
     If at any point of object merging, duplicate value is not a dict, merging will stop.
@@ -146,7 +147,7 @@ def _concatenate_dicts(values: list[dict]) -> dict:
 
 
 def _concatenate_simple_values_with_subs(values: UnresolvedConcatenation) -> UnresolvedConcatenation:
-    """[${a}, b, c, ${d}, e, f, g] should turn to [${a}, bc, ${d}, efg]."""
+    """Turn [${a}, b, c, ${d}, e, f, g] into [${a}, bc, ${d}, efg]."""
     result = UnresolvedConcatenation()
     chunks_to_concatenate: list[str] = []
     for value in values:
@@ -239,9 +240,7 @@ def _(superior: UnresolvedConcatenation, inferior: dict | UnresolvedSubstitution
 
 
 def merge(superior: dict, inferior: dict) -> dict:
-    """If both values are objects, then the objects are merged.
-    If keys overlap, the latter wins.
-    """
+    """Merge two objects recursively. If keys overlap, the latter wins."""
     result = deepcopy(inferior)
     for key, value in superior.items():
         inferior_value = result.get(key)

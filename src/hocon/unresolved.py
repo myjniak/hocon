@@ -1,3 +1,5 @@
+"""Definition of 3 types unique to hocon, used when resolving parsed data to a simple dict/list."""
+
 from dataclasses import dataclass, field
 from itertools import count
 from typing import Self, get_args
