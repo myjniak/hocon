@@ -2,9 +2,10 @@
 
 ## 0.5.0
 - Turn UNDEFINED to an instance of class Undefined
-- Fixed all typing problems detected with mypy
-- Satisfied ruff checks
+- HOCON parsing Exceptions will now (mostly) print line and col where the failure occurred
+- FIX: all typing problems detected with mypy
 - Code documentation improved
+- FIX: newlines allowed between key and separator and between separator and value
 
 ## 0.4.0
 - Implemented required() function in include syntax

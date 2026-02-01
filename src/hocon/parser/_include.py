@@ -28,12 +28,12 @@ def parse_include_value(data: ParserInput, idx: int) -> tuple[ParserInput, int]:
         idx += 8
         if data[idx] != "(":
             msg = "Missing '(' bracket in required function!"
-            raise HOCONIncludeError(msg)
+            raise HOCONIncludeError(msg, data, idx)
         idx += 1
     include_mode, idx = _read_mode(data, idx)
     if data[idx : idx + 3] == '"""' or data[idx] != '"':
         msg = "Only single quoted include filepaths are supported."
-        raise HOCONIncludeError(msg)
+        raise HOCONIncludeError(msg, data, idx)
     string, idx = parse_quoted_string(data, idx + 1)
     idx = _eat_closing_brackets(data, idx, include_mode, required=required)
     content = load_include_content(data, string, include_mode, required=required)
@@ -50,7 +50,7 @@ def load_include_content(data: ParserInput, string: str, mode: IncludeMode, *, r
         external_input = ParserInput(data=external_data, absolute_filepath=external_filepath, encoding=data.encoding)
         ext_idx = eat_whitespace_and_comments(external_input, 0)
         if external_input[ext_idx] == "[":
-            msg = "An included file must contain an object, not an array."
+            msg = f"An included file '{string}' must contain an object, not an array."
             raise HOCONIncludeError(msg)
         return external_input
     msg = f"Include {mode=} not implemented"
@@ -69,7 +69,7 @@ def _eat_closing_bracket(data: ParserInput, idx: int) -> int:
     if data[idx] == ")":
         return idx + 1
     msg = "Missing closing ')' bracket in include statement!"
-    raise HOCONIncludeError(msg)
+    raise HOCONIncludeError(msg, data, idx)
 
 
 def _read_mode(data: ParserInput, idx: int) -> tuple[IncludeMode, int]:
@@ -80,7 +80,7 @@ def _read_mode(data: ParserInput, idx: int) -> tuple[IncludeMode, int]:
         idx += mode_len
         if data[idx] != "(":
             msg = "Missing '(' bracket!"
-            raise HOCONIncludeError(msg)
+            raise HOCONIncludeError(msg, data, idx)
         idx += 1
         break
     else:
@@ -88,4 +88,4 @@ def _read_mode(data: ParserInput, idx: int) -> tuple[IncludeMode, int]:
     if data[idx] == '"':
         return mode, idx
     msg = "Unsupported include syntax!"
-    raise HOCONIncludeError(msg)
+    raise HOCONIncludeError(msg, data, idx)
