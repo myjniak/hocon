@@ -12,6 +12,10 @@ from hocon.strings import UnquotedString
 class UnresolvedConcatenation(list):
 
     def __repr__(self) -> str:
+        """Replace [] in list repr with 〈 〉 brackets to distinguish Duplications from regular lists, when printed.
+
+        A bare minimum, to be able to represent parsed data as string.
+        """
         return "〈" + super().__repr__()[1:-1] + "〉"
 
     def get_type(self) -> type[list | dict | str]:
@@ -68,6 +72,10 @@ class UnresolvedConcatenation(list):
 
 class UnresolvedDuplication(list):
     def __repr__(self) -> str:
+        """Replace [] in list repr with 【 】 brackets to distinguish Duplications from regular lists, when printed.
+
+        A bare minimum, to be able to represent parsed data as string.
+        """
         return "【" + super().__repr__()[1:-1] + "】"
 
     def sanitize(self) -> Self:
@@ -95,18 +103,22 @@ class UnresolvedSubstitution:
         return self.including_root + self.relative_location
 
     def __str__(self) -> str:
+        """Reconstruct substitution string from original data, like ${?x}."""
         return r"${" + ("?" if self.optional else "") + ".".join(self.keys) + r"}"
 
     def __repr__(self) -> str:
-        return self.__str__()
+        """Return the same str as __str__ for now."""
+        return str(self)
 
     def __eq__(self, other: object) -> bool:
+        """Return true when keys, optional flag and location are equal."""
         if not isinstance(other, UnresolvedSubstitution):
             return NotImplemented
         return self.keys == other.keys and self.optional == other.optional and self.location == other.location
 
     def __hash__(self) -> int:
-        return hash((".".join(self.keys), self.optional, ".".join(self.location)))
+        """Enable UnresolvedSubstitutions to become ditionary keys for potential user convenience."""
+        return hash(self.id_)
 
 
 ANY_UNRESOLVED = UnresolvedConcatenation | UnresolvedSubstitution | UnresolvedDuplication

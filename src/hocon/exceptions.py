@@ -1,3 +1,6 @@
+"""Hocon Exceptions."""
+
+
 class HOCONError(Exception):
     """Generic HOCON library error."""
 
