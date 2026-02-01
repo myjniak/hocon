@@ -1,8 +1,31 @@
 """Hocon Exceptions."""
 
+from hocon.parser._data import ParserInput
+
 
 class HOCONError(Exception):
     """Generic HOCON library error."""
+
+    def __init__(self, message: str, data: ParserInput | None = None, idx: int | None = None) -> None:
+        """Include line and column info, print the whole problematic line, if not empty."""
+        self.location = ""
+        self.line = ""
+        if data and idx:
+            self.location, self.line = self.prepare_message_suffix(data, idx)
+        self.message = message
+        final_msg = self.message + ": " + self.location + "\n" + self.line.strip("\n")
+        super().__init__(final_msg)
+
+    @staticmethod
+    def prepare_message_suffix(data: ParserInput, idx: int) -> tuple[str, str]:
+        data_up_to_idx = data.data[:idx]
+        line_no = data_up_to_idx.count("\n") + 1
+        idx_line_beginning = data_up_to_idx.rfind("\n")
+        if idx_line_beginning == -1:
+            idx_line_beginning = 0
+        idx_line_end = data.data.find("\n", idx_line_beginning + 1)
+        col = idx - idx_line_beginning
+        return f"line {line_no} col {col}", data.data[idx_line_beginning:idx_line_end]
 
 
 class HOCONDecodeError(HOCONError):

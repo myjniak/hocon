@@ -28,3 +28,15 @@ def test_no_separator():
             },
         },
     }
+
+
+def test_separator_after_newline():
+    """Any kind of Whitespace char is read until the separator is read. Including newlines."""
+    result = hocon.loads("""
+    {
+    key
+          =
+           value
+            }
+    """)
+    assert result == {"key": "value"}
