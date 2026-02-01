@@ -1,3 +1,9 @@
+"""Contains 2 types of variables.
+
+1. Constants compliant with Hocon spec
+2. Types used for implementation convenience.
+"""
+
 import re
 from typing import Any
 
