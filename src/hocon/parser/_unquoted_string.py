@@ -20,7 +20,7 @@ def _parse_unquoted_string_value(data: ParserInput, idx: int) -> tuple[UnquotedS
         if char in unquoted_string_end or data[idx : idx + 2] == "//":
             if not string:
                 msg = "Error when parsing unquoted string"
-                raise HOCONUnquotedStringError(msg)
+                raise HOCONUnquotedStringError(msg, data, idx)
             return UnquotedString(string), idx
         string += char
         idx += 1
@@ -33,9 +33,6 @@ def _parse_unquoted_string_key(data: ParserInput, idx: int) -> tuple[UnquotedStr
         char = data[idx]
         if string == "include":
             return UnquotedString(string), idx
-        if char == "\n":
-            msg = "Encountered newline before key-value separator."
-            raise HOCONInvalidKeyError(msg)
         if char in string_end or data[idx : idx + 2] == "//":
             if not string:
                 _raise_parse_key_exception(data, idx)
@@ -47,12 +44,15 @@ def _parse_unquoted_string_key(data: ParserInput, idx: int) -> tuple[UnquotedStr
 def _raise_parse_key_exception(data: ParserInput, idx: int) -> None:
     if data[idx] == ",":
         msg = "Excessive leading comma found in a dictionary."
-        raise HOCONUnexpectedSeparatorError(msg)
+        raise HOCONUnexpectedSeparatorError(msg, data, idx)
     if data[idx] in "{[":
-        msg = "Objects and arrays do not make sense as field keys."
-        raise HOCONInvalidKeyError(msg)
+        msg = "Objects and arrays do not make sense as field keys"
+        raise HOCONInvalidKeyError(msg, data, idx)
     if data[idx] == ".":
-        msg = "Keypath separator '.' used in an invalid way."
-        raise HOCONInvalidKeyError(msg)
-    msg = f"Unexpected ({idx}th) character found when parsing keypath: '{data[idx]}'"
-    raise HOCONInvalidKeyError(msg)
+        msg = "Keypath separator '.' used in an invalid way"
+        raise HOCONInvalidKeyError(msg, data, idx)
+    if idx == len(data.data) - 1:
+        msg = "Unexpected EOF while parsing keypath"
+    else:
+        msg = "Unexpected character found when parsing keypath"
+    raise HOCONInvalidKeyError(msg, data, idx)

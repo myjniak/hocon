@@ -61,7 +61,8 @@ class _Cutter:
             return self.cut_duplication(subtree, keypath_index=keypath_index)
         if isinstance(subtree, UnresolvedConcatenation):
             return self.cut_concatenation(subtree)
-        raise HOCONSubstitutionUndefinedError(subtree)
+        msg = f"Failed to resolve {self.sub}"
+        raise HOCONSubstitutionUndefinedError(msg)
 
     def cut_duplication(self, subtree: UnresolvedDuplication, keypath_index: int = 0) -> None:
         for index, item in enumerate(subtree):
