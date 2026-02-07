@@ -69,4 +69,4 @@ def assert_no_content_left(data: ParserInput, idx: int) -> None:
                 msg = "Excessive meaningful data outside of the HOCON structure."
                 raise HOCONExcessiveDataError(msg, data, idx)
     except IndexError:
-        return
+        pass

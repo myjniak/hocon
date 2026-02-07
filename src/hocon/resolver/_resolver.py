@@ -122,9 +122,9 @@ class Resolver:
 
     @staticmethod
     def _concatenate_simple_values(values: UnresolvedConcatenation) -> SIMPLE_VALUE_TYPE:
-        for i in range(len(values)):
-            if not isinstance(values[i], str):
-                values[i] = json.dumps(values[i])
+        for index, value in enumerate(values):
+            if not isinstance(value, str):
+                values[index] = json.dumps(value)
         return resolve_simple_value(values)
 
     def _concatenate_lists(self, values: UnresolvedConcatenation) -> list:
