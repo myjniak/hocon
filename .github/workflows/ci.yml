@@ -23,15 +23,15 @@ jobs:
           pip install .
           pip install hatch coverage
       - name: Black
-        run: hatch run test:black
+        run: hatch run test:lint_black
       - name: Ruff
-        run: hatch run test:ruff
+        run: hatch run test:lint_ruff
       - name: Pylint
-        run: hatch run test:pylint
+        run: hatch run test:lint_pylint
       - name: MyPy
-        run: hatch run test:mypy
+        run: hatch run test:lint_mypy
       - name: Pytest
-        run: export PYTHON_VERSION=${{ matrix.python-version }} && hatch run test:coverage
+        run: export PYTHON_VERSION=${{ matrix.python-version }} && hatch run test:test
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
         with:

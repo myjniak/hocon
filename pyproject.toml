@@ -53,6 +53,7 @@ fragments = [
 
 [tool.hatch.envs.test]
 dependencies = [
+    "hypothesis",
     "pylint",
     "pytest",
     "pytest-timeout",
@@ -64,8 +65,8 @@ dependencies = [
 ]
 
 [tool.hatch.envs.test.scripts]
-run_tests_with_dynamic_typechecks = 'coverage run -m pytest --typeguard-packages=hocon -m "not passing_unsupported_type"'
-run_tests_violating_typehints = 'coverage run -a -m pytest -m "passing_unsupported_type"'
+run_tests_with_dynamic_typechecks = 'coverage run --source hocon -m pytest --typeguard-packages=hocon -m "not passing_unsupported_type"'
+run_tests_violating_typehints = 'coverage run --source hocon -a -m pytest -m "passing_unsupported_type"'
 
 test = [
     'run_tests_with_dynamic_typechecks',
@@ -74,10 +75,10 @@ test = [
     'coverage xml -o junit/test-results.xml-{env:PYTHON_VERSION:3.13}.xml',
 ]
 
-black = "python -m black --check src/"
-mypy = "python -m mypy --strict -p hocon"
-pylint = "python -m pylint src"
-ruff = "python -m ruff check src"
+lint_black = "python -m black --check src/"
+lint_mypy = "python -m mypy --strict -p hocon"
+lint_pylint = "python -m pylint src"
+lint_ruff = "python -m ruff check src"
 
 [tool.black]
 line-length = 120
