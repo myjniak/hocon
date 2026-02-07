@@ -10,6 +10,7 @@ from hocon.strings import UnquotedString
 
 
 class UnresolvedConcatenation(list):
+    """A list representing https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#value-concatenation."""
 
     def __repr__(self) -> str:
         """Replace [] in list repr with 〈 〉 brackets to distinguish Duplications from regular lists, when printed.
@@ -71,6 +72,8 @@ class UnresolvedConcatenation(list):
 
 
 class UnresolvedDuplication(list):
+    """A list representing http://github.com/lightbend/config/blob/v1.4.3/HOCON.md#duplicate-keys-and-object-merging."""
+
     def __repr__(self) -> str:
         """Replace [] in list repr with 【 】 brackets to distinguish Duplications from regular lists, when printed.
 
@@ -92,6 +95,8 @@ class UnresolvedDuplication(list):
 
 @dataclass
 class UnresolvedSubstitution:
+    """See https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#substitutions."""
+
     keys: list[str]
     optional: bool
     relative_location: list[str] = field(default_factory=list)
