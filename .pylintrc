@@ -1,0 +1,14 @@
+[FORMAT]
+max-line-length=120
+
+[MESSAGES CONTROL]
+disable=missing-class-docstring,
+        missing-function-docstring,
+        missing-module-docstring,
+        unidiomatic-typecheck,
+        invalid-name,
+        too-few-public-methods,
+        unused-import,
+        too-many-boolean-expressions,
+        too-few-public-methods,
+        duplicate-code

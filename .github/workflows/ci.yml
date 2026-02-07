@@ -26,6 +26,8 @@ jobs:
         run: hatch run test:black
       - name: Ruff
         run: hatch run test:ruff
+      - name: Pylint
+        run: hatch run test:pylint
       - name: MyPy
         run: hatch run test:mypy
       - name: Pytest

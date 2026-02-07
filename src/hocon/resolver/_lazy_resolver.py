@@ -103,7 +103,7 @@ def _resolve_dict(values: dict) -> dict[Any, Any]:
 
 @dataclass(frozen=True)
 class ConcatenationType:
-    type: type[list | dict | str]
+    type: type
     has_substitutions: bool
 
 
@@ -212,7 +212,7 @@ def _concatenate_lists(values: UnresolvedConcatenation) -> list:
 @singledispatch
 def merge_dict_concatenation(
     superior: dict | UnresolvedSubstitution | UnresolvedConcatenation,
-    inferior: dict | UnresolvedSubstitution,
+    _: dict | UnresolvedSubstitution,
 ) -> dict | UnresolvedConcatenation:
     msg = f"Bad input value type: {type(superior)}"
     raise NotImplementedError(msg)

@@ -53,6 +53,7 @@ fragments = [
 
 [tool.hatch.envs.test]
 dependencies = [
+    "pylint",
     "pytest",
     "pytest-timeout",
     "pytest-cov",
@@ -75,6 +76,7 @@ test = [
 
 black = "python -m black --check src/"
 mypy = "python -m mypy --strict -p hocon"
+pylint = "python -m pylint src"
 ruff = "python -m ruff check src"
 
 [tool.black]
