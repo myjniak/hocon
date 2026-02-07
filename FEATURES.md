@@ -47,7 +47,7 @@ For example tests for Array and object concatenation are marked with "f10_2" tag
 | f18        | [Duration format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#duration-format)                                                                            |  :no_entry_sign:   |  :no_entry_sign:   |        This library does not support "asking for data types". See f16.        |
 | f19        | [Period format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#period-format)                                                                                |  :no_entry_sign:   |  :no_entry_sign:   |        This library does not support "asking for data types". See f16.        |
 | f20        | [Size in bytes format](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#size-in-bytes-format)                                                                  |  :no_entry_sign:   |  :no_entry_sign:   |        This library does not support "asking for data types". See f16.        |
-| f21        | [Config object merging and file merging](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#config-object-merging-and-file-merging)                              |        :x:         |        :x:         |
+| f21        | [Config object merging and file merging](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#config-object-merging-and-file-merging)                              | :heavy_check_mark: | :heavy_check_mark: |
 | f22        | [Java properties mapping](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#java-properties-mapping)                                                            |        :x:         |        :x:         |
 | f23        | [Conventional configuration files for JVM apps](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-configuration-files-for-jvm-apps)                |  :no_entry_sign:   |  :no_entry_sign:   | Feature intertwines too much with Java ecosystem to be implemented in python. |
 | f24        | [Conventional override by system properties](https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#conventional-override-by-system-properties)                      |  :no_entry_sign:   |  :no_entry_sign:   | Feature intertwines too much with Java ecosystem to be implemented in python. |
@@ -55,7 +55,7 @@ For example tests for Array and object concatenation are marked with "f10_2" tag
 
 ## Additional requirements
 
-There are several assumptions which are not defined by the HOCON spec but are essential to the library health.
+There are several assumptions which are not defined by the HOCON spec but are essential to the library health and convenient usage.
 
 | Requirement ID | Requirement                                                       | Notes                                      |
 |----------------|-------------------------------------------------------------------|--------------------------------------------|

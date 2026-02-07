@@ -6,6 +6,8 @@
 - FIX: all typing problems detected with mypy
 - Code documentation improved
 - FIX: newlines allowed between key and separator and between separator and value
+- merging two objects added to the interface (hocon.resolver.merge)
+- FIX: merging objects with SIMPLE VALUE cutoff in nested subobjects
 
 ## 0.4.0
 - Implemented required() function in include syntax

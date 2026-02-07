@@ -70,23 +70,25 @@ def _(values: UnresolvedDuplication) -> ANY_VALUE_TYPE | UnresolvedDuplication:
     """
     values = values.sanitize()
     last_value = resolve(values[-1])
-    deduplicated = UnresolvedDuplication([last_value])
     if isinstance(last_value, SIMPLE_VALUE_TYPE) or type(last_value) is list:
         return last_value
-    for value in reversed(values[:-1]):
+
+    first_value = resolve(values[0])
+    deduplicated = UnresolvedDuplication([first_value])
+    for value in values[1:]:
         maybe_resolved_value = resolve(value)
         if isinstance(maybe_resolved_value, get_args(ANY_UNRESOLVED)) or isinstance(
             deduplicated[0],
             get_args(ANY_UNRESOLVED),
         ):
-            deduplicated.insert(0, maybe_resolved_value)
+            deduplicated.append(maybe_resolved_value)
         elif isinstance(maybe_resolved_value, dict):
-            if isinstance(deduplicated[0], dict):
-                deduplicated[0] = merge(deduplicated[0], maybe_resolved_value)
+            if isinstance(deduplicated[-1], dict):
+                deduplicated[-1] = merge(maybe_resolved_value, deduplicated[-1])
             else:
-                deduplicated.insert(0, maybe_resolved_value)
+                deduplicated.append(maybe_resolved_value)
         else:
-            break
+            deduplicated = UnresolvedDuplication([maybe_resolved_value])
     if len(deduplicated) == 1 and isinstance(deduplicated[0], ANY_VALUE_TYPE):
         return deduplicated[0]
     return deduplicated
