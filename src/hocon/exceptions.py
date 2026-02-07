@@ -1,6 +1,6 @@
 """Hocon Exceptions."""
 
-from hocon.parser._data import ParserInput
+from hocon.parser.data import ParserInput
 
 
 class HOCONError(Exception):
@@ -11,13 +11,13 @@ class HOCONError(Exception):
         self.location = ""
         self.line = ""
         if data and idx:
-            self.location, self.line = self.prepare_message_suffix(data, idx)
+            self.location, self.line = self._prepare_message_suffix(data, idx)
         self.message = message
         final_msg = self.message + ": " + self.location + "\n" + self.line.strip("\n")
         super().__init__(final_msg)
 
     @staticmethod
-    def prepare_message_suffix(data: ParserInput, idx: int) -> tuple[str, str]:
+    def _prepare_message_suffix(data: ParserInput, idx: int) -> tuple[str, str]:
         data_up_to_idx = data.data[:idx]
         line_no = data_up_to_idx.count("\n") + 1
         idx_line_beginning = data_up_to_idx.rfind("\n")

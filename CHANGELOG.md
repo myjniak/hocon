@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.1
+- Publish hocon.parser.data.ParserInput
+
 ## 0.5.0
 - Turn UNDEFINED to an instance of class Undefined
 - HOCON parsing Exceptions will now (mostly) print line and col where the failure occurred

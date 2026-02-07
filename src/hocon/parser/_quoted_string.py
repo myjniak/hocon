@@ -2,7 +2,7 @@ from _json import scanstring
 
 from hocon.strings import QuotedString
 
-from ._data import ParserInput
+from .data import ParserInput
 
 
 def parse_quoted_string(data: ParserInput, idx: int) -> tuple[QuotedString, int]:

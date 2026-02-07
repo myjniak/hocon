@@ -2,7 +2,7 @@ import pytest
 
 from hocon import loads
 from hocon.parser import parse
-from hocon.parser._data import ParserInput
+from hocon.parser.data import ParserInput
 from hocon.parser._parser import parse_dict_value
 from hocon.resolver import _lazy_resolver, resolve
 from hocon.strings import QuotedString, UnquotedString

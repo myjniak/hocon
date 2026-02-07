@@ -79,10 +79,10 @@ class SubstitutionResolver:
         resolved_sub = get_from_env(substitution)
         if resolved_sub.status == SubstitutionStatus.UNDEFINED and substitution.optional is False:
             resolving_status = self.subs[substitution.id_].status
-            if resolving_status == SubstitutionStatus.FALLBACK_RESOLVING and substitution.keys not in (
+            if resolving_status == SubstitutionStatus.FALLBACK_RESOLVING and substitution.keys not in [
                 substitution.location,
                 substitution.relative_location,
-            ):
+            ]:
                 msg = f"Cycle occurred when resolving {substitution}"
                 raise HOCONSubstitutionCycleError(msg)
             msg = f"Could not resolve substitution {substitution}."

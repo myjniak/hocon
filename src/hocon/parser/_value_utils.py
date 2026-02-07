@@ -4,8 +4,8 @@ from copy import deepcopy
 from functools import reduce
 
 from hocon.exceptions import HOCONExcessiveDataError
-from hocon.parser._data import ParserInput
 from hocon.parser._eat import eat_comments, eat_whitespace
+from hocon.parser.data import ParserInput
 from hocon.unresolved import (
     UnresolvedConcatenation,
     UnresolvedDuplication,

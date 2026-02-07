@@ -1,6 +1,6 @@
 import pytest
 
-from hocon.parser._data import ParserInput
+from hocon.parser.data import ParserInput
 from hocon.parser._key import parse_keypath
 
 
