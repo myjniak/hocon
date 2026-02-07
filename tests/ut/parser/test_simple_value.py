@@ -1,7 +1,7 @@
 import pytest
 
 from hocon.exceptions import HOCONUnexpectedSeparatorError
-from hocon.parser._data import ParserInput
+from hocon.parser.data import ParserInput
 from hocon.parser._simple_value import parse_simple_value
 from hocon.strings import QuotedString, UnquotedString
 from hocon.unresolved import (

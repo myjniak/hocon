@@ -7,10 +7,10 @@ from hocon.exceptions import (
 from hocon.strings import QuotedString, UnquotedString
 from hocon.unresolved import UnresolvedSubstitution
 
-from ._data import ParserInput
 from ._key import parse_keypath
 from ._quoted_string import parse_quoted_string, parse_triple_quoted_string
 from ._unquoted_string import _parse_unquoted_string_value
+from .data import ParserInput
 
 
 def parse_simple_value(

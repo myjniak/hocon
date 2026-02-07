@@ -20,6 +20,10 @@ class UnresolvedConcatenation(list):
         return "〈" + super().__repr__()[1:-1] + "〉"
 
     def get_type(self) -> type[list | dict | str]:
+        """Scan all concatenation items to evaluate type.
+
+        After all, string concatenations are resolved differently than lists and dicts.
+        """
         concat_types = {type(value) for value in self}
         concat_types.discard(UnresolvedSubstitution)
         simple_value_classes = get_args(SIMPLE_VALUE_TYPE)
@@ -30,18 +34,23 @@ class UnresolvedConcatenation(list):
             msg = f"Concatenation of multiple types not allowed: {type_names}"
             raise HOCONConcatenationError(msg)
         concat_type = concat_types.pop()
-        if concat_type not in [list, dict]:
+        if concat_type not in {list, dict}:
             msg = f"Concatenation of type {concat_type.__name__} not supported!"
             raise HOCONConcatenationError(msg)
         return concat_type
 
     def has_substitutions(self) -> bool:
+        """Check if ${x} are inside this concatenation."""
         concat_types = {type(value) for value in self}
         return UnresolvedSubstitution in concat_types
 
     def sanitize(self) -> "UnresolvedConcatenation":
+        """Get rid of elements that should be discarded by hocon resolver.
+
+        Raise an exception if self contains elements of multiple types.
+        """
         concatenation = self._filter_out_undefined_substitutions()
-        if any(type(value) in [list, dict] for value in concatenation):
+        if any(type(value) in {list, dict} for value in concatenation):
             concatenation = concatenation.filter_out_unquoted_space()
         elif any(isinstance(value, str) for value in concatenation):
             concatenation = concatenation.strip_unquoted_space()
@@ -49,12 +58,14 @@ class UnresolvedConcatenation(list):
         return concatenation
 
     def filter_out_unquoted_space(self) -> "UnresolvedConcatenation":
+        """Remove all unquoted spaces from this concatenation."""
         return UnresolvedConcatenation(filter(lambda v: not self._is_empty_unquoted_string(v), self))
 
     def _filter_out_undefined_substitutions(self) -> "UnresolvedConcatenation":
         return UnresolvedConcatenation(filter(lambda v: v is not UNDEFINED, self))
 
     def strip_unquoted_space(self) -> "UnresolvedConcatenation":
+        """Remove all unquoted spaces from the left and right end of this concatenation."""
         try:
             first = next(index for index, value in enumerate(self) if not self._is_empty_unquoted_string(value))
         except StopIteration:
@@ -82,6 +93,7 @@ class UnresolvedDuplication(list):
         return "【" + super().__repr__()[1:-1] + "】"
 
     def sanitize(self) -> Self:
+        """Discard all items overriden by a list or a simple value."""
         if len(self) == 0:
             msg = "Unresolved duplicate key must contain at least 2 elements."
             raise HOCONDuplicateKeyMergeError(msg)
@@ -105,6 +117,10 @@ class UnresolvedSubstitution:
 
     @property
     def location(self) -> list[str]:
+        """Return FULL path to this substitution from the very root of the main config file.
+
+        Even if this substitution is defined inside a nested included file.
+        """
         return self.including_root + self.relative_location
 
     def __str__(self) -> str:

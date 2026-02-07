@@ -6,7 +6,7 @@ from hocon.exceptions import (
 )
 from hocon.strings import UnquotedString
 
-from ._data import ParserInput
+from .data import ParserInput
 
 
 def _parse_unquoted_string_value(data: ParserInput, idx: int) -> tuple[UnquotedString, int]:

@@ -3,9 +3,9 @@ from enum import StrEnum, auto
 from pathlib import Path
 
 from hocon.exceptions import HOCONIncludeError
-from hocon.parser._data import ParserInput
 from hocon.parser._eat import eat_whitespace_and_comments
 from hocon.parser._quoted_string import parse_quoted_string
+from hocon.parser.data import ParserInput
 
 
 @dataclass
@@ -41,7 +41,7 @@ def parse_include_value(data: ParserInput, idx: int) -> tuple[ParserInput, int]:
 
 
 def load_include_content(data: ParserInput, string: str, mode: IncludeMode, *, required: bool) -> ParserInput:
-    if mode in [IncludeMode.FILE, IncludeMode.DEFAULT]:
+    if mode in {IncludeMode.FILE, IncludeMode.DEFAULT}:
         external_filepath = Path(data.absolute_filepath).parent / string
         if not required and not external_filepath.exists():
             external_data = "{}"

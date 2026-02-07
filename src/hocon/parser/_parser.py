@@ -7,7 +7,6 @@ from hocon.exceptions import (
 )
 from hocon.unresolved import UnresolvedConcatenation
 
-from ._data import ParserInput
 from ._eat import (
     eat_comments,
     eat_dict_item_separators,
@@ -23,6 +22,7 @@ from ._value_utils import (
     convert_iadd_to_self_referential_substitution,
     merge_unconcatenated,
 )
+from .data import ParserInput
 
 
 def parse(data: str, root_filepath: str | Path | None = None, encoding: str = "UTF-8") -> ROOT_TYPE:
