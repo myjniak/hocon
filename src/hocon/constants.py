@@ -51,7 +51,7 @@ ROOT_TYPE = list[Any] | dict[Any, Any]
 
 
 class Undefined:
-    pass
+    """A marker when value evaluates to nothing."""
 
 
 UNDEFINED = Undefined()
