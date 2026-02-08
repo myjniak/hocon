@@ -31,7 +31,7 @@ def parse_include_value(data: ParserInput, idx: int) -> tuple[ParserInput, int]:
         raise HOCONIncludeError(msg, data, idx)
     string, idx = parse_quoted_string(data, idx + 1)
     idx = _eat_closing_brackets(data, idx, include_mode, required=required)
-    content = load_include_content(data, string, include_mode, required=required)
+    content = load_include_content(data, str(string), include_mode, required=required)
     return content, idx
 
 

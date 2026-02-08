@@ -24,13 +24,13 @@ def test_sanitize_duplication():
 
 
 def test_filter_unquoted_spaces():
-    concatenation = UnresolvedConcatenation([{}, {}, UnquotedString("  "), {}, UnquotedString()])
+    concatenation = UnresolvedConcatenation([{}, {}, UnquotedString("  "), {}, UnquotedString("")])
     result = concatenation.filter_out_unquoted_space()
     assert result == [{}, {}, {}]
 
 
 def test_filter_unquoted_spaces_2():
-    concatenation = UnresolvedConcatenation([{}, UnquotedString(" Hi"), {}, UnquotedString()])
+    concatenation = UnresolvedConcatenation([{}, UnquotedString(" Hi"), {}, UnquotedString("")])
     result = concatenation.filter_out_unquoted_space()
     assert result == [{}, UnquotedString(" Hi"), {}]
 

@@ -8,6 +8,7 @@ from typing import Any, get_args
 from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED, Undefined
 from hocon.exceptions import HOCONConcatenationError
 from hocon.resolver._simple_value import resolve_simple_value
+from hocon.strings import HOCON_STRING
 from hocon.unresolved import (
     ANY_UNRESOLVED,
     UnresolvedConcatenation,
@@ -185,7 +186,7 @@ def _concatenate_simple_values(
     strip_left: bool = True,
     strip_right: bool = True,
 ) -> SIMPLE_VALUE_TYPE:
-    if not all(isinstance(value, str) for value in values):
+    if not all(isinstance(value, HOCON_STRING) for value in values):
         types = {type(value).__name__ for value in values}
         msg = f"Lazy concatenation of types {types} not allowed."
         raise HOCONConcatenationError(msg)

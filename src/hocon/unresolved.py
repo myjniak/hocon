@@ -6,7 +6,7 @@ from typing import Self, get_args
 
 from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED
 from hocon.exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError
-from hocon.strings import UnquotedString
+from hocon.strings import HOCON_STRING, UnquotedString
 
 
 class UnresolvedConcatenation(list):
@@ -52,7 +52,7 @@ class UnresolvedConcatenation(list):
         concatenation = self._filter_out_undefined_substitutions()
         if any(type(value) in {list, dict} for value in concatenation):
             concatenation = concatenation.filter_out_unquoted_space()
-        elif any(isinstance(value, str) for value in concatenation):
+        elif any(isinstance(value, HOCON_STRING) for value in concatenation):
             concatenation = concatenation.strip_unquoted_space()
         concatenation.get_type()
         return concatenation

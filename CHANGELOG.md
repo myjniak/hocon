@@ -3,6 +3,7 @@
 ## 0.6.0
 - Move published hocon.parser.ParserInput to hocon.parser.data.ParserInput to avoid cycle import
 - FIX: comment before array closure "]"
+- QuotedString and UnquotedString are no longer inheriting after str
 
 ## 0.5.0
 - Turn UNDEFINED to an instance of class Undefined

@@ -5,6 +5,7 @@
 """
 
 import re
+from collections import UserString
 from typing import Any
 
 WHITE_HEXES = [
@@ -45,7 +46,7 @@ ELEMENT_SEPARATORS = ",\n"
 SECTION_OPENING = "{["
 SECTION_CLOSING = "}]"
 
-SIMPLE_VALUE_TYPE = int | float | str | bool | None
+SIMPLE_VALUE_TYPE = int | float | str | UserString | bool | None
 ANY_VALUE_TYPE = dict | list | SIMPLE_VALUE_TYPE
 ROOT_TYPE = list[Any] | dict[Any, Any]
 
