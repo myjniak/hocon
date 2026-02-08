@@ -88,7 +88,7 @@ def parse_list(data: ParserInput, idx: int = 0, current_keypath: list[str] | Non
     unconcatenated_list: list[UnresolvedConcatenation] = []
     index = 0
     while True:
-        idx = eat_whitespace(data, idx)
+        idx = eat_whitespace_and_comments(data, idx)
         if data[idx] == "]":
             idx += 1
             return unconcatenated_list, idx
