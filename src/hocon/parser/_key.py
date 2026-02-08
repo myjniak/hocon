@@ -11,6 +11,8 @@ from .data import ParserInput
 
 @dataclass
 class Keypath:
+    """Used when parsing keypath of the hocon tree and in substitution target keypath."""
+
     keys: list[str]
     end_idx: int
     iadd: bool = False

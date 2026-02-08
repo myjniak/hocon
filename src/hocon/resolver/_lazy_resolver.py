@@ -105,6 +105,8 @@ def _resolve_dict(values: dict) -> dict[Any, Any]:
 
 @dataclass(frozen=True)
 class ConcatenationType:
+    """With 3 types than can have subs, that makes 6 different methods of resolving concatenations."""
+
     type: type
     has_substitutions: bool
 

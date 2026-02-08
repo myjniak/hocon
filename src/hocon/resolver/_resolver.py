@@ -34,6 +34,8 @@ def resolve(parsed: ROOT_TYPE) -> ROOT_TYPE:
 
 
 class Resolver:
+    """Convert HOCON object to python dict/list."""
+
     def __init__(self, parsed: ROOT_TYPE) -> None:
         self._resolve_substitution = SubstitutionResolver(parsed, self)
 

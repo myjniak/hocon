@@ -5,12 +5,17 @@ from hocon.constants import ANY_VALUE_TYPE, Undefined
 
 
 class SubstitutionStatus(Enum):
-    UNRESOLVED = auto()
-    RESOLVING = auto()
-    FALLBACK_UNRESOLVED = auto()
-    FALLBACK_RESOLVING = auto()
-    RESOLVED = auto()
-    UNDEFINED = auto()
+    """Starts always from UNRESOLVED. Ends on RESOLVED or UNDEFINED.
+
+    State transitions documented for each state inline.
+    """
+
+    UNRESOLVED = auto(), "--> RESOLVING"
+    RESOLVING = auto(), "--> RESOLVED, UNDEFINED, FALLBACK_UNRESOLVED"
+    FALLBACK_UNRESOLVED = auto(), "--> FALLBACK_RESOLVING"
+    FALLBACK_RESOLVING = auto(), "--> RESOLVED, UNDEFINED"
+    RESOLVED = auto(), "happy end :)"
+    UNDEFINED = auto(), "bad ending :("
 
     def to_resolving(self) -> "SubstitutionStatus | None":
         state_change_map = {
@@ -26,5 +31,7 @@ class SubstitutionStatus(Enum):
 
 @dataclass
 class Substitution:
+    """Resolver's representation of a ${substitution}."""
+
     value: ANY_VALUE_TYPE | Undefined = None
     status: SubstitutionStatus = SubstitutionStatus.UNRESOLVED

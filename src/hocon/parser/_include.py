@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from enum import StrEnum, auto
 from pathlib import Path
 
@@ -8,13 +7,9 @@ from hocon.parser._quoted_string import parse_quoted_string
 from hocon.parser.data import ParserInput
 
 
-@dataclass
-class IncludeFile:
-    path: Path
-    required: bool = False
-
-
 class IncludeMode(StrEnum):
+    """See https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#include-syntax."""
+
     FILE = auto()
     CLASSPATH = auto()
     URL = auto()
