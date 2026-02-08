@@ -1,3 +1,4 @@
+from collections import UserString
 from dataclasses import dataclass
 
 from hocon.constants import WHITE_CHARS
@@ -26,7 +27,7 @@ def parse_keypath(data: ParserInput, idx: int = 0, keyend_indicator: str = ":={"
         string, idx = _parse_key_chunk(data, idx)
         if not keychunks_list[-1] and string.startswith("include") and type(string) is UnquotedString:
             return Keypath(keys=[], end_idx=idx, include=True)
-        keychunks_list[-1].append(string)
+        keychunks_list[-1].append(str(string))
         char = data[idx]
         if data[idx] in keyend_indicator or data[idx : idx + 2] == "+=":
             if isinstance(string, UnquotedString):
@@ -42,7 +43,7 @@ def parse_keypath(data: ParserInput, idx: int = 0, keyend_indicator: str = ":={"
             keychunks_list.append([])
 
 
-def _parse_key_chunk(data: ParserInput, idx: int) -> tuple[str, int]:
+def _parse_key_chunk(data: ParserInput, idx: int) -> tuple[UserString, int]:
     char = data[idx]
     if data[idx : idx + 3] == '"""':
         string, idx = parse_triple_quoted_string(data, idx + 3)
