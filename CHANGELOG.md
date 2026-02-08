@@ -1,7 +1,7 @@
 # Changelog
 
-## 0.5.1
-- Publish hocon.parser.data.ParserInput
+## 0.6.0
+- Move published hocon.parser.ParserInput to hocon.parser.data.ParserInput to avoid cycle import
 
 ## 0.5.0
 - Turn UNDEFINED to an instance of class Undefined
