@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED, Undefined
 from hocon.exceptions import HOCONDeduplicationError, HOCONError
 from hocon.resolver._simple_value import resolve_simple_value
+from hocon.strings import HOCON_STRING
 from hocon.unresolved import (
     ANY_UNRESOLVED,
     UnresolvedConcatenation,
@@ -125,7 +126,7 @@ class Resolver:
     @staticmethod
     def _concatenate_simple_values(values: UnresolvedConcatenation) -> SIMPLE_VALUE_TYPE:
         for index, value in enumerate(values):
-            if not isinstance(value, str):
+            if not isinstance(value, HOCON_STRING):
                 values[index] = json.dumps(value)
         return resolve_simple_value(values)
 
