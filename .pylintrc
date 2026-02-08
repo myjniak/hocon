@@ -2,8 +2,7 @@
 max-line-length=120
 
 [MESSAGES CONTROL]
-disable=missing-class-docstring,
-        missing-function-docstring,
+disable=missing-function-docstring,
         missing-module-docstring,
         unidiomatic-typecheck,
         invalid-name,

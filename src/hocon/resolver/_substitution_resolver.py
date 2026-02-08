@@ -14,10 +14,21 @@ from ._substitution import Substitution, SubstitutionStatus
 
 
 class Resolver(Protocol):
+    """SubstitutionResolver should receive an object with this method set."""
+
     def resolve(self, values: ANY_VALUE_TYPE | ANY_UNRESOLVED) -> ANY_VALUE_TYPE | Undefined: ...
 
 
 class SubstitutionResolver:
+    """The only resolver that needs the entire config tree to perform correctly.
+
+    Example:
+    parsed = parse("{value: 42, sub: ${value}}")
+    resolve_sub = SubstitutionResolver(parsed, Resolver(parsed))
+    resolve_sub(parsed["sub"][0]) ---> 42
+
+    """
+
     def __init__(
         self,
         parsed: ROOT_TYPE,
