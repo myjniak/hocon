@@ -43,7 +43,7 @@ def _parse_unquoted_string_key(data: ParserInput, idx: int) -> tuple[UnquotedStr
 
 def _raise_parse_key_exception(data: ParserInput, idx: int) -> None:
     if data[idx] == ",":
-        msg = "Excessive leading comma found in a dictionary."
+        msg = "Excessive leading comma found in a dictionary"
         raise HOCONUnexpectedSeparatorError(msg, data, idx)
     if data[idx] in "{[":
         msg = "Objects and arrays do not make sense as field keys"

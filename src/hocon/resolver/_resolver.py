@@ -144,6 +144,8 @@ class Resolver:
                 values.pop()
             else:
                 break
+            if not values:
+                break
         return deduplicated
 
     def merge(self, superior: dict, inferior: dict) -> dict:

@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE
 from hocon.exceptions import HOCONSubstitutionUndefinedError
 from hocon.unresolved import (
@@ -20,7 +18,7 @@ class _Cutter:
     def cut(self, subtree: ANY_VALUE_TYPE | ANY_UNRESOLVED, keypath_index: int = 0) -> None:
         is_past_last_key = keypath_index == len(self.sub.location)
         if is_past_last_key:
-            return self.final_cut(subtree, keypath_index=keypath_index)
+            return self.final_cut(subtree)
         key = self.sub.location[keypath_index]
         is_last_key = keypath_index + 1 == len(self.sub.location)
         if isinstance(subtree, (UnresolvedDuplication, UnresolvedConcatenation)):
@@ -56,18 +54,18 @@ class _Cutter:
             subtree.pop(key)
         return None
 
-    def final_cut(self, subtree: ANY_VALUE_TYPE | ANY_UNRESOLVED, keypath_index: int = 0) -> None:
+    def final_cut(self, subtree: ANY_VALUE_TYPE | ANY_UNRESOLVED) -> None:
         if isinstance(subtree, UnresolvedDuplication):
-            return self.cut_duplication(subtree, keypath_index=keypath_index)
+            return self.cut_duplication(subtree)
         if isinstance(subtree, UnresolvedConcatenation):
             return self.cut_concatenation(subtree)
         msg = f"Failed to resolve {self.sub}"
         raise HOCONSubstitutionUndefinedError(msg)
 
-    def cut_duplication(self, subtree: UnresolvedDuplication, keypath_index: int = 0) -> None:
+    def cut_duplication(self, subtree: UnresolvedDuplication) -> None:
         for index, item in enumerate(subtree):
             if isinstance(item, UnresolvedConcatenation):
-                self.cut(item, keypath_index)
+                self.cut_concatenation(item)
             elif item == self.sub or self.is_sub_found:
                 self.is_sub_found = True
                 for _ in range(len(subtree) - index):
@@ -91,7 +89,6 @@ def cut_self_reference_and_fields_that_override_it(
     substitution: UnresolvedSubstitution,
     parsed: ROOT_TYPE,
 ) -> ROOT_TYPE:
-    carved_parsed = deepcopy(parsed)
     cutter = _Cutter(substitution)
-    cutter.cut(carved_parsed)
-    return carved_parsed
+    cutter.cut(parsed)
+    return parsed
