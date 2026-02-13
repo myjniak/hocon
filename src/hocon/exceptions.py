@@ -10,10 +10,11 @@ class HOCONError(Exception):
         """Include line and column info, print the whole problematic line, if not empty."""
         self.location = ""
         self.line = ""
+        self.message = message
+        final_msg = self.message
         if data and idx:
             self.location, self.line = self._prepare_message_suffix(data, idx)
-        self.message = message
-        final_msg = self.message + ": " + self.location + "\n" + self.line.strip("\n")
+            final_msg += ": " + self.location + "\n" + self.line.strip("\n")
         super().__init__(final_msg)
 
     @staticmethod

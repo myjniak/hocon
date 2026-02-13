@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 from typing import Protocol, get_args
 
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, UNDEFINED, Undefined
@@ -82,7 +83,7 @@ class SubstitutionResolver:
     def _turn_to_resolving_state(self, substitution: UnresolvedSubstitution, status: SubstitutionStatus) -> None:
         new_status = status.to_resolving()
         if new_status is None:
-            msg = f"Could not resolve {substitution}."
+            msg = f"Could not resolve {substitution}"
             raise HOCONSubstitutionCycleError(msg)
         self.subs[substitution.id_] = Substitution(status=new_status)
 
@@ -96,7 +97,7 @@ class SubstitutionResolver:
             ]:
                 msg = f"Cycle occurred when resolving {substitution}"
                 raise HOCONSubstitutionCycleError(msg)
-            msg = f"Could not resolve substitution {substitution}."
+            msg = f"Could not resolve substitution {substitution}"
             raise HOCONSubstitutionUndefinedError(msg)
         self.subs[substitution.id_] = resolved_sub
         return resolved_sub.value
@@ -119,13 +120,12 @@ class SubstitutionResolver:
         b : 5
         and ultimately will return {c:1}
         """
-        carved_parsed = cut_self_reference_and_fields_that_override_it(substitution, self._parsed)
-        sub_resolver = SubstitutionResolver(
-            carved_parsed,
-            resolver=self.resolver,
-            substitutions=self.subs,
-        )
-        return sub_resolver(substitution)
+        orig_parsed = self._parsed
+        carved_parsed = cut_self_reference_and_fields_that_override_it(substitution, deepcopy(self._parsed))
+        self._parsed = carved_parsed
+        result = self(substitution)
+        self._parsed = orig_parsed
+        return result
 
 
 def get_from_env(substitution: UnresolvedSubstitution) -> Substitution:

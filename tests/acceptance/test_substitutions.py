@@ -1,6 +1,6 @@
-
 from hocon import loads
-from hocon._main import parse, resolve
+from hocon.resolver import resolve
+from hocon.parser import parse
 
 
 def test_1():
@@ -146,3 +146,26 @@ def test_substitution_with_array_in_path():
         "a": [1, 2, 3, 4],
         "b": 3,
     }
+
+
+def test_mixed_overrides():
+    data = """
+    x: "x" // "x"
+    y: ${x}"y" // "xy"
+    x: ${y}"z" // "xyz"
+    """
+    result = loads(data)
+    assert result == {
+        "x": "xyz",
+        "y": "xy"
+    }
+
+
+def test_empty_duplication():
+    """When all elements of Unresolved Duplication resolve to UNDEFINED, the entire key should be removed."""
+    data = """
+        x: ${?y}
+        x: ${?z}
+        """
+    result = loads(data)
+    assert result == {}

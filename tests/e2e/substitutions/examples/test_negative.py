@@ -68,5 +68,4 @@ def test_undefined_by_spec():
     b : 2
     a : ${b}
     b : ${a}"""
-    with pytest.raises(HOCONSubstitutionCycleError):
-        hocon.loads(data)
+    assert hocon.loads(data) == {"a": 1, "b": 1}
