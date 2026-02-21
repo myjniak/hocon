@@ -6,6 +6,8 @@
 - QuotedString and UnquotedString are no longer inheriting after str
 - FIX: Intertwining mutual overrides of 2 substitutions
 - FIX: Removing key containing duplication if all its elements resolve to nothing (UNDEFINED)
+- FIX: include files from cwd when using hocon.loads
+- FIX: include absolute filepaths when using hocon.load
 
 ## 0.5.0
 - Turn UNDEFINED to an instance of class Undefined
