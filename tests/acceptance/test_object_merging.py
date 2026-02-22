@@ -1,8 +1,6 @@
 import pytest
 
 from hocon import loads
-from hocon.parser import parse
-from hocon.resolver._lazy_resolver import resolve
 
 
 def test_substitution_dict_deduplication():
@@ -68,7 +66,6 @@ def test_nested_dicts():
     assert loads(data) == {"p": {"a": {"x": 1, "y": 2}}}
 
 
-@pytest.mark.xfail
 def test_multiple_appends():
     data = """
     a = [1,2]
@@ -164,7 +161,6 @@ def test_merge_duplication_with_list():
     assert result == {"a": {"b": [2]}}
 
 
-@pytest.mark.xfail
 def test_merge_duplications():
     data = """
     a = {
