@@ -1,5 +1,3 @@
-import pytest
-
 from hocon import loads
 
 
@@ -76,7 +74,6 @@ def test_multiple_appends():
     assert loads(data) == {"a": [1, 2, 3, 4, 5]}
 
 
-@pytest.mark.xfail
 def test_nested_multiple_merges():
     data = """
     a.b = [1,2]
@@ -86,7 +83,15 @@ def test_nested_multiple_merges():
     assert loads(data) == {"a": {"b": [1, 2, 3, 4, 5, 6]}}
 
 
-@pytest.mark.xfail
+def test_nested_merges_overriden():
+    data = """
+    a.b = [1,2]
+    a.b = ${a.b} [3,4]
+    a.b = 5
+    """
+    assert loads(data) == {"a": {"b": 5}}
+
+
 def test_merge_list_with_undefined():
     data = """
     a.b = [1,2]
@@ -104,7 +109,6 @@ def test_merge_undefined():
     assert loads(data) == {"a": {}}
 
 
-@pytest.mark.xfail
 def test_merge_simple_with_undefined():
     """According to https://github.com/lightbend/config implementation"""
     data = """
@@ -114,7 +118,6 @@ def test_merge_simple_with_undefined():
     assert loads(data) == {"a": {"b": 1}}
 
 
-@pytest.mark.xfail
 def test_merge_simple_with_undefined_2():
     """According to https://github.com/lightbend/config implementation"""
     data = """
@@ -134,10 +137,7 @@ def test_merge_undefined_with_dict():
         }
     """
     result = loads(data)
-    assert result == {
-        "a": {"a": 1},
-        "b": {"a": {"a": 1}}
-    }
+    assert result == {"a": {"a": 1}, "b": {"a": {"a": 1}}}
 
 
 def test_undefined_in_dict_overrides_it_all():
@@ -146,14 +146,14 @@ def test_undefined_in_dict_overrides_it_all():
         a: {b: [1,2,3]} {b: {c: ${?x}}}
     """
     result = loads(data)
-    assert result == {"a":{"b":{}}}
+    assert result == {"a": {"b": {}}}
 
 
-@pytest.mark.xfail
 def test_merge_duplication_with_list():
     data = """
     a = {b: [2]}
-    a = {b: ${?x}
+    a = {
+         b: ${?x}
          b: ${?y}
     }
     """

@@ -63,7 +63,7 @@ def _(values: UnresolvedConcatenation) -> ANY_VALUE_TYPE | UnresolvedSubstitutio
 
 @resolve.register
 def _(values: UnresolvedDuplication) -> ANY_VALUE_TYPE | UnresolvedDuplication:
-    """Resolve duplication values starting from the last (latest overrides/merges with the rest).
+    """Resolve duplication values starting from the first (each latter item overrides/merges with the previous item).
 
     If it's a SIMPLE_VALUE_TYPE or a list, it overrides the rest.
     If it's a dict type, objects will merge.
@@ -244,15 +244,60 @@ def _(superior: UnresolvedConcatenation, inferior: dict | UnresolvedSubstitution
 
 
 def merge(superior: dict, inferior: dict) -> dict:
-    """Merge two objects recursively. If keys overlap, the latter wins."""
+    """Merge two objects recursively. If keys overlap, merge values."""
     result = deepcopy(inferior)
     for key, value in superior.items():
         inferior_value = result.get(key)
-        if isinstance(inferior_value, get_args(ANY_UNRESOLVED)):
-            inferior_value = resolve(inferior_value)
-        if isinstance(value, dict) and isinstance(inferior_value, dict):
-            result[key] = merge(value, inferior_value)
-        else:
-            resolved_value = resolve(value)
-            result[key] = resolved_value
+        if inferior_value is None:
+            result[key] = value
+            continue
+        result[key] = _ValueMerger.merge(inferior_value, value)
     return result
+
+
+class _ValueMerger:
+    duplication_elem = list | UnresolvedSubstitution | UnresolvedConcatenation
+
+    @classmethod
+    def merge(
+        cls,
+        inferior: ANY_VALUE_TYPE | ANY_UNRESOLVED,
+        superior: ANY_VALUE_TYPE | ANY_UNRESOLVED,
+    ) -> ANY_VALUE_TYPE | ANY_UNRESOLVED:
+        if isinstance(inferior, dict) and isinstance(superior, dict):
+            return merge(superior, inferior)
+        if isinstance(inferior, UnresolvedDuplication):
+            return cls._merge_with_duplication(inferior, superior)
+        if isinstance(inferior, cls.duplication_elem):
+            return cls._merge_with_duplication_element(inferior, superior)
+        if isinstance(inferior, SIMPLE_VALUE_TYPE) and isinstance(superior, list | ANY_UNRESOLVED):
+            return UnresolvedConcatenation([inferior, superior])
+        return superior
+
+    @classmethod
+    def _merge_with_duplication(
+        cls,
+        inferior: UnresolvedDuplication,
+        superior: ANY_VALUE_TYPE | ANY_UNRESOLVED,
+    ) -> ANY_VALUE_TYPE | ANY_UNRESOLVED:
+        duplication_elem = list | UnresolvedSubstitution | UnresolvedConcatenation
+        if isinstance(superior, UnresolvedDuplication):
+            inferior.extend(superior)
+            return inferior
+        if isinstance(superior, duplication_elem):
+            inferior.append(superior)
+            return inferior
+        return superior
+
+    @classmethod
+    def _merge_with_duplication_element(
+        cls,
+        inferior: "_ValueMerger.duplication_elem",
+        superior: ANY_VALUE_TYPE | ANY_UNRESOLVED,
+    ) -> ANY_VALUE_TYPE | ANY_UNRESOLVED:
+        if isinstance(superior, UnresolvedDuplication):
+            superior.insert(0, inferior)
+            return superior
+        if isinstance(superior, cls.duplication_elem):
+            return UnresolvedDuplication([inferior, superior])
+        return superior
