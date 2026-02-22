@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.1
+- FIX: multiple list += x appending
+- FIX: merging items with UNDEFINED substitution 
+
 ## 0.6.0
 - Move published hocon.parser.ParserInput to hocon.parser.data.ParserInput to avoid cycle import
 - FIX: comment before array closure "]"

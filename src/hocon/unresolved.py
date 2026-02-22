@@ -98,7 +98,7 @@ class UnresolvedDuplication(list):
             msg = "Unresolved duplicate key must contain at least 2 elements."
             raise HOCONDuplicateKeyMergeError(msg)
         for index in reversed(range(len(self))):
-            if not isinstance(self[index], dict | ANY_UNRESOLVED):
+            if not isinstance(self[index], list | dict | ANY_UNRESOLVED):
                 for _ in range(index + 1):
                     del self[0]
                 break

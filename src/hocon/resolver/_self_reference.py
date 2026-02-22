@@ -66,7 +66,7 @@ class _Cutter:
         for index, item in enumerate(subtree):
             if isinstance(item, UnresolvedConcatenation):
                 self.cut_concatenation(item)
-            elif item == self.sub or self.is_sub_found:
+            elif (item == self.sub and item.id_ == self.sub.id_) or self.is_sub_found:
                 self.is_sub_found = True
                 for _ in range(len(subtree) - index):
                     subtree.pop()
@@ -78,7 +78,7 @@ class _Cutter:
 
     def cut_concatenation(self, subtree: UnresolvedConcatenation) -> None:
         for index, item in enumerate(subtree):
-            if item == self.sub or self.is_sub_found:
+            if (item == self.sub and item.id_ == self.sub.id_) or self.is_sub_found:
                 self.is_sub_found = True
                 for _ in range(len(subtree) - index):
                     subtree.pop()
