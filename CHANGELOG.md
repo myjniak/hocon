@@ -2,6 +2,7 @@
 
 ## 0.6.1
 - FIX: multiple list += x appending
+- FIX: multiple nested sub.list += [x, y] merging 
 - FIX: merging items with UNDEFINED substitution 
 
 ## 0.6.0
