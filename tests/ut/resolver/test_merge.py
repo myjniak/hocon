@@ -1,4 +1,5 @@
 from hocon.resolver._resolver import Resolver
+from hocon.unresolved import UnresolvedSubstitution
 
 
 def test_1():
@@ -61,14 +62,13 @@ def test_2():
 
 
 def test_3():
-    dictionary = {
-        "a": 0,
-        "b": 1,
-    }
-    key = "a"
-    value = {}
-    output = Resolver({}).merge({key: value}, dictionary)
+    output = Resolver({}).merge({"a": {}}, {"a": 0, "b": 1,})
     assert output == {
         "a": {},
         "b": 1,
     }
+
+
+def test_4():
+    output = Resolver({}).merge({"a": UnresolvedSubstitution(["c"], True)}, {"a": 1})
+    assert output == {"a": 1}

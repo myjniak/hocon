@@ -30,7 +30,7 @@ def test_bad_order():
     foo : { a : 1 }
     """
     with pytest.raises(HOCONSubstitutionUndefinedError):
-        print(hocon.loads(data))
+        hocon.loads(data)
 
 
 def test_undefined():

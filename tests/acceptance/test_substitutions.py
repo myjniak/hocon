@@ -1,4 +1,7 @@
+import pytest
+
 from hocon import loads
+from hocon.exceptions import HOCONSubstitutionUndefinedError
 from hocon.resolver import resolve
 from hocon.parser import parse
 
@@ -164,8 +167,49 @@ def test_mixed_overrides():
 def test_empty_duplication():
     """When all elements of Unresolved Duplication resolve to UNDEFINED, the entire key should be removed."""
     data = """
-        x: ${?y}
-        x: ${?z}
+        x: ${?a}
+        x: ${?b}
+        x: ${?c}
+        x: ${?d}
         """
     result = loads(data)
     assert result == {}
+
+
+def test_sub_in_duplication_that_could_be_a_dict():
+    """${x} could be a dict, which should lead to merging. If ${x} can't be resolved, Exception should be raised."""
+    data = """
+            a: ${x}
+            a: {a: 1}
+            """
+    with pytest.raises(HOCONSubstitutionUndefinedError):
+        loads(data)
+
+
+def test_sub_in_duplication_that_could_be_a_list():
+    """${x} could be anything, but whatever it is - the list should override it.
+    In duplications, only dicts can merge."""
+    data = """
+            a: ${x}
+            a: [1, 2, 3]
+            """
+    result = loads(data)
+    assert result == {"a": [1, 2, 3]}
+
+
+def test_sub_in_concatenation_that_could_be_a_dict():
+    """${x} could be a dict, which should lead to merging. If ${x} can't be resolved, Exception should be raised."""
+    data = """
+            a: ${x} {a: 1}
+            """
+    with pytest.raises(HOCONSubstitutionUndefinedError):
+        loads(data)
+
+
+def test_sub_in_concatenation_that_could_be_a_list():
+    """${x} could be a list, which should lead to merging. If ${x} can't be resolved, Exception should be raised."""
+    data = """
+            a: ${x} [1, 2, 3]
+            """
+    with pytest.raises(HOCONSubstitutionUndefinedError):
+        loads(data)
