@@ -3,6 +3,7 @@ import pytest
 from hocon.constants import UNDEFINED
 from hocon.exceptions import HOCONConcatenationError
 from hocon.resolver import _lazy_resolver
+from hocon.strings import UnquotedString
 from hocon.unresolved import UnresolvedConcatenation, UnresolvedSubstitution
 
 
@@ -13,9 +14,9 @@ def test_lazy_resolve_unsupported_type():
 
 
 def test_resolve_empty_concatenation():
-    concatenation = UnresolvedConcatenation([])
-    resolved = _lazy_resolver.resolve(concatenation)
-    assert resolved == UNDEFINED
+    concatenation = UnresolvedConcatenation([UnquotedString(" ")])
+    with pytest.raises(HOCONConcatenationError, match="Invalid empty concatenation provided! 〈' '〉"):
+        _lazy_resolver.resolve(concatenation)
 
 
 def test_concatenation_cant_contain_unsupported_hocon_types():
