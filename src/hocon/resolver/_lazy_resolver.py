@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from functools import cache, reduce, singledispatch
 from typing import Any, get_args
 
-from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED, Undefined
+from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE
 from hocon.exceptions import HOCONConcatenationError
 from hocon.resolver._simple_value import resolve_simple_value
 from hocon.strings import HOCON_STRING
@@ -18,7 +18,7 @@ from hocon.unresolved import (
 
 
 @singledispatch
-def resolve(values: ANY_VALUE_TYPE | ANY_UNRESOLVED) -> Undefined | ANY_VALUE_TYPE | ANY_UNRESOLVED:
+def resolve(values: ANY_VALUE_TYPE | ANY_UNRESOLVED) -> ANY_VALUE_TYPE | ANY_UNRESOLVED:
     msg = f"Bad input value type: {type(values)}"
     raise NotImplementedError(msg)
 
@@ -33,8 +33,7 @@ def _(values: list) -> list[Any]:
     resolved_list = []
     for element in values:
         resolved_elem = resolve(element)
-        if resolved_elem is not UNDEFINED:
-            resolved_list.append(resolved_elem)
+        resolved_list.append(resolved_elem)
     return resolved_list
 
 
@@ -44,12 +43,13 @@ def _(values: dict) -> dict[Any, Any]:
 
 
 @resolve.register
-def _(values: UnresolvedConcatenation) -> Undefined | ANY_VALUE_TYPE | UnresolvedSubstitution | UnresolvedConcatenation:
-    values = values.sanitize()
-    if not values:
-        return UNDEFINED
-    first_value = values[0]
-    if len(values) == 1 and (
+def _(values: UnresolvedConcatenation) -> ANY_VALUE_TYPE | UnresolvedSubstitution | UnresolvedConcatenation:
+    concatenation = values.sanitize()
+    if not concatenation:
+        msg = f"Invalid empty concatenation provided! {values}"
+        raise HOCONConcatenationError(msg)
+    first_value = concatenation[0]
+    if len(concatenation) == 1 and (
         type(first_value) is str
         or type(first_value) is int
         or type(first_value) is bool
@@ -57,8 +57,8 @@ def _(values: UnresolvedConcatenation) -> Undefined | ANY_VALUE_TYPE | Unresolve
         or type(first_value) is UnresolvedSubstitution
     ):
         return first_value
-    concatenate_function = _get_concatenator(values)
-    return concatenate_function(values)
+    concatenate_function = _get_concatenator(concatenation)
+    return concatenate_function(concatenation)
 
 
 @resolve.register
@@ -99,8 +99,7 @@ def _resolve_dict(values: dict) -> dict[Any, Any]:
     resolved_dict = {}
     for key, value in values.items():
         resolved_value = resolve(value)
-        if resolved_value is not UNDEFINED:
-            resolved_dict[key] = resolved_value
+        resolved_dict[key] = resolved_value
     return resolved_dict
 
 
@@ -255,6 +254,5 @@ def merge(superior: dict, inferior: dict) -> dict:
             result[key] = merge(value, inferior_value)
         else:
             resolved_value = resolve(value)
-            if resolved_value is not UNDEFINED:
-                result[key] = resolved_value
+            result[key] = resolved_value
     return result
