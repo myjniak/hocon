@@ -2,7 +2,8 @@
 
 ## 0.6.2
 - Simplify lazy deduplication
-- Add a xfailing test - deduplicating nested dicts with a substitution in between
+- FIX: deduplicating nested dicts with a substitution in between
+- FIX: do not evaluate ${sub} when hidden by a value that cannot be merged with it (https://github.com/lightbend/config/issues/838)
 
 ## 0.6.1
 - FIX: multiple list += x appending

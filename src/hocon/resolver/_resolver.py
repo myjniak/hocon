@@ -102,17 +102,19 @@ class Resolver:
         deduplicated = self._resolve_latest_unresolved_duplication_element(values)
         if not isinstance(deduplicated, dict):
             return deduplicated
+        duplication = UnresolvedDuplication([deduplicated])
         for value in reversed(values[:-1]):
             resolved_value = value
             if isinstance(value, UnresolvedConcatenation):
                 resolved_value = self.resolve(value)
             if not isinstance(resolved_value, (dict, UnresolvedSubstitution)):
                 break
-            if isinstance(resolved_value, UnresolvedSubstitution):
+            if isinstance(value, UnresolvedSubstitution):
                 resolved_value = self.resolve(value)
             if isinstance(resolved_value, dict):
-                deduplicated = self.merge(deduplicated, resolved_value)
-        return self.resolve(deduplicated)
+                duplication.insert(0, resolved_value)
+        lazy_resolved = _lazy_resolver.resolve(duplication)
+        return self.resolve(lazy_resolved)
 
     resolve.register(resolve_list)
     resolve.register(resolve_dict)
