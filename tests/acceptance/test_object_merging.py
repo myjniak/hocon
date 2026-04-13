@@ -45,18 +45,16 @@ def test_deduplication_cut_off_2():
     }
 
 
-@pytest.mark.xfail
 def test_nested_dicts_simple_value_cutoff():
     """As with duplicate keys, an intermediate non-object value "hides" earlier object values.
     42 simply wins and loses all information about what it overrode.
     """
     data = """
     p: {"a" : { "y" : 2 }}
-    p: ${x}
+    p: {"a" : 42}
     p: {"a" : { "x" : 1 }}
-    x: {"a" : 42}
     """
-    assert loads(data) == {"p": {"a": {"x": 1}}, "x": {"a": 42}}
+    assert loads(data) == {"p": {"a": {"x": 1}}}
 
 
 def test_nested_dicts():
@@ -190,3 +188,14 @@ def test_merging_while_ignoring_overriden_unresolvable():
     """
     result = loads(data)
     assert result == {"a": {"key": "value", "key2": "value2"}, "y": {"key2": "value2"}}
+
+
+def test_merge_nested_dicts_with_complex_substituions():
+    """Refer to https://github.com/lightbend/config/issues/838"""
+    data = """
+    p: {"a" : ${y}}
+    p: ${x}
+    p: {"a" : { "x" : 1 }}
+    x: {"a" : 42}
+    """
+    assert loads(data) == {"p": {"a": {"x": 1}}, "x": {"a": 42}}
