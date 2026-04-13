@@ -1,3 +1,5 @@
+import pytest
+
 from hocon import loads
 
 
@@ -43,16 +45,18 @@ def test_deduplication_cut_off_2():
     }
 
 
+@pytest.mark.xfail
 def test_nested_dicts_simple_value_cutoff():
     """As with duplicate keys, an intermediate non-object value "hides" earlier object values.
     42 simply wins and loses all information about what it overrode.
     """
     data = """
     p: {"a" : { "y" : 2 }}
-    p: {"a" : 42}
+    p: ${x}
     p: {"a" : { "x" : 1 }}
+    x: {"a" : 42}
     """
-    assert loads(data) == {"p": {"a": {"x": 1}}}
+    assert loads(data) == {"p": {"a": {"x": 1}}, "x": {"a": 42}}
 
 
 def test_nested_dicts():

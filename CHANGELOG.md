@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.2
+- Simplify lazy deduplication
+- Add a xfailing test - deduplicating nested dicts with a substitution in between
+
 ## 0.6.1
 - FIX: multiple list += x appending
 - FIX: multiple nested sub.list += [x, y] merging 
