@@ -3,7 +3,7 @@ from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import dataclass
 from functools import cache, reduce, singledispatch
-from typing import Any, get_args
+from typing import Any
 
 from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE
 from hocon.exceptions import HOCONConcatenationError
@@ -70,26 +70,14 @@ def _(values: UnresolvedDuplication) -> ANY_VALUE_TYPE | UnresolvedDuplication:
     If at any point of object merging, duplicate value is not a dict, merging will stop.
     """
     values = values.sanitize()
-    last_value = resolve(values[-1])
-    if isinstance(last_value, SIMPLE_VALUE_TYPE) or type(last_value) is list:
-        return last_value
-
     first_value = resolve(values[0])
     deduplicated = UnresolvedDuplication([first_value])
     for value in values[1:]:
         maybe_resolved_value = resolve(value)
-        if isinstance(maybe_resolved_value, get_args(ANY_UNRESOLVED)) or isinstance(
-            deduplicated[0],
-            get_args(ANY_UNRESOLVED),
-        ):
-            deduplicated.append(maybe_resolved_value)
-        elif isinstance(maybe_resolved_value, dict):
-            if isinstance(deduplicated[-1], dict):
-                deduplicated[-1] = merge(maybe_resolved_value, deduplicated[-1])
-            else:
-                deduplicated.append(maybe_resolved_value)
+        if isinstance(maybe_resolved_value, dict) and isinstance(deduplicated[-1], dict):
+            deduplicated[-1] = merge(maybe_resolved_value, deduplicated[-1])
         else:
-            deduplicated = UnresolvedDuplication([maybe_resolved_value])
+            deduplicated.append(maybe_resolved_value)
     if len(deduplicated) == 1 and isinstance(deduplicated[0], ANY_VALUE_TYPE):
         return deduplicated[0]
     return deduplicated
