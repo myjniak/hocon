@@ -4,33 +4,22 @@ from hocon.constants import _FLOAT_CONSTANTS, NUMBER_RE, SIMPLE_VALUE_TYPE, WHIT
 from hocon.strings import HOCON_STRING, QuotedString, UnquotedString
 
 
-def resolve_simple_value(
-    chunks: list[HOCON_STRING],
-    *,
-    strip_left: bool = True,
-    strip_right: bool = True,
-) -> SIMPLE_VALUE_TYPE:
-    chunks = _strip_string_list(chunks, left=strip_left, right=strip_right)
+def resolve_simple_value(chunks: list[HOCON_STRING]) -> SIMPLE_VALUE_TYPE:
+    chunks = _strip_string_list(chunks)
     if len(chunks) == 1 and isinstance(chunks[0], UnquotedString):
         return _cast_string_value(str(chunks[0]))
     return "".join(list(map(str, chunks)))
 
 
-def _strip_string_list(values: list[HOCON_STRING], *, left: bool = True, right: bool = True) -> list[HOCON_STRING]:
-    if left:
-        first = next(
-            index for index, value in enumerate(values) if value.strip(WHITE_CHARS) or isinstance(value, QuotedString)
-        )
-    else:
-        first = 0
-    if right:
-        last = -1 * next(
-            index
-            for index, value in enumerate(reversed(values))
-            if value.strip(WHITE_CHARS) or isinstance(value, QuotedString)
-        )
-    else:
-        last = 0
+def _strip_string_list(values: list[HOCON_STRING]) -> list[HOCON_STRING]:
+    first = next(
+        index for index, value in enumerate(values) if value.strip(WHITE_CHARS) or isinstance(value, QuotedString)
+    )
+    last = -1 * next(
+        index
+        for index, value in enumerate(reversed(values))
+        if value.strip(WHITE_CHARS) or isinstance(value, QuotedString)
+    )
     if last == 0:
         return values[first:]
     return values[first:last]

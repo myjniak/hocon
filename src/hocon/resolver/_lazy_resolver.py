@@ -7,8 +7,6 @@ from typing import Any
 
 from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE
 from hocon.exceptions import HOCONConcatenationError
-from hocon.resolver._simple_value import resolve_simple_value
-from hocon.strings import HOCON_STRING
 from hocon.unresolved import (
     ANY_UNRESOLVED,
     UnresolvedConcatenation,
@@ -107,7 +105,7 @@ def _get_concatenator(
 ]:
     concatenate_functions = _get_concatenators()
     concat_type = ConcatenationType(type=values.get_type(), has_substitutions=values.has_substitutions())
-    return concatenate_functions[concat_type]
+    return concatenate_functions.get(concat_type, lambda x: x)
 
 
 @cache
@@ -121,10 +119,8 @@ def _get_concatenators() -> dict[
     return {
         ConcatenationType(list, has_substitutions=True): _concatenate_lists_with_subs,
         ConcatenationType(dict, has_substitutions=True): _concatenate_dicts_with_subs,
-        ConcatenationType(str, has_substitutions=True): _concatenate_simple_values_with_subs,
         ConcatenationType(list, has_substitutions=False): _concatenate_lists,
         ConcatenationType(dict, has_substitutions=False): _concatenate_dicts,
-        ConcatenationType(str, has_substitutions=False): _concatenate_simple_values,
     }
 
 
@@ -136,48 +132,6 @@ def _concatenate_dicts_with_subs(
 
 def _concatenate_dicts(values: list[dict]) -> dict:
     return _resolve_dict(reduce(merge, reversed(values)))
-
-
-def _concatenate_simple_values_with_subs(values: UnresolvedConcatenation) -> UnresolvedConcatenation:
-    """Turn [${a}, b, c, ${d}, e, f, g] into [${a}, bc, ${d}, efg]."""
-    result = UnresolvedConcatenation()
-    chunks_to_concatenate: list[str] = []
-    for value in values:
-        if isinstance(value, UnresolvedSubstitution):
-            if chunks_to_concatenate:
-                if len(chunks_to_concatenate) == 1:
-                    result.append(chunks_to_concatenate[0])
-                else:
-                    result.append(
-                        _concatenate_simple_values(
-                            UnresolvedConcatenation(chunks_to_concatenate),
-                            strip_left=False,
-                            strip_right=False,
-                        ),
-                    )
-                chunks_to_concatenate = []
-            result.append(value)
-            continue
-        chunks_to_concatenate.append(value)
-    if chunks_to_concatenate:
-        if len(chunks_to_concatenate) == 1:
-            result.append(chunks_to_concatenate[0])
-        else:
-            result.append(_concatenate_simple_values(UnresolvedConcatenation(chunks_to_concatenate), strip_left=False))
-    return result
-
-
-def _concatenate_simple_values(
-    values: UnresolvedConcatenation,
-    *,
-    strip_left: bool = True,
-    strip_right: bool = True,
-) -> SIMPLE_VALUE_TYPE:
-    if not all(isinstance(value, HOCON_STRING) for value in values):
-        types = {type(value).__name__ for value in values}
-        msg = f"Lazy concatenation of types {types} not allowed."
-        raise HOCONConcatenationError(msg)
-    return resolve_simple_value(values, strip_left=strip_left, strip_right=strip_right)
 
 
 def _concatenate_lists_with_subs(values: UnresolvedConcatenation) -> UnresolvedConcatenation:
@@ -244,7 +198,7 @@ def merge(superior: dict, inferior: dict) -> dict:
 
 
 class _ValueMerger:
-    duplication_elem = list | UnresolvedSubstitution | UnresolvedConcatenation
+    duplication_elem = dict | list | UnresolvedSubstitution | UnresolvedConcatenation
 
     @classmethod
     def merge(
@@ -258,8 +212,6 @@ class _ValueMerger:
             return cls._merge_with_duplication(inferior, superior)
         if isinstance(inferior, cls.duplication_elem):
             return cls._merge_with_duplication_element(inferior, superior)
-        if isinstance(inferior, SIMPLE_VALUE_TYPE) and isinstance(superior, list | ANY_UNRESOLVED):
-            return UnresolvedConcatenation([inferior, superior])
         return superior
 
     @classmethod
@@ -268,11 +220,10 @@ class _ValueMerger:
         inferior: UnresolvedDuplication,
         superior: ANY_VALUE_TYPE | ANY_UNRESOLVED,
     ) -> ANY_VALUE_TYPE | ANY_UNRESOLVED:
-        duplication_elem = list | UnresolvedSubstitution | UnresolvedConcatenation
         if isinstance(superior, UnresolvedDuplication):
             inferior.extend(superior)
             return inferior
-        if isinstance(superior, duplication_elem):
+        if isinstance(superior, cls.duplication_elem):
             inferior.append(superior)
             return inferior
         return superior
