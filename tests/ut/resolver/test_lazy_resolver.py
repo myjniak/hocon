@@ -4,7 +4,7 @@ from hocon.constants import UNDEFINED
 from hocon.exceptions import HOCONConcatenationError
 from hocon.resolver import _lazy_resolver
 from hocon.strings import UnquotedString
-from hocon.unresolved import UnresolvedConcatenation, UnresolvedSubstitution
+from hocon.unresolved import UnresolvedConcatenation, UnresolvedSubstitution, UnresolvedDuplication
 
 
 @pytest.mark.passing_unsupported_type
@@ -42,10 +42,3 @@ def test_concatenation_substitution_only():
 def test_cant_merge_unsupported_types():
     with pytest.raises(NotImplementedError):
         _lazy_resolver.merge_dict_concatenation({1, 2, 3}, {4: 5})
-
-
-def test_resolve_multiple_simple_type_concatentation():
-    """At the point of resolving unresolved simple concatenations should only consist of strings"""
-    concatenation = UnresolvedConcatenation([True, 6, None, "fun"])
-    with pytest.raises(HOCONConcatenationError, match="Lazy concatenation of types .* not allowed."):
-        _lazy_resolver.resolve(concatenation)

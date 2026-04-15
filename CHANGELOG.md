@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.3
+- Stripping away lazy resolver
+
 ## 0.6.2
 - Simplify lazy deduplication
 - FIX: deduplicating nested dicts with a substitution in between

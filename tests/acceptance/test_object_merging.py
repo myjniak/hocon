@@ -66,6 +66,16 @@ def test_nested_dicts():
     assert loads(data) == {"p": {"a": {"x": 1, "y": 2}}}
 
 
+def test_nested_dicts_2():
+    data = """
+    p: {"a" : ${x}}
+    p: {"a" : { "y" : 2 }}
+    p: {"a" : { "x" : 1 }}
+    x: {"z": 3}
+    """
+    assert loads(data) == {"p": {"a": {"x": 1, "y": 2, "z": 3}}, "x": {"z": 3}}
+
+
 def test_multiple_appends():
     data = """
     a = [1,2]

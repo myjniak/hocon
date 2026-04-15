@@ -91,3 +91,13 @@ def test_lazy_concatenating_with_substitution_2():
         "x": {"a": 1, "b": 2, "c": 2.5, "d": 4},
         "y": {"c": 3, "d": 4}
     }
+
+
+def test_concatenation_and_duplication_mix():
+    data = """
+    a = {a: 1} {b: 2}
+    a = { c: 3, d: 4 }
+    """
+    assert loads(data) == {
+        "a": {"a": 1, "b": 2, "c": 3, "d": 4}
+    }
