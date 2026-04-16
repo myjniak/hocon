@@ -2,6 +2,7 @@
 
 ## 0.6.3
 - Stripping away lazy resolver
+- FIX: Resolving to duplication that resolved to UNDEFINED should raise an exception
 
 ## 0.6.2
 - Simplify lazy deduplication

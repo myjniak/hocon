@@ -213,3 +213,24 @@ def test_sub_in_concatenation_that_could_be_a_list():
             """
     with pytest.raises(HOCONSubstitutionUndefinedError):
         loads(data)
+
+
+def test_resolve_to_undefined_duplication():
+    data = """
+        a: ${?y}
+        b: ${a}
+    """
+    with pytest.raises(HOCONSubstitutionUndefinedError):
+        loads(data)
+
+
+def test_resolve_to_undefined_duplication_2():
+    data = """
+        a {
+          b: ${?y}
+          b: ${?z}
+        }
+        x: ${a.b}
+    """
+    with pytest.raises(HOCONSubstitutionUndefinedError):
+        loads(data)
