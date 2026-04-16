@@ -99,7 +99,7 @@ class Resolver:
         if not values:
             msg = "Unresolved duplicate key must contain at least 1 element."
             raise HOCONDeduplicationError(msg)
-        deduplicated = self._resolve_latest_unresolved_duplication_element(values)
+        deduplicated: ANY_VALUE_TYPE | Undefined = self._resolve_latest_unresolved_duplication_element(values)
         if not isinstance(deduplicated, dict):
             return deduplicated
         duplication = UnresolvedDuplication([deduplicated])
@@ -140,13 +140,10 @@ class Resolver:
         self,
         values: UnresolvedDuplication,
     ) -> ANY_VALUE_TYPE | Undefined:
-        while True:
-            deduplicated: ANY_VALUE_TYPE | Undefined = self.resolve(values[-1])
-            if deduplicated is UNDEFINED:
-                values.pop()
-            else:
-                break
-            if not values:
+        deduplicated: ANY_VALUE_TYPE | Undefined = UNDEFINED
+        for value in reversed(values):
+            deduplicated = self.resolve(value)
+            if deduplicated is not UNDEFINED:
                 break
         return deduplicated
 

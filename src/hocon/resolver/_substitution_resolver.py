@@ -53,7 +53,9 @@ class SubstitutionResolver:
         subvalue = self._try_resolve(substitution)
         if self.subs[substitution.id_].status.is_resolved:
             return self.subs[substitution.id_].value
-
+        if subvalue == UNDEFINED and not substitution.optional:
+            msg = f"Could not resolve {substitution}"
+            raise HOCONSubstitutionUndefinedError(msg)
         self.subs[substitution.id_] = Substitution(value=subvalue, status=SubstitutionStatus.RESOLVED)
         return subvalue
 
