@@ -36,9 +36,3 @@ def test_concatenation_substitution_only():
     concatenation = UnresolvedConcatenation([sub])
     result = _lazy_resolver.resolve(concatenation)
     assert result == sub
-
-
-@pytest.mark.passing_unsupported_type
-def test_cant_merge_unsupported_types():
-    with pytest.raises(NotImplementedError):
-        _lazy_resolver.merge_dict_concatenation({1, 2, 3}, {4: 5})

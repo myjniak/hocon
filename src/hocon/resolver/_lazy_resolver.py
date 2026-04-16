@@ -117,72 +117,18 @@ def _get_concatenators() -> dict[
     ],
 ]:
     return {
-        ConcatenationType(list, has_substitutions=True): _concatenate_lists_with_subs,
-        ConcatenationType(dict, has_substitutions=True): _concatenate_dicts_with_subs,
         ConcatenationType(list, has_substitutions=False): _concatenate_lists,
         ConcatenationType(dict, has_substitutions=False): _concatenate_dicts,
     }
-
-
-def _concatenate_dicts_with_subs(
-    values: list[dict | UnresolvedSubstitution | UnresolvedConcatenation],
-) -> dict | UnresolvedConcatenation | UnresolvedSubstitution:
-    return reduce(merge_dict_concatenation, reversed(values))
 
 
 def _concatenate_dicts(values: list[dict]) -> dict:
     return _resolve_dict(reduce(merge, reversed(values)))
 
 
-def _concatenate_lists_with_subs(values: UnresolvedConcatenation) -> UnresolvedConcatenation:
-    result = UnresolvedConcatenation()
-    chunks_to_concatenate: list[list] = []
-    for value in values:
-        if isinstance(value, UnresolvedSubstitution):
-            if chunks_to_concatenate:
-                result.append(_concatenate_lists(UnresolvedConcatenation(chunks_to_concatenate)))
-                chunks_to_concatenate = []
-            result.append(value)
-            continue
-        chunks_to_concatenate.append(value)
-    if chunks_to_concatenate:
-        result.append(_concatenate_lists(UnresolvedConcatenation(chunks_to_concatenate)))
-    return result
-
-
 def _concatenate_lists(values: UnresolvedConcatenation) -> list:
     resolved_lists = [resolve(value) for value in values]
     return reduce(operator.iadd, resolved_lists, [])
-
-
-@singledispatch
-def merge_dict_concatenation(
-    superior: dict | UnresolvedSubstitution | UnresolvedConcatenation,
-    _: dict | UnresolvedSubstitution,
-) -> dict | UnresolvedConcatenation:
-    msg = f"Bad input value type: {type(superior)}"
-    raise NotImplementedError(msg)
-
-
-@merge_dict_concatenation.register(UnresolvedSubstitution)
-def _(superior: UnresolvedSubstitution, inferior: dict | UnresolvedSubstitution) -> UnresolvedConcatenation:
-    return UnresolvedConcatenation([inferior, superior])
-
-
-@merge_dict_concatenation.register(dict)
-def _(superior: dict, inferior: dict | UnresolvedSubstitution) -> dict | UnresolvedConcatenation:
-    if isinstance(inferior, dict):
-        return merge(superior, inferior)
-    return UnresolvedConcatenation([inferior, superior])
-
-
-@merge_dict_concatenation.register(UnresolvedConcatenation)
-def _(superior: UnresolvedConcatenation, inferior: dict | UnresolvedSubstitution) -> dict | UnresolvedConcatenation:
-    if isinstance(superior[0], dict) and isinstance(inferior, dict):
-        superior[0] = merge(superior[0], inferior)
-    else:
-        superior.insert(0, inferior)
-    return superior
 
 
 def merge(superior: dict, inferior: dict) -> dict:
