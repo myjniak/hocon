@@ -127,7 +127,7 @@ class Resolver:
     resolve.register(resolve_substitution)
     resolve.register(resolve_duplication)
 
-    def _concatenate_dicts(self, values: list[dict]) -> dict:
+    def _concatenate_dicts(self, values: UnresolvedConcatenation[dict]) -> dict:
         return self.resolve_dict(reduce(self.merge, reversed(values)))
 
     @staticmethod
@@ -135,7 +135,7 @@ class Resolver:
         for index, value in enumerate(values):
             if not isinstance(value, HOCON_STRING):
                 values[index] = json.dumps(value)
-        return resolve_simple_value(values)
+        return resolve_simple_value(list(values))
 
     def _concatenate_lists(self, values: UnresolvedConcatenation) -> list:
         resolved_lists: list[ANY_VALUE_TYPE | Undefined] = [self.resolve(value) for value in values]
@@ -155,7 +155,7 @@ class Resolver:
         return result
 
     def resolve_substitutions(self, values: UnresolvedConcatenation) -> UnresolvedConcatenation:
-        values_with_resolved_substitutions = UnresolvedConcatenation()
+        values_with_resolved_substitutions: UnresolvedConcatenation[ANY_VALUE_TYPE] = UnresolvedConcatenation()
         for value in values:
             resolved_value = value
             if isinstance(value, UnresolvedSubstitution):

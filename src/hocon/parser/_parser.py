@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import Any
 
-from hocon.constants import ROOT_TYPE
+from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE
 from hocon.exceptions import (
     HOCONNoDataError,
 )
-from hocon.unresolved import UnresolvedConcatenation
+from hocon.unresolved import ANY_UNRESOLVED, UnresolvedConcatenation
 
 from ._eat import (
     eat_comments,
@@ -108,8 +108,12 @@ def parse_value_chunk(data: ParserInput, idx: int, current_keypath: list[str]) -
     return parse_simple_value(data, idx, current_keypath=current_keypath)
 
 
-def parse_dict_value(data: ParserInput, idx: int, current_keypath: list[str]) -> tuple[UnresolvedConcatenation, int]:
-    values = UnresolvedConcatenation()
+def parse_dict_value(
+    data: ParserInput,
+    idx: int,
+    current_keypath: list[str],
+) -> tuple[UnresolvedConcatenation[ANY_VALUE_TYPE | ANY_UNRESOLVED], int]:
+    values: UnresolvedConcatenation[ANY_VALUE_TYPE | ANY_UNRESOLVED] = UnresolvedConcatenation()
     while True:
         old_idx = idx
         idx = eat_comments(data, idx)
@@ -122,8 +126,12 @@ def parse_dict_value(data: ParserInput, idx: int, current_keypath: list[str]) ->
             return values, idx
 
 
-def parse_list_element(data: ParserInput, idx: int, current_keypath: list[str]) -> tuple[UnresolvedConcatenation, int]:
-    values = UnresolvedConcatenation()
+def parse_list_element(
+    data: ParserInput,
+    idx: int,
+    current_keypath: list[str],
+) -> tuple[UnresolvedConcatenation[ANY_VALUE_TYPE | ANY_UNRESOLVED], int]:
+    values: UnresolvedConcatenation[ANY_VALUE_TYPE | ANY_UNRESOLVED] = UnresolvedConcatenation()
     while True:
         old_idx = idx
         idx = eat_comments(data, idx)

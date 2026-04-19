@@ -1,15 +1,18 @@
 """Definition of 3 types unique to hocon, used when resolving parsed data to a simple dict/list."""
 
+from collections import UserList
 from dataclasses import dataclass, field
 from itertools import count
-from typing import Self, get_args
+from typing import Generic, Self, TypeVar, get_args
 
 from hocon.constants import ANY_VALUE_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED
 from hocon.exceptions import HOCONConcatenationError, HOCONDuplicateKeyMergeError
 from hocon.strings import HOCON_STRING, UnquotedString
 
+T = TypeVar("T")
 
-class UnresolvedConcatenation(list):
+
+class UnresolvedConcatenation(UserList, Generic[T]):
     """A list representing https://github.com/lightbend/config/blob/v1.4.3/HOCON.md#value-concatenation."""
 
     def __repr__(self) -> str:
@@ -82,7 +85,7 @@ class UnresolvedConcatenation(list):
         return isinstance(value, UnquotedString) and value.is_empty()
 
 
-class UnresolvedDuplication(list):
+class UnresolvedDuplication(UserList):
     """A list representing http://github.com/lightbend/config/blob/v1.4.3/HOCON.md#duplicate-keys-and-object-merging."""
 
     def __repr__(self) -> str:
