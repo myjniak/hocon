@@ -111,10 +111,7 @@ def _get_concatenator(
 @cache
 def _get_concatenators() -> dict[
     ConcatenationType,
-    Callable[
-        [UnresolvedConcatenation],
-        dict | list | SIMPLE_VALUE_TYPE | UnresolvedSubstitution | UnresolvedConcatenation,
-    ],
+    Callable[[UnresolvedConcatenation], dict | list],
 ]:
     return {
         ConcatenationType(list, has_substitutions=False): _concatenate_lists,
@@ -122,7 +119,7 @@ def _get_concatenators() -> dict[
     }
 
 
-def _concatenate_dicts(values: list[dict]) -> dict:
+def _concatenate_dicts(values: UnresolvedConcatenation[dict]) -> dict:
     return _resolve_dict(reduce(merge, reversed(values)))
 
 

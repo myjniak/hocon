@@ -5,6 +5,7 @@
 - FIX: Resolving to duplication that resolved to UNDEFINED should raise an exception
 - Add performance test (pyhocon comparison)
 - FIX: Resolve duplication with a concatenation in between that resolves to UNDEFINED
+- Remove list inheritance of UnresolvedDuplication and UnresolvedConcatenation
 
 ## 0.6.2
 - Simplify lazy deduplication

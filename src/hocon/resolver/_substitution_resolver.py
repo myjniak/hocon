@@ -1,4 +1,5 @@
 import os
+from collections import UserList
 from copy import deepcopy
 from typing import Protocol, get_args
 
@@ -76,7 +77,7 @@ class SubstitutionResolver:
                     value = self(substitution)
                 else:
                     value = self._resolve_sub_from_env(substitution)
-        if isinstance(value, (dict, list)):
+        if isinstance(value, (dict, list, UserList)):
             value = self.resolver.resolve(value)
         if isinstance(value, UnresolvedSubstitution):
             value = self(value)
