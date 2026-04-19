@@ -252,9 +252,12 @@ final {
     for _ in range(100):
         hocon.loads(data)
     stop = time()
-    print(stop - start)
+    hocon2_time = stop - start
+    print(f"{hocon2_time=}")
     start = time()
     for _ in range(100):
         pyhocon.ConfigFactory.parse_string(data)
     stop = time()
-    print(stop - start)
+    pyhocon_time = stop - start
+    print(f"{pyhocon_time=}")
+    print(f"hocon2 is {pyhocon_time/hocon2_time} faster than pyhocon!")

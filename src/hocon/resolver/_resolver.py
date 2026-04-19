@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 from hocon.constants import ANY_VALUE_TYPE, ROOT_TYPE, SIMPLE_VALUE_TYPE, UNDEFINED, Undefined
 from hocon.exceptions import HOCONDeduplicationError, HOCONError
-from hocon.resolver._simple_value import resolve_simple_value
-from hocon.strings import HOCON_STRING
+from hocon.resolver._simple_value import cast_string_value, resolve_simple_value
+from hocon.strings import HOCON_STRING, UnquotedString
 from hocon.unresolved import (
     ANY_UNRESOLVED,
     UnresolvedConcatenation,
@@ -47,6 +47,8 @@ class Resolver:
 
     @resolve.register
     def _(self, values: SIMPLE_VALUE_TYPE) -> SIMPLE_VALUE_TYPE:
+        if isinstance(values, UnquotedString):
+            return cast_string_value(str(values))
         return values
 
     def resolve_list(self, values: list) -> list:
@@ -74,13 +76,8 @@ class Resolver:
         if not values:
             return UNDEFINED
         first_value = values[0]
-        if len(values) == 1 and (
-            type(first_value) is str
-            or type(first_value) is int
-            or type(first_value) is bool
-            or type(first_value) is None
-        ):
-            return first_value
+        if len(values) == 1:
+            return self.resolve(first_value)
         concat_type = values.get_type()
         concatenate_functions: dict[type[list | dict | str], Callable[[UnresolvedConcatenation], ANY_VALUE_TYPE]] = {
             list: self._concatenate_lists,
@@ -99,20 +96,28 @@ class Resolver:
         if not values:
             msg = "Unresolved duplicate key must contain at least 1 element."
             raise HOCONDeduplicationError(msg)
-        deduplicated: ANY_VALUE_TYPE | Undefined = self._resolve_latest_unresolved_duplication_element(values)
-        if not isinstance(deduplicated, dict):
-            return deduplicated
-        duplication = UnresolvedDuplication([deduplicated])
-        for value in reversed(values[:-1]):
-            resolved_value = value
-            if isinstance(value, UnresolvedConcatenation):
-                resolved_value = self.resolve(value)
-            if not isinstance(resolved_value, (dict, UnresolvedSubstitution)):
+        duplication = UnresolvedDuplication([])
+        reversed_values = reversed(values)
+        for value in reversed_values:
+            resolved_value = self.resolve(value)
+            if resolved_value is UNDEFINED:
+                continue
+            if isinstance(resolved_value, dict):
+                duplication.append(resolved_value)
                 break
-            if isinstance(value, UnresolvedSubstitution):
+            return resolved_value
+        for value in reversed_values:
+            resolved_value = value
+            if isinstance(value, UnresolvedConcatenation | UnresolvedSubstitution):
                 resolved_value = self.resolve(value)
+            if resolved_value is UNDEFINED:
+                continue
             if isinstance(resolved_value, dict):
                 duplication.insert(0, resolved_value)
+                continue
+            break
+        if not duplication:
+            return UNDEFINED
         lazy_resolved = _lazy_resolver.resolve(duplication)
         return self.resolve(lazy_resolved)
 
@@ -135,17 +140,6 @@ class Resolver:
     def _concatenate_lists(self, values: UnresolvedConcatenation) -> list:
         resolved_lists: list[ANY_VALUE_TYPE | Undefined] = [self.resolve(value) for value in values]
         return reduce(operator.iadd, resolved_lists, [])
-
-    def _resolve_latest_unresolved_duplication_element(
-        self,
-        values: UnresolvedDuplication,
-    ) -> ANY_VALUE_TYPE | Undefined:
-        deduplicated: ANY_VALUE_TYPE | Undefined = UNDEFINED
-        for value in reversed(values):
-            deduplicated = self.resolve(value)
-            if deduplicated is not UNDEFINED:
-                break
-        return deduplicated
 
     def merge(self, superior: dict, inferior: dict) -> dict:
         """Merge two objects recursively. If keys overlap, the latter wins."""

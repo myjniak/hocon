@@ -209,3 +209,13 @@ def test_merge_nested_dicts_with_complex_substituions():
     x: {"a" : 42}
     """
     assert loads(data) == {"p": {"a": {"x": 1}}, "x": {"a": 42}}
+
+
+def test_merge_with_undefined_concatenation_in_between():
+    """Refer to https://github.com/lightbend/config/issues/838"""
+    data = """
+    p: {"a" : 1}
+    p: ${?x}${?y}
+    p: {"b" : 2}
+    """
+    assert loads(data) == {"p": {"a": 1, "b": 2}}
