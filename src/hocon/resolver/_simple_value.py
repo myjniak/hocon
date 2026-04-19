@@ -7,7 +7,7 @@ from hocon.strings import HOCON_STRING, QuotedString, UnquotedString
 def resolve_simple_value(chunks: list[HOCON_STRING]) -> SIMPLE_VALUE_TYPE:
     chunks = _strip_string_list(chunks)
     if len(chunks) == 1 and isinstance(chunks[0], UnquotedString):
-        return _cast_string_value(str(chunks[0]))
+        return cast_string_value(str(chunks[0]))
     return "".join(list(map(str, chunks)))
 
 
@@ -25,7 +25,7 @@ def _strip_string_list(values: list[HOCON_STRING]) -> list[HOCON_STRING]:
     return values[first:last]
 
 
-def _cast_string_value(string: str) -> SIMPLE_VALUE_TYPE:
+def cast_string_value(string: str) -> SIMPLE_VALUE_TYPE:
     if string.startswith("true"):
         return True
     if string.startswith("false"):
